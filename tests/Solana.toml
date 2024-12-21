@@ -1,0 +1,64 @@
+# Solana.toml is used to declare settings for use with `npx mucho`
+
+[settings]
+# define the directory to store all the fixtures (accounts/programs) you want to clone
+# accountDir = ".cache/accounts" # default="fixtures"
+
+# desired cluster to clone all fixtures from (if not individually overriden per fixture)
+# cluster = "mainnet" # default="mainnet"
+# cluster = "devnet"
+# cluster = "testnet"
+
+# path to a local keypair file that will be used as the default authority for various operations
+# keypair = "any-path" # default="~/.config/solana/id.json"
+
+[programs.localnet]
+counter_solana_native = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+
+[clone.account.wallet]
+# this is a random wallet account, owned by system program
+address = "GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk"
+# override the cluster for this particular account, if not defined: uses `settings.cluster`
+# cluster = "mainnet"
+# cluster = "devnet"
+
+# if you want to always force clone the account every clone operation
+# frequency = "always" # default="cached"
+
+[clone.account.tm-rando]
+# random metaplex token metadata account
+address = "5uZQ4GExZXwwKRNmpxwxTW2ZbHxh8KjDDwKne7Whqm4H"
+# this account is owned by `metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s` (Metaplex's Token Metadata program)
+# the owner program will be auto cloned (from the same cluster) 
+# without needing to declare it anywhere
+
+[clone.account.rando]
+# some random account from devnet
+address = "HaMxedZofAdLasiTggfGiKLzQVt759Gcw1JBP5KUPPkA"
+# owned by: AHDckVNCgytZg6jkZPFUKTFJLMvnj3qmiigVNA5Z3yZu (some random program on devnet)
+cluster = "devnet"
+
+[clone.program.bubblegum]
+address = "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY"
+
+# override the cluster for this particular program, if not defined: uses `settings.cluster`
+# cluster = "mainnet"
+# cluster = "devnet"
+
+# if you want to always force clone the account
+# frequency = "always"
+
+[clone.account.bonk]
+# for tokens: list the mint address
+address = "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
+
+# override the cluster for this particular account, if not defined: uses `settings.cluster`
+# cluster = "devnet"
+cluster = "mainnet"
+
+# if you want to always force clone the account
+# frequency = "always"
+
+[clone.account.usdc]
+address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+frequency = "always"

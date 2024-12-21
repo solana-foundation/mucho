@@ -1,0 +1,25 @@
+{
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "bin",
+
+    "target": "es2022",
+    "module": "esnext",
+    "allowJs": true,
+    "checkJs": true,
+
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+
+    "noEmit": true,
+    "strict": false,
+    "useUnknownInCatchVariables": false,
+
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}

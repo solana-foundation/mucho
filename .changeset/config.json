@@ -1,0 +1,16 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.4/schema.json",
+  "access": "public",
+  "baseBranch": "master",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "solana-developers/mucho"
+    }
+  ],
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "ignore": [],
+  "updateInternalDependencies": "patch"
+}

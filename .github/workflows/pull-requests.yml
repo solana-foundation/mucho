@@ -1,0 +1,35 @@
+name: Pull requests
+
+on:
+  pull_request:
+
+jobs:
+  all-pr-checks:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - run: echo "Done"
+
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node:
+          - "current"
+          - "lts/*"
+
+    name: Build & Test on Node ${{ matrix.node }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        uses: ./.github/workflows/actions/install-dependencies
+        with:
+          version: ${{ matrix.node }}
+
+      - name: Build
+        run: pnpm build
+      - name: Unit Tests
+        run: pnpm test
