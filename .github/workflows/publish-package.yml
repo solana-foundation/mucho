@@ -28,14 +28,14 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Build
-        run: pnpm build
-
       - name: Create Changesets Pull Request or Trigger an NPM Publish
         id: changesets
         uses: changesets/action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # This expects you to have a script called release which does a build for your packages and calls changeset publish
+          publish: pnpm changeset:publish
 
       # - name: Push Git Tag
       #   if: steps.changesets.outputs.hasChangesets == 'false'
