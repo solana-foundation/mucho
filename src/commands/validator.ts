@@ -31,6 +31,13 @@ export function validatorCommand() {
       // .addOption(
       //   new Option("--prompt", "prompt to override any existing cloned accounts"),
       // )
+      .usage("[options] [-- <TEST_VALIDATOR_ARGS>...]")
+      .addOption(
+        new Option(
+          "-- <TEST_VALIDATOR_ARGS>",
+          `arguments to pass to the underlying 'solana-test-validator' command`,
+        ),
+      )
       .addOption(
         new Option(
           "--reset",
