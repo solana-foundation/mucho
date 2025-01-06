@@ -280,8 +280,6 @@ export function deployCommand() {
        * do you want to continue?
        */
 
-      console.log(""); // spacer in the terminal
-
       shellExecInSession({
         command,
         args: passThroughArgs,
