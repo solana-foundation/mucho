@@ -27,7 +27,7 @@ export async function promptToInstall(
     .catch(() => {
       /**
        * it seems that if we execute a Commander command within another command
-       * (like nesting it under test-validator and prompting the user)
+       * (like nesting it under `mucho validator` and prompting the user)
        * the user may not be able to exit the parent command's process via CTRL+C
        * todo: investigate this more to see if we can still allow the command to continue
        */

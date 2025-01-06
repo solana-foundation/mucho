@@ -4,7 +4,7 @@ This is the `mucho`, a command-line tool designed to simplify the development
 and testing of Solana blockchain programs. The tool provides an array of
 commands to manage Solana Toolkit installations, clone and manage blockchain
 fixtures (accounts, programs, etc), and simplifying the experience of running a
-local test-validator with all the required state for a consistent development
+local test validator with all the required state for a consistent development
 experience.
 
 **System Requirements:**
@@ -128,13 +128,13 @@ The default behavior for deploying is as follows:
 
 ### validator
 
-Run the Solana test-validator on your local machine, including loading all the
+Run the Solana test validator on your local machine, including loading all the
 cloned fixtures for your repo.
 
 **Usage:**
 
 ```shell
-npx mucho test-validator --help
+npx mucho validator --help
 ```
 
 > Under the hood, the `validator` commands wraps the Agave tool suite's
@@ -197,7 +197,7 @@ Declare general defaults and configuration settings for use in various places.
   - Default: `fixtures`
 - `keypair` - Path to the default local keypair file to use in various places
   (i.e. set as the upgrade authority for all cloned programs when running
-  `test-validator`)
+  `mucho validator`)
   - Type: `string`
   - Default: `~/.config/solana/id.json` (same as the Agave CLI tool suite)
 
@@ -228,7 +228,7 @@ counter = "BmDHboaj1kBUoinJKKSRqKfMeRKJqQqEbUj1VgzeQe4A"
 counter = "AgVqLc7bKvnLL6TQnBMsMAkT18LixiW9isEb21q1HWUR"
 ```
 
-These addresses will be used to load programs using the `test-validator` at
+These addresses will be used to load programs using the `mucho validator` at
 genesis.
 
 ### `clone` configuration
@@ -348,7 +348,7 @@ this tool supports include:
 - Clone cache - Cloned fixtures are cached by default (in the repo), helping to
   reduce the load on RPC providers. This also helps developers working on the
   same source repository to have a consistent ledger state when performing local
-  development and testing via [`test-validator`](#test-validator).
+  development and testing via [`mucho validator`](#validator).
 - Mix-and-match cloning - This tool allows more
   [fine grain control](#cloneaccount) over which cluster any specific
   account/program gets cloned from. For example, if you want `account1` to come
