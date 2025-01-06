@@ -1,4 +1,3 @@
-import { spawn } from "child_process";
 import { resolve } from "path";
 import { rmSync } from "fs";
 import {
@@ -111,34 +110,4 @@ export function buildTestValidatorCommand({
   // todo: support cloning programs via `--clone-upgradeable-program`?
 
   return command.join(" ");
-}
-
-type RunTestValidatorInput = {
-  command?: string;
-  args?: string[];
-};
-
-export function runTestValidator({ command, args }: RunTestValidatorInput) {
-  console.log(""); // print a line separator
-
-  // Spawn a child process
-  const child = spawn(command, args, {
-    detached: false, // run the command in the same session
-    stdio: "inherit", // Stream directly to the user's terminal
-    shell: true, // Runs in shell for compatibility with shell commands
-    // cwd: // todo: do we want this?
-  });
-
-  // Handle child process events
-  child.on("error", (err) => {
-    console.error(`Failed to start the command: ${err.message}`);
-  });
-
-  child.on("exit", (code) => {
-    if (code === 0) {
-      console.log("Command executed successfully.");
-    } else {
-      console.error(`Command exited with code ${code}`);
-    }
-  });
 }

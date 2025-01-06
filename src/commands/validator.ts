@@ -1,17 +1,14 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliOutputConfig, loadConfigToml } from "@/lib/cli";
 import { titleMessage, warnMessage } from "@/lib/logs";
-import { checkCommand } from "@/lib/shell";
+import { checkCommand, shellExecInSession } from "@/lib/shell";
 import {
   deepMerge,
   doesFileExist,
   loadFileNamesToMap,
   updateGitignore,
 } from "@/lib/utils";
-import {
-  buildTestValidatorCommand,
-  runTestValidator,
-} from "@/lib/shell/test-validator";
+import { buildTestValidatorCommand } from "@/lib/shell/test-validator";
 import { COMMON_OPTIONS } from "@/const/commands";
 import { loadKeypairFromFile } from "@/lib/solana";
 import { DEFAULT_CACHE_DIR, DEFAULT_TEST_LEDGER_DIR } from "@/const/solana";
@@ -51,7 +48,7 @@ export function validatorCommand() {
       .addOption(COMMON_OPTIONS.config)
       .addOption(COMMON_OPTIONS.keypair)
       .addOption(COMMON_OPTIONS.url)
-      .action(async (options) => {
+      .action(async (options, { args: passThroughArgs }) => {
         if (!options.outputOnly) {
           titleMessage("solana-test-validator");
         } else options.output = options.outputOnly;
@@ -167,8 +164,10 @@ export function validatorCommand() {
         );
         console.log(explorerUrl.toString());
 
-        runTestValidator({
+        shellExecInSession({
           command,
+          args: passThroughArgs,
+          outputOnly: options.outputOnly,
         });
       })
   );
