@@ -12,14 +12,14 @@ import {
 import shellExec from "shell-exec";
 import ora from "ora";
 import { TOOL_CONFIG } from "@/const/setup";
+import picocolors from "picocolors";
 
 /**
  * Check to see which debian/ubuntu dependencies
  */
-export async function checkDebianDependenciesInstalled(
-  exitWhenMissing: boolean = true,
-  printInstallCommand: boolean = true,
-): Promise<string[] | void> {
+export async function checkDebianDependenciesInstalled(): Promise<
+  string[] | void
+> {
   const deps: string[] = [
     "build-essential",
     "pkg-config",
@@ -63,19 +63,6 @@ export async function checkDebianDependenciesInstalled(
   });
 
   if (missingDeps.length == 0) return;
-
-  if (printInstallCommand) {
-    console.log(
-      "sudo apt update && sudo apt install -y",
-      missingDeps.join(" "),
-    );
-  }
-
-  if (exitWhenMissing) {
-    console.error("Missing dependencies:", missingDeps.join(" "));
-    process.exit(0);
-  }
-
   return missingDeps;
 }
 
@@ -93,12 +80,21 @@ export async function installRust({ version }: InstallCommandPropsBase = {}) {
     // if the user's system does not have `apt`, skip this check
     if (os == "linux" && (await checkCommand(`apt --version`))) {
       spinner.text = `Checking for required linux dependencies`;
-      const missingDeps = await checkDebianDependenciesInstalled(true, true);
+      const missingDeps = await checkDebianDependenciesInstalled();
       if (missingDeps && missingDeps.length > 0) {
-        throw (
-          `Your system is missing required system dependencies: ` +
-          missingDeps.join(" ")
+        spinner.fail(
+          picocolors.red(`Missing dependencies: ${missingDeps.join(" ")}`),
         );
+
+        console.log(
+          "Install the missing dependencies using the following command:",
+        );
+        console.log(
+          "sudo apt update && sudo apt install -y",
+          missingDeps.join(" "),
+        );
+
+        process.exit(0);
       }
     }
 
@@ -129,11 +125,11 @@ export async function installRust({ version }: InstallCommandPropsBase = {}) {
       spinner.succeed(`rust ${installedVersion} installed`);
       return installedVersion;
     } else {
-      spinner.fail("rust failed to install");
+      spinner.fail(picocolors.red("rust failed to install"));
       return false;
     }
   } catch (err) {
-    spinner.fail("Unable to install rust");
+    spinner.fail(picocolors.red("Unable to install rust"));
 
     if (typeof err == "string") console.error(err);
     else if (err instanceof Error) console.error(err.message);
@@ -187,11 +183,11 @@ export async function installSolana({
       spinner.succeed(`solana ${installedVersion} installed`);
       return installedVersion;
     } else {
-      spinner.fail("solana failed to install");
+      spinner.fail(picocolors.red("solana failed to install"));
       return false;
     }
   } catch (err) {
-    spinner.fail("Unable to install the Solana CLI tool suite");
+    spinner.fail(picocolors.red("Unable to install the Solana CLI tool suite"));
     if (typeof err == "string") console.error(err);
     else if (err instanceof Error) console.error(err.message);
     else console.error(err.message);
@@ -237,11 +233,11 @@ export async function installAnchorVersionManager({
       spinner.succeed(`avm ${installedVersion} installed`);
       return installedVersion;
     } else {
-      spinner.fail("avm failed to install");
+      spinner.fail(picocolors.red("avm failed to install"));
       return false;
     }
   } catch (err) {
-    spinner.fail("Unable to install avm");
+    spinner.fail(picocolors.red("Unable to install avm"));
     if (typeof err == "string") console.error(err);
     else if (err instanceof Error) console.error(err.message);
     else console.error(err.message);
@@ -318,11 +314,11 @@ export async function installAnchorUsingAvm({
       spinner.succeed(`anchor ${installedVersion} installed using avm`);
       return installedVersion;
     } else {
-      spinner.fail("anchor failed to install");
+      spinner.fail(picocolors.red("anchor failed to install"));
       return false;
     }
   } catch (err) {
-    spinner.fail("Unable to install anchor using avm");
+    spinner.fail(picocolors.red("Unable to install anchor using avm"));
     if (typeof err == "string") console.error(err);
     else if (err instanceof Error) console.error(err.message);
     else console.error(err.message);
@@ -354,11 +350,11 @@ export async function installYarn({}: InstallCommandPropsBase = {}) {
       spinner.succeed(`yarn ${installedVersion} installed`);
       return installedVersion;
     } else {
-      spinner.fail("yarn package manager failed to install");
+      spinner.fail(picocolors.red("yarn package manager failed to install"));
       return false;
     }
   } catch (err) {
-    spinner.fail("Unable to install yarn package manager");
+    spinner.fail(picocolors.red("Unable to install yarn package manager"));
     if (typeof err == "string") console.error(err);
     else if (err instanceof Error) console.error(err.message);
     else console.error(err.message);
@@ -386,7 +382,7 @@ export async function installTrident({
     if (verifyParentCommand) {
       const isParentInstalled = await installedToolVersion("rust");
       if (!isParentInstalled) {
-        spinner.fail("Rust/cargo was not found");
+        spinner.fail(picocolors.red("Rust/cargo was not found"));
         throw "parent command not found";
       }
     }
@@ -411,11 +407,11 @@ export async function installTrident({
       spinner.succeed(`trident ${installedVersion} installed`);
       return installedVersion;
     } else {
-      spinner.fail("trident failed to install");
+      spinner.fail(picocolors.red("trident failed to install"));
       return false;
     }
   } catch (err) {
-    spinner.fail("Unable to install the trident fuzzer");
+    spinner.fail(picocolors.red("Unable to install the trident fuzzer"));
     if (typeof err == "string") console.error(err);
     else if (err instanceof Error) console.error(err.message);
     else console.error(err.message);
@@ -498,11 +494,11 @@ export async function installZest({
       spinner.succeed(`zest ${installedVersion} installed`);
       return installedVersion;
     } else {
-      spinner.fail("zest failed to install");
+      spinner.fail(picocolors.red("zest failed to install"));
       return false;
     }
   } catch (err) {
-    spinner.fail("Unable to install zest");
+    spinner.fail(picocolors.red("Unable to install zest"));
     if (typeof err == "string") console.error(err);
     else if (err instanceof Error) console.error(err.message);
     else console.error(err.message);
@@ -575,11 +571,11 @@ export async function installSolanaVerify({
       await isDockerInstalled();
       return installedVersion;
     } else {
-      spinner.fail("solana-verify failed to install");
+      spinner.fail(picocolors.red("solana-verify failed to install"));
       return false;
     }
   } catch (err) {
-    spinner.fail("Unable to install solana-verify");
+    spinner.fail(picocolors.red("Unable to install solana-verify"));
     if (typeof err == "string") console.error(err);
     else if (err instanceof Error) console.error(err.message);
     else console.error(err.message);
