@@ -31,6 +31,10 @@ export const TOOL_CONFIG: { [key in ToolNames]: ToolCommandConfig } = {
     // the zest cli does not have a version command, so we grab it from cargo
     version: "cargo install --list | grep zest",
   },
+  "cargo-update": {
+    dependencies: ["rust"],
+    version: "cargo install --list | grep cargo-update",
+  },
   verify: {
     dependencies: ["rust"],
     version: "solana-verify --version",

@@ -27,6 +27,7 @@ export async function checkInstalledTools({
     yarn: false,
     trident: false,
     zest: false,
+    "cargo-update": false,
     verify: false,
   };
 

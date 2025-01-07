@@ -202,13 +202,18 @@ export async function installSolana({
  */
 export async function installAnchorVersionManager({
   version = "latest",
+  updateAvailable,
 }: InstallCommandPropsBase = {}) {
   const spinner = ora("Installing avm (anchor version manager)").start();
   try {
     let installedVersion = await installedToolVersion("avm");
     if (installedVersion) {
-      spinner.info(`avm ${installedVersion} is already installed`);
+      let message = `avm ${installedVersion} is already installed`;
+      if (updateAvailable) {
+        message = picocolors.yellow(message + ` - update available`);
+      }
       // todo: do we want to help people update avm?
+      spinner.info(message);
       return true;
     }
 
@@ -370,12 +375,19 @@ export async function installYarn({}: InstallCommandPropsBase = {}) {
 export async function installTrident({
   version = "latest",
   verifyParentCommand = true,
+  updateAvailable,
 }: InstallCommandPropsBase = {}): Promise<boolean | string> {
   const spinner = ora("Installing trident (fuzzer)").start();
   try {
     let installedVersion = await installedToolVersion("trident");
     if (installedVersion) {
-      spinner.info(`trident ${installedVersion} is already installed`);
+      let message = `trident ${installedVersion} is already installed`;
+      if (updateAvailable) {
+        message = picocolors.yellow(
+          message + ` - ${updateAvailable.latest} available`,
+        );
+      }
+      spinner.info(message);
       return true;
     }
 
@@ -427,12 +439,17 @@ export async function installTrident({
 export async function installZest({
   version = "latest",
   verifyParentCommand = true,
+  updateAvailable,
 }: InstallCommandPropsBase = {}) {
   const spinner = ora("Installing zest (code coverage)").start();
   try {
     let installedVersion = await installedToolVersion("zest");
     if (installedVersion) {
-      spinner.info(`zest ${installedVersion} is already installed`);
+      let message = `zest ${installedVersion} is already installed`;
+      if (updateAvailable) {
+        message = picocolors.yellow(message + ` - update available`);
+      }
+      spinner.info(message);
       return true;
     }
 
@@ -509,17 +526,86 @@ export async function installZest({
 }
 
 /**
+ * Install the `cargo-update` tool to help detect installed crate versions
+ */
+export async function installCargoUpdate({
+  version = "latest",
+  verifyParentCommand = true,
+}: InstallCommandPropsBase = {}) {
+  const spinner = ora("Installing cargo-update").start();
+  try {
+    let installedVersion = await installedToolVersion("cargo-update");
+    if (installedVersion) {
+      spinner.info(`cargo-update ${installedVersion} is already installed`);
+      return true;
+    }
+
+    if (verifyParentCommand) {
+      const parentVersion = await installedToolVersion("rust");
+      if (!parentVersion) {
+        throw "rustc/cargo was not found but is required";
+      }
+    }
+
+    let result: Awaited<ReturnType<typeof shellExec>>;
+
+    try {
+      spinner.text = `Installing cargo-update...`;
+      result = await shellExec(`cargo install cargo-update`);
+    } catch (err) {
+      throw "Unable to execute the cargo-update installer";
+    }
+
+    if (result && result.code != 0) {
+      const error = result.stderr.trim().split("\n");
+
+      // todo: we can handle any specific known install errors here
+
+      // fallback to displaying the error
+      throw error.join("\n");
+    }
+
+    spinner.text = "Verifying cargo-update was installed";
+    installedVersion = await installedToolVersion("cargo-update");
+
+    if (installedVersion) {
+      spinner.succeed(`cargo-update ${installedVersion} installed`);
+      return installedVersion;
+    } else {
+      spinner.fail(picocolors.red("cargo-update failed to install"));
+      return false;
+    }
+  } catch (err) {
+    spinner.fail(picocolors.red("Unable to install cargo-update"));
+    if (typeof err == "string") console.error(err);
+    else if (err instanceof Error) console.error(err.message);
+    else console.error(err.message);
+  }
+
+  // default return false
+  return false;
+}
+
+/**
  * Install the solana-verify tool
  */
 export async function installSolanaVerify({
   version = "latest",
   verifyParentCommand = true,
+  updateAvailable,
 }: InstallCommandPropsBase = {}) {
   const spinner = ora("Installing solana-verify").start();
   try {
     let installedVersion = await installedToolVersion("verify");
     if (installedVersion) {
-      spinner.info(`solana-verify ${installedVersion} is already installed`);
+      let message = `solana-verify ${installedVersion} is already installed`;
+      if (updateAvailable) {
+        message = picocolors.yellow(
+          message + ` - ${updateAvailable.latest} available`,
+        );
+      }
+      spinner.info(message);
+
       await isDockerInstalled();
       return true;
     }
