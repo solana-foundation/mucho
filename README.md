@@ -7,6 +7,10 @@ fixtures (accounts, programs, etc), and simplifying the experience of running a
 local test validator with all the required state for a consistent development
 experience.
 
+> `mucho` is in beta and subject to change. Please feel free to
+> [open issues](https://github.com/solana-developers/mucho/issues) with any
+> feedback, feature requests, or issues you experience.
+
 **System Requirements:**
 
 - NodeJS (version >= 22)
