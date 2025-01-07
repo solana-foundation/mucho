@@ -69,11 +69,6 @@ export function installCommand() {
           );
         }
 
-        // const tools = await checkInstalledTools({
-        //   // outputToolStatus: toolName == "all",
-        //   outputToolStatus: false,
-        // });
-
         // track which commands may require a path/session refresh
         const pathsToRefresh: string[] = [];
 
