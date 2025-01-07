@@ -15,7 +15,7 @@ import { getPlatformToolsVersions } from "@/lib/solana";
 export function infoCommand() {
   return new Command("info")
     .configureOutput(cliOutputConfig)
-    .description("gather helpful troubleshooting info about about your system")
+    .description("gather helpful troubleshooting info about your setup")
     .action(async () => {
       titleMessage("Gather troubleshooting info");
       console.log();
