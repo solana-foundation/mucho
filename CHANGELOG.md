@@ -1,5 +1,31 @@
 # mucho
 
+## 0.3.0
+
+### Minor Changes
+
+- [#6](https://github.com/solana-developers/mucho/pull/6)
+  [`40097b5`](https://github.com/solana-developers/mucho/commit/40097b5cf9811776a9cbde1bbf705be44af59a98)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - check for updates of
+  the cargo based tooling (like avm, trident, and zest)
+
+- [#8](https://github.com/solana-developers/mucho/pull/8)
+  [`9c35f52`](https://github.com/solana-developers/mucho/commit/9c35f52a55c97ea2c871b5a066fd423aa9ad1e4f)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - added the `info`
+  command to help troubleshoot issues
+
+### Patch Changes
+
+- [#4](https://github.com/solana-developers/mucho/pull/4)
+  [`79007a1`](https://github.com/solana-developers/mucho/commit/79007a17fb45c3c2433150bbb9a49df212562e01)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - fix typo and make
+  spinner fail text red
+
+- [#7](https://github.com/solana-developers/mucho/pull/7)
+  [`61c9535`](https://github.com/solana-developers/mucho/commit/61c9535852eaba39c9a7b4cd7819143d3ab296d6)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - update readme to add
+  beta disclaimer
+
 ## 0.2.0
 
 ### Minor Changes
