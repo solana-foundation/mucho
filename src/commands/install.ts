@@ -13,8 +13,9 @@ import {
   installZest,
   installSolanaVerify,
 } from "@/lib/install";
-import { checkInstalledTools, checkShellPathSource } from "@/lib/setup";
+import { checkShellPathSource } from "@/lib/setup";
 import { PathSourceStatus, TOOL_CONFIG } from "@/const/setup";
+import { getCargoUpdateOutput } from "@/lib/update";
 
 const toolNames: Array<ToolNames> = [
   "rust",
@@ -68,10 +69,10 @@ export function installCommand() {
           );
         }
 
-        const tools = await checkInstalledTools({
-          // outputToolStatus: toolName == "all",
-          outputToolStatus: false,
-        });
+        // const tools = await checkInstalledTools({
+        //   // outputToolStatus: toolName == "all",
+        //   outputToolStatus: false,
+        // });
 
         // track which commands may require a path/session refresh
         const pathsToRefresh: string[] = [];
@@ -91,6 +92,10 @@ export function installCommand() {
               : true,
           );
         }
+
+        // this requires cargo to already be installed, so we must do it after
+        const updatesAvailable = await getCargoUpdateOutput();
+
         if (!toolName || toolName == "solana") {
           const res = await installSolana({
             os,
@@ -115,6 +120,9 @@ export function installCommand() {
           await installAnchorVersionManager({
             os,
             version,
+            updateAvailable: updatesAvailable.filter(
+              (data) => data.name.toLowerCase() == "avm",
+            )[0],
           });
         }
         if (!toolName || toolName == "anchor") {
@@ -127,18 +135,27 @@ export function installCommand() {
           await installTrident({
             os,
             version,
+            updateAvailable: updatesAvailable.filter(
+              (data) => data.name.toLowerCase() == "trident-cli",
+            )[0],
           });
         }
         if (!toolName || toolName == "zest") {
           await installZest({
             os,
             version,
+            updateAvailable: updatesAvailable.filter(
+              (data) => data.name.toLowerCase() == "zest",
+            )[0],
           });
         }
         if (!toolName || toolName == "verify") {
           await installSolanaVerify({
             os,
             version,
+            updateAvailable: updatesAvailable.filter(
+              (data) => data.name.toLowerCase() == "solana-verify",
+            )[0],
           });
         }
         if (!toolName || toolName == "yarn") {
