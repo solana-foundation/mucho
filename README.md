@@ -179,8 +179,8 @@ npx mucho coverage -- --help
 
 ### info
 
-Gather helpful troubleshooting info about your setup, including tool version and
-general info about your Solana CLI configuration.
+Gather helpful troubleshooting info about your setup, including tool versions
+and general info about your operating system and Solana CLI configuration.
 
 **Usage:**
 
