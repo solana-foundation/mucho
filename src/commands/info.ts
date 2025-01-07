@@ -1,9 +1,10 @@
+import os from "node:os";
 import { Command } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
 import { titleMessage } from "@/lib/logs";
 import ora from "ora";
 
-import { detectOperatingSystem, getCommandOutput } from "@/lib/shell";
+import { getCommandOutput } from "@/lib/shell";
 import { checkInstalledTools } from "@/lib/setup";
 import { getPlatformToolsVersions } from "@/lib/solana";
 
@@ -26,10 +27,11 @@ export function infoCommand() {
 
       const info: string[] = [];
 
-      const os = detectOperatingSystem();
-
       info.push("--- start mucho info ---");
-      info.push(`Operating system: ${os}`);
+      info.push(`System Info:`);
+      const sysInfo = await getCommandOutput("uname -a");
+      if (sysInfo) info.push(sysInfo.toString());
+      else info.push(`platform: ${os.platform()}, arch: ${os.arch()}`);
 
       const tools = await checkInstalledTools();
 
