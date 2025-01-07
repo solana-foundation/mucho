@@ -7,6 +7,7 @@ export type ToolNames =
   | "anchor"
   | "yarn"
   | "zest"
+  | "cargo-update"
   | "verify"
   | "trident";
 
@@ -40,6 +41,8 @@ export type InstallCommandPropsBase = {
   verbose?: boolean;
   /**  */
   verifyParentCommand?: boolean;
+  /**  */
+  updateAvailable?: PackageUpdate | undefined;
 
   /**
    * Reference to an existing `spinner`
@@ -51,4 +54,11 @@ export type ShellExecInSessionArgs = {
   command: string;
   args?: string[];
   outputOnly?: boolean;
+};
+
+export type PackageUpdate = {
+  name: string;
+  installed: string;
+  latest: string;
+  needsUpdate: boolean;
 };
