@@ -177,3 +177,15 @@ export function shellExecInSession({
     shell: true, // uns in shell mode for compatibility with shell commands
   });
 }
+
+/**
+ * Run a single command and get its stringified output
+ * If the command fails or throws, this will return `false`
+ */
+export async function getCommandOutput(cmd: string): Promise<string | false> {
+  try {
+    return (await shellExec(cmd)).stdout.toString().trim();
+  } catch (error) {
+    return false;
+  }
+}

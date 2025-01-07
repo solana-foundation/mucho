@@ -35,6 +35,7 @@ system. If installed globally, unexpected behavior may occur.
 - [`build`](#build) - Build all or a single Solana program in your workspace.
 - [`deploy`](#deploy) - Deploy a Solana program in your workspace.
 - [`coverage`](#coverage) - Run code coverage tests on a Solana program.
+- [`info`](#info) - Gather helpful troubleshooting info about your setup.
 
 ### install
 
@@ -174,6 +175,17 @@ command:
 
 ```shell
 npx mucho coverage -- --help
+```
+
+### info
+
+Gather helpful troubleshooting info about your setup, including tool versions
+and general info about your operating system and Solana CLI configuration.
+
+**Usage:**
+
+```shell
+npx mucho info
 ```
 
 ## Solana.toml

@@ -6,6 +6,7 @@ import { cliProgramRoot } from "@/commands";
 
 import { installCommand } from "@/commands/install";
 // import { doctorCommand } from "@/commands/doctor";
+import { infoCommand } from "@/commands/info";
 import { cloneCommand } from "@/commands/clone";
 import { validatorCommand } from "@/commands/validator";
 import { buildCommand } from "@/commands/build";
@@ -26,7 +27,8 @@ async function main() {
       .addCommand(cloneCommand())
       .addCommand(buildCommand())
       .addCommand(deployCommand())
-      .addCommand(coverageCommand());
+      .addCommand(coverageCommand())
+      .addCommand(infoCommand());
 
     // set the default action to `help` without an error
     if (process.argv.length === 2) {
