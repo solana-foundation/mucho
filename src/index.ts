@@ -5,7 +5,7 @@ import { errorMessage } from "@/lib/logs";
 import { cliProgramRoot } from "@/commands";
 
 import { installCommand } from "@/commands/install";
-import { doctorCommand } from "@/commands/doctor";
+// import { doctorCommand } from "@/commands/doctor";
 import { cloneCommand } from "@/commands/clone";
 import { validatorCommand } from "@/commands/validator";
 import { buildCommand } from "@/commands/build";
@@ -21,7 +21,7 @@ async function main() {
 
     program
       .addCommand(installCommand())
-      .addCommand(doctorCommand())
+      // .addCommand(doctorCommand())
       .addCommand(validatorCommand())
       .addCommand(cloneCommand())
       .addCommand(buildCommand())
