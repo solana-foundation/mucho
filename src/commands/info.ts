@@ -60,14 +60,33 @@ export function infoCommand() {
           .join("\n"),
       );
 
+      const testValidatorChecker = await getCommandOutput(
+        // lsof limits the program name character length
+        `ps aux | awk '/solana-test-validator/ && !/grep/ {$1=$2=$3=$4=$5=$6=$7=$8=$9=$10=""; print substr($0,11)}'`,
+      );
+
+      // build the test validator port, with support for an manually defined one
+      let localnetClusterUrl = "http://127.0.0.1:8899";
+      if (
+        !!testValidatorChecker &&
+        testValidatorChecker.includes("--rpc-port")
+      ) {
+        localnetClusterUrl = `http://127.0.0.1:${
+          testValidatorChecker.match(/--rpc-port\s+(\d+)/)[1] || 8899
+        }`;
+      }
+
       const address = await getCommandOutput("solana address");
       info.push("Address: " + address);
 
       const balances = {
-        devnet: await getCommandOutput("solana balance -ud"),
-        mainnet: await getCommandOutput("solana balance -um"),
-        testnet: await getCommandOutput("solana balance -ut"),
-        localnet: await getCommandOutput("solana balance -ul"),
+        devnet: (await getCommandOutput("solana balance -ud")) || false,
+        mainnet: (await getCommandOutput("solana balance -um")) || false,
+        testnet: (await getCommandOutput("solana balance -ut")) || false,
+        localnet:
+          (await getCommandOutput(
+            `solana balance --url ${localnetClusterUrl}`,
+          )) || false,
       };
 
       info.push("Balances for address:");
@@ -75,13 +94,8 @@ export function infoCommand() {
         info.push("  " + key + ": " + balances[key]);
       }
 
-      const testValidatorChecker = await getCommandOutput(
-        // lsof limits the program name character length
-        // "lsof -i -P | grep solana-t | grep '(LISTEN)'",
-        "ps aux | grep 'solana-test-validator'",
-      );
-
       info.push("Is test-validator running? " + !!testValidatorChecker);
+      info.push("Localnet url: " + localnetClusterUrl);
 
       info.push("---- end mucho info ----");
 
