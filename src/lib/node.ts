@@ -1,10 +1,20 @@
 const MIN_NODE_VERSION = "22.0.0";
 // const MIN_BUN_VERSION = "0.4.0";
 
-export function checkVersion(currentVersion, requiredVersion) {
-  const [major, minor] = currentVersion.split(".").map(Number);
-  const [reqMajor, reqMinor] = requiredVersion.split(".").map(Number);
-  return major > reqMajor || (major === reqMajor && minor >= reqMinor);
+/**
+ * Compare two version to see if the `requiredVersion` is newer than the `currentVersion`
+ */
+export function isVersionNewer(
+  currentVersion: string,
+  requiredVersion: string,
+) {
+  const [major, minor, patch] = currentVersion.split(".").map(Number);
+  const [reqMajor, reqMinor, reqPatch] = requiredVersion.split(".").map(Number);
+  return (
+    major > reqMajor ||
+    (major === reqMajor && minor >= reqMinor) ||
+    (major === reqMajor && minor == reqMinor && patch >= reqPatch)
+  );
 }
 
 /**
@@ -17,7 +27,7 @@ export function assertRuntimeVersion() {
   if (isBun) {
     // todo: we may need to actually check other javascript runtime versions
     // // @ts-ignore
-    // if (!checkVersion(Bun.version, MIN_BUN_VERSION)) {
+    // if (!isVersionNewer(Bun.version, MIN_BUN_VERSION)) {
     //   console.error(
     //     `This tool requires Bun v${MIN_BUN_VERSION} or higher.`,
     //     // @ts-ignore
@@ -26,7 +36,7 @@ export function assertRuntimeVersion() {
     //   process.exit(1);
     // }
   } else {
-    if (!checkVersion(process.versions.node, MIN_NODE_VERSION)) {
+    if (!isVersionNewer(process.versions.node, MIN_NODE_VERSION)) {
       console.error(
         `This tool requires Node.js v${MIN_NODE_VERSION} or higher.`,
         `You are using v${process.versions.node}.`,
