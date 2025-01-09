@@ -66,6 +66,12 @@ export function validatorCommand() {
       )
       .addOption(
         new Option(
+          "-l, --ledger <LEDGER_DIR>",
+          "location for the local ledger",
+        ).default(DEFAULT_TEST_LEDGER_DIR),
+      )
+      .addOption(
+        new Option(
           "--output",
           "output the generated test validator command while executing it",
         ),
@@ -159,6 +165,7 @@ export function validatorCommand() {
           verbose: !options.output,
           reset: options.reset || false,
           accountDir: config.settings.accountDir,
+          ledgerDir: config.settings.ledgerDir,
           // todo: allow setting the authority from the cli args
           authority: authorityAddress,
           localPrograms: locatedPrograms,

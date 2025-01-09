@@ -13,7 +13,11 @@ import {
   loadYamlFile,
 } from "@/lib/utils";
 import { SolanaToml, SolanaTomlWithConfigPath } from "@/types/config";
-import { DEFAULT_CLI_YAML_PATH, DEFAULT_CONFIG_FILE } from "@/const/solana";
+import {
+  DEFAULT_CLI_YAML_PATH,
+  DEFAULT_CONFIG_FILE,
+  DEFAULT_TEST_LEDGER_DIR,
+} from "@/const/solana";
 import { COMMON_OPTIONS } from "@/const/commands";
 import { warningOutro, warnMessage } from "@/lib/logs";
 import { SolanaCliYaml } from "@/types/solana";
@@ -89,6 +93,7 @@ export function loadConfigToml(
     cluster: COMMON_OPTIONS.url.defaultValue,
     accountDir: COMMON_OPTIONS.accountDir.defaultValue,
     keypair: COMMON_OPTIONS.keypair.defaultValue,
+    ledgerDir: DEFAULT_TEST_LEDGER_DIR,
   };
 
   config.settings = Object.assign(defaultSettings, config.settings || {});
