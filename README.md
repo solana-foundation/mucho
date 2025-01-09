@@ -58,6 +58,9 @@ The Solana Toolkit includes the following tools:
 - [Agave CLI tool suite](https://solana.com/docs/intro/installation#install-the-solana-cli) -
   the standard tool suite required to build and deploy Solana programs (formerly
   known as the "Solana CLI tool suite").
+- [Mucho CLI](https://github.com/solana-developers/mucho) - a superset of
+  popular developer tools within the Solana ecosystem used to simplify the
+  development and testing of Solana blockchain programs.
 - [solana-verify](https://github.com/Ellipsis-Labs/solana-verifiable-build) - A
   command line tool to build and verify Solana programs.
 - [Anchor and AVM](https://www.anchor-lang.com/docs/installation#installing-using-anchor-version-manager-avm-recommended) -
