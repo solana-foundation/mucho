@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { assertRuntimeVersion } from "@/lib/node";
+import { checkForSelfUpdate } from "@/lib/npm";
 import { errorMessage } from "@/lib/logs";
 import { cliProgramRoot } from "@/commands";
 
@@ -17,6 +18,9 @@ import { deployCommand } from "@/commands/deploy";
 assertRuntimeVersion();
 
 async function main() {
+  // auto check for new version of the cli
+  await checkForSelfUpdate();
+
   try {
     const program = cliProgramRoot();
 
