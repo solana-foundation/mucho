@@ -1,11 +1,15 @@
 import picocolors from "picocolors";
+import type { Formatter } from "picocolors/types";
 
 /**
  * Print a plain message using clack's `outro`
  * (including a process exit code)
  */
-export function titleMessage(msg: string) {
-  console.log(picocolors.inverse(` ${msg} `));
+export function titleMessage(
+  msg: string,
+  colorFn: Formatter = picocolors.inverse,
+) {
+  console.log(colorFn(` ${msg} `));
 }
 
 /**

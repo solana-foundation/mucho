@@ -10,7 +10,7 @@ export function cliProgramRoot() {
 
   // initialize the cli commands and options parsing
   const program = new Command()
-    .name(`npx mucho`)
+    .name(`mucho`)
     .version(app.version, "--version", "output the version number of this tool")
     // .description("")
     .configureOutput(cliOutputConfig);

@@ -11,7 +11,7 @@ import { COMMON_OPTIONS } from "@/const/commands";
 import { autoLocateProgramsInWorkspace, loadCargoToml } from "@/lib/cargo";
 import { buildProgramCommand } from "@/lib/shell/build";
 import { doesFileExist } from "@/lib/utils";
-import { checkVersion } from "@/lib/node";
+import { isVersionNewer } from "@/lib/node";
 import { getPlatformToolsVersions } from "@/lib/solana";
 
 /**
@@ -92,8 +92,8 @@ export function buildCommand() {
       const { platformTools } = await getPlatformToolsVersions();
 
       if (
-        checkVersion(solanaVersion, "2.0") &&
-        !checkVersion(platformTools, "1.43")
+        isVersionNewer(solanaVersion || "", "2.0") &&
+        !isVersionNewer(platformTools, "1.43")
       ) {
         warnMessage(
           `cargo build-sbf versions >=2.X requires building with platform tools version >=1.43`,

@@ -2,6 +2,30 @@ import { PackageUpdate } from "@/types";
 import { installCargoUpdate } from "./install";
 import { warnMessage } from "./logs";
 import { checkCommand } from "./shell";
+import { getNpmRegistryPackageVersion } from "./npm";
+import { getAppInfo } from "./app-info";
+import { isVersionNewer } from "./node";
+
+/**
+ * Check for updates to any npm package
+ */
+export async function getNpmPackageUpdates(
+  packageName: string,
+): Promise<PackageUpdate[]> {
+  const updates: PackageUpdate[] = [];
+
+  const res = await getNpmRegistryPackageVersion(packageName);
+  if (res.latest && isVersionNewer(res.latest, getAppInfo().version)) {
+    updates.push({
+      installed: getAppInfo().version,
+      needsUpdate: true,
+      latest: res.latest,
+      name: packageName,
+    });
+  }
+
+  return updates;
+}
 
 /**
  * Use the `install-update` crate to help manage the various rust
