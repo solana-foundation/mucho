@@ -12,12 +12,15 @@ import {
   installTrident,
   installZest,
   installSolanaVerify,
+  installMucho,
 } from "@/lib/install";
 import { checkShellPathSource } from "@/lib/setup";
 import { PathSourceStatus, TOOL_CONFIG } from "@/const/setup";
-import { getCargoUpdateOutput } from "@/lib/update";
+import { getCargoUpdateOutput, getNpmPackageUpdates } from "@/lib/update";
+import { getNpmRegistryPackageVersion } from "@/lib/npm";
 
 const toolNames: Array<ToolNames> = [
+  "mucho",
   "rust",
   "solana",
   "avm",
@@ -72,6 +75,18 @@ export function installCommand() {
         // track which commands may require a path/session refresh
         const pathsToRefresh: string[] = [];
 
+        const updatesAvailable = await getNpmPackageUpdates("mucho");
+
+        if (!toolName || toolName == "mucho") {
+          await installMucho({
+            os,
+            version,
+            updateAvailable: updatesAvailable.filter(
+              (data) => data.name.toLowerCase() == "mucho",
+            )[0],
+          });
+        }
+
         if (!toolName || toolName == "rust") {
           await installRust({
             os,
@@ -89,7 +104,7 @@ export function installCommand() {
         }
 
         // this requires cargo to already be installed, so we must do it after
-        const updatesAvailable = await getCargoUpdateOutput();
+        updatesAvailable.push(...(await getCargoUpdateOutput()));
 
         if (!toolName || toolName == "solana") {
           const res = await installSolana({

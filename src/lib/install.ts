@@ -15,6 +15,50 @@ import { TOOL_CONFIG } from "@/const/setup";
 import picocolors from "picocolors";
 
 /**
+ * Install the mucho cli
+ * note: we have to assume `npm` is already available
+ */
+export async function installMucho({
+  updateAvailable,
+}: InstallCommandPropsBase = {}) {
+  const spinner = ora("Installing the mucho cli...").start();
+  try {
+    let installedVersion = await installedToolVersion("mucho");
+    if (installedVersion) {
+      let message = `mucho ${installedVersion} is already installed`;
+      if (updateAvailable) {
+        message = picocolors.yellow(
+          message + ` - v${updateAvailable.latest} available`,
+        );
+      }
+      spinner.info(message);
+      return true;
+    }
+
+    spinner.text = `Installing the mucho cli`;
+    await shellExec(`npm install -g mucho@latest`);
+
+    spinner.text = "Verifying mucho was installed";
+    installedVersion = await installedToolVersion("mucho");
+    if (installedVersion) {
+      spinner.succeed(`mucho ${installedVersion} installed`);
+      return installedVersion;
+    } else {
+      spinner.fail(picocolors.red("mucho cli failed to install"));
+      return false;
+    }
+  } catch (err) {
+    spinner.fail(picocolors.red("Unable to install the mucho cli"));
+    if (typeof err == "string") console.error(err);
+    else if (err instanceof Error) console.error(err.message);
+    else console.error(err.message);
+  }
+
+  // default return false
+  return false;
+}
+
+/**
  * Check to see which debian/ubuntu dependencies
  */
 export async function checkDebianDependenciesInstalled(): Promise<

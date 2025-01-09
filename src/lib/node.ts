@@ -8,6 +8,7 @@ export function isVersionNewer(
   currentVersion: string,
   requiredVersion: string,
 ) {
+  if (currentVersion == requiredVersion) return false;
   const [major, minor, patch] = currentVersion.split(".").map(Number);
   const [reqMajor, reqMinor, reqPatch] = requiredVersion.split(".").map(Number);
   return (
