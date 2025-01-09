@@ -1,5 +1,26 @@
 # mucho
 
+## 0.4.0
+
+### Minor Changes
+
+- [#13](https://github.com/solana-developers/mucho/pull/13)
+  [`836be5d`](https://github.com/solana-developers/mucho/commit/836be5d6843bc74bcf1e92e68ee2b13d7d5cfb6c)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - add self updating to
+  the cli
+
+- [#9](https://github.com/solana-developers/mucho/pull/9)
+  [`b496a9d`](https://github.com/solana-developers/mucho/commit/b496a9d28a65665fa2f2df074d16a0195ea51cc0)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - added special validator
+  version handing to return the test validator version and mucho version
+
+### Patch Changes
+
+- [#12](https://github.com/solana-developers/mucho/pull/12)
+  [`220cc86`](https://github.com/solana-developers/mucho/commit/220cc86f5db02ed2e9dd67827ba056bf7a7f0be7)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - refactor using all test
+  validator args and options
+
 ## 0.3.0
 
 ### Minor Changes
