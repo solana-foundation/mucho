@@ -113,7 +113,7 @@ export async function checkForSelfUpdate() {
     );
     console.log(
       "  ",
-      picocolors.green(`npm install -g ${getAppInfo().name}@latest`),
+      picocolors.green(`npm install -gy ${getAppInfo().name}@latest`),
     );
 
     console.log(); // print a spacer

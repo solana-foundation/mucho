@@ -36,7 +36,7 @@ export async function installMucho({
     }
 
     spinner.text = `Installing the mucho cli`;
-    await shellExec(`npm install -g mucho@latest`);
+    await shellExec(`npm install -gy mucho@latest`);
 
     spinner.text = "Verifying mucho was installed";
     installedVersion = await installedToolVersion("mucho");
@@ -391,7 +391,7 @@ export async function installYarn({}: InstallCommandPropsBase = {}) {
     }
 
     spinner.text = `Installing yarn package manager`;
-    await shellExec(`npm install -g yarn`);
+    await shellExec(`npm install -gy yarn`);
 
     spinner.text = "Verifying yarn was installed";
     installedVersion = await installedToolVersion("yarn");

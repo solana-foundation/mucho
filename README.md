@@ -18,7 +18,7 @@ experience.
 **Installation:**
 
 ```shell
-npm install -g mucho@latest
+npm install -gy mucho@latest
 ```
 
 **Usage:**
