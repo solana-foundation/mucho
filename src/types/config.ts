@@ -11,6 +11,8 @@ export type SolanaToml = {
      * when not set, fallback to the Solana CLI cluster
      */
     cluster: SolanaCluster;
+    /** local directory for the ledger */
+    ledgerDir?: string;
     /** local directory path to store any cloned accounts */
     accountDir: string;
     /** path to the local authority keypair */

@@ -19,7 +19,7 @@ export const COMMON_OPTIONS = {
    * note: this is a different config file than the solana cli's config file
    */
   config: new Option(
-    "-c --config <PATH>",
+    "-C --config <PATH>",
     "path to a Solana.toml config file",
   ).default(DEFAULT_CONFIG_FILE),
   /**
