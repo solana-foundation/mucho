@@ -18,7 +18,9 @@ type NpmRegistryResponse = {
 /**
  * Poll the npm registry to fetch the latest version of any package name
  */
-export async function getLatestNpmPackageVersion(packageName: string): Promise<
+export async function getNpmRegistryPackageVersion(
+  packageName: string,
+): Promise<
   | {
       latest: string;
       allVersions: string[];
@@ -83,7 +85,7 @@ export async function getLatestNpmPackageVersion(packageName: string): Promise<
  *
  */
 export async function checkForSelfUpdate() {
-  const res = await getLatestNpmPackageVersion(getAppInfo().name);
+  const res = await getNpmRegistryPackageVersion(getAppInfo().name);
 
   if ("error" in res) {
     // console.error(`Unable to perform the mucho self update checks`);
