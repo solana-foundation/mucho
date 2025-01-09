@@ -5,7 +5,7 @@ import path from "path";
 import shellExec from "shell-exec";
 import { TOOL_CONFIG } from "@/const/setup";
 import { warnMessage } from "@/lib/logs";
-import { type ChildProcess, spawn } from "node:child_process";
+import { type ChildProcess, execSync, spawn } from "node:child_process";
 
 export const VERSION_REGEX = /(?:[\w-]+\s+)?(\d+\.\d+\.?\d+?)/;
 
@@ -185,6 +185,23 @@ export function shellExecInSession({
 export async function getCommandOutput(cmd: string): Promise<string | false> {
   try {
     return (await shellExec(cmd)).stdout.toString().trim();
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Run a single command and get its stringified output
+ * If the command fails or throws, this will return `false`
+ */
+export function getCommandOutputSync(cmd: string): string | false {
+  try {
+    return execSync(cmd, {
+      encoding: "utf-8",
+      stdio: "pipe",
+    })
+      .toString()
+      .trim();
   } catch (error) {
     return false;
   }

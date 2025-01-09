@@ -1,7 +1,11 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliOutputConfig, loadConfigToml } from "@/lib/cli";
 import { titleMessage, warnMessage } from "@/lib/logs";
-import { checkCommand, shellExecInSession } from "@/lib/shell";
+import {
+  checkCommand,
+  getCommandOutputSync,
+  shellExecInSession,
+} from "@/lib/shell";
 import {
   deepMerge,
   doesFileExist,
@@ -32,11 +36,11 @@ export function validatorCommand() {
     process.argv[2].toLowerCase() == "validator" &&
     process.argv[3].toLowerCase() == "--version"
   ) {
-    const validatorVersion = execSync(
-      "solana-test-validator --version",
-    ).toString();
     console.log("mucho", getAppInfo().version);
-    console.log(validatorVersion);
+    console.log(
+      getCommandOutputSync("solana-test-validator --version") ||
+        `solana-test-validator not found`,
+    );
     process.exit();
   }
 
