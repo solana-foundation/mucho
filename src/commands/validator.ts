@@ -1,7 +1,11 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliOutputConfig, loadConfigToml } from "@/lib/cli";
 import { titleMessage, warnMessage } from "@/lib/logs";
-import { checkCommand, shellExecInSession } from "@/lib/shell";
+import {
+  checkCommand,
+  getCommandOutputSync,
+  shellExecInSession,
+} from "@/lib/shell";
 import {
   deepMerge,
   doesFileExist,
@@ -16,7 +20,9 @@ import { deconflictAnchorTomlWithConfig, loadAnchorToml } from "@/lib/anchor";
 import { validateExpectedCloneCounts } from "@/lib/shell/clone";
 import { promptToAutoClone } from "@/lib/prompts/clone";
 import { listLocalPrograms } from "@/lib/programs";
-import { cloneCommand } from "./clone";
+import { cloneCommand } from "@/commands/clone";
+import { getAppInfo } from "@/lib/app-info";
+import { execSync } from "child_process";
 
 /**
  * Command: `validator`
@@ -24,6 +30,20 @@ import { cloneCommand } from "./clone";
  * Run the 'solana-test-validator' on your local machine
  */
 export function validatorCommand() {
+  // special handle getting the test validator version
+  if (
+    process.argv.length === 4 &&
+    process.argv[2].toLowerCase() == "validator" &&
+    process.argv[3].toLowerCase() == "--version"
+  ) {
+    console.log("mucho", getAppInfo().version);
+    console.log(
+      getCommandOutputSync("solana-test-validator --version") ||
+        `solana-test-validator not found`,
+    );
+    process.exit();
+  }
+
   return (
     new Command("validator")
       .configureOutput(cliOutputConfig)
