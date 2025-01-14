@@ -22,9 +22,9 @@ import { getCurrentNpmPackageVersion } from "./npm";
 export async function installMucho({
   updateAvailable,
 }: InstallCommandPropsBase = {}) {
-  const spinner = ora("Installing the mucho cli...").start();
+  const spinner = ora("Checking the mucho cli...").start();
   try {
-    let installedVersion = await installedToolVersion("mucho");
+    let installedVersion = await getCurrentNpmPackageVersion("mucho", true);
     if (installedVersion) {
       if (!updateAvailable) {
         spinner.info(`mucho ${installedVersion} is already installed`);

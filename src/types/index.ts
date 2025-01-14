@@ -6,7 +6,6 @@ export type ToolNames =
   | "avm"
   | "anchor"
   | "yarn"
-  | "mucho"
   | "zest"
   | "cargo-update"
   | "verify"

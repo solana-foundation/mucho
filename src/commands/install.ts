@@ -19,7 +19,6 @@ import { PathSourceStatus, TOOL_CONFIG } from "@/const/setup";
 import { getCargoUpdateOutput, getNpmPackageUpdates } from "@/lib/update";
 
 const toolNames: Array<ToolNames> = [
-  "mucho",
   "rust",
   "solana",
   "avm",

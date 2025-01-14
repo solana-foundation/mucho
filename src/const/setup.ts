@@ -21,9 +21,6 @@ export const TOOL_CONFIG: { [key in ToolNames]: ToolCommandConfig } = {
   yarn: {
     version: "yarn --version",
   },
-  mucho: {
-    version: "mucho --version",
-  },
   trident: {
     dependencies: ["rust"],
     // the trident cli does not have a version command, so we grab it from cargo
