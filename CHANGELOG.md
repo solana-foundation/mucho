@@ -1,5 +1,20 @@
 # mucho
 
+## 0.4.1
+
+### Patch Changes
+
+- [#21](https://github.com/solana-developers/mucho/pull/21)
+  [`6c6b531`](https://github.com/solana-developers/mucho/commit/6c6b53106ff1ee80d37b99522699a766f02ba2e7)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - fix self installer to
+  correctly detect installed mucho version. also to always install the latest
+  version
+
+- [#19](https://github.com/solana-developers/mucho/pull/19)
+  [`1404279`](https://github.com/solana-developers/mucho/commit/14042795532516ae05c0835e044902eb389636b5)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - handle error when no
+  cli config is set. also improve error handling around no keypair file existing
+
 ## 0.4.0
 
 ### Minor Changes
