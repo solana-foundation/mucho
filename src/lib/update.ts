@@ -28,7 +28,7 @@ export async function getNpmPackageUpdates(
     (registry.latest && isVersionNewer(registry.latest, current))
   ) {
     updates.push({
-      installed: current || "none",
+      installed: current,
       needsUpdate: true,
       latest: registry.latest,
       name: packageName,

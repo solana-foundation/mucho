@@ -58,7 +58,7 @@ export type ShellExecInSessionArgs = {
 
 export type PackageUpdate = {
   name: string;
-  installed: string;
+  installed: string | false;
   latest: string;
   needsUpdate: boolean;
 };
