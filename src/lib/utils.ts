@@ -29,11 +29,10 @@ export function loadPlaintextFile(filePath: string): string | null {
     return data;
   } catch (error) {
     if (error.code === "ENOENT") {
-      console.error("File not found:", filePath);
+      throw new Error(`File not found: ${filePath}`);
     } else {
-      console.error("Error reading file:", error.message);
+      throw new Error(`Error reading file: ${error.message}`);
     }
-    return null;
   }
 }
 

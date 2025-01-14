@@ -26,7 +26,7 @@ export const COMMON_OPTIONS = {
    * path to the local authority keypair
    */
   keypair: new Option("--keypair <PATH>", "path to a keypair file").default(
-    cliConfig.keypair_path || DEFAULT_KEYPAIR_PATH,
+    cliConfig?.keypair_path || DEFAULT_KEYPAIR_PATH,
   ),
   /**
    * rpc url or moniker to use

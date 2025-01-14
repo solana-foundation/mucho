@@ -18,30 +18,35 @@ import { deployCommand } from "@/commands/deploy";
 assertRuntimeVersion();
 
 async function main() {
-  // auto check for new version of the cli
-  await checkForSelfUpdate();
-
+  // create a global error boundary
   try {
-    const program = cliProgramRoot();
+    // auto check for new version of the cli
+    await checkForSelfUpdate();
 
-    program
-      .addCommand(installCommand())
-      // .addCommand(doctorCommand())
-      .addCommand(validatorCommand())
-      .addCommand(cloneCommand())
-      .addCommand(buildCommand())
-      .addCommand(deployCommand())
-      .addCommand(coverageCommand())
-      .addCommand(infoCommand());
+    try {
+      const program = cliProgramRoot();
 
-    // set the default action to `help` without an error
-    if (process.argv.length === 2) {
-      process.argv.push("--help");
+      program
+        .addCommand(installCommand())
+        // .addCommand(doctorCommand())
+        .addCommand(validatorCommand())
+        .addCommand(cloneCommand())
+        .addCommand(buildCommand())
+        .addCommand(deployCommand())
+        .addCommand(coverageCommand())
+        .addCommand(infoCommand());
+
+      // set the default action to `help` without an error
+      if (process.argv.length === 2) {
+        process.argv.push("--help");
+      }
+
+      await program.parseAsync();
+    } catch (err) {
+      errorMessage(err.toString());
     }
-
-    await program.parseAsync();
   } catch (err) {
-    errorMessage(err.toString());
+    errorMessage(err, "[mucho - unhandled error]");
   }
 }
 

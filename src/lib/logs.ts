@@ -2,7 +2,7 @@ import picocolors from "picocolors";
 import type { Formatter } from "picocolors/types";
 
 /**
- * Print a plain message using clack's `outro`
+ * Print a plain message using `picocolors`
  * (including a process exit code)
  */
 export function titleMessage(
@@ -37,7 +37,7 @@ export function warningOutro(msg: string = "Operation canceled") {
 }
 
 /**
- * Print a plain message using clack's `outro`
+ * Print a plain message using `picocolors`
  * (including a process exit code)
  */
 export function cancelOutro(msg: string = "Operation canceled") {
@@ -47,7 +47,7 @@ export function cancelOutro(msg: string = "Operation canceled") {
 }
 
 /**
- * Print a blue notice message using clack's `outro`
+ * Print a blue notice message using `picocolors`
  * (including a process exit code)
  */
 export function noticeOutro(msg: string) {
@@ -57,7 +57,7 @@ export function noticeOutro(msg: string) {
 }
 
 /**
- * Print a green success message using clack's `outro`
+ * Print a green success message using `picocolors`
  * (including a process exit code)
  */
 export function successOutro(msg: string = "Operation successful") {
@@ -67,19 +67,19 @@ export function successOutro(msg: string = "Operation successful") {
 }
 
 /**
- * Print a red error message using clack's `outro`
+ * Print a red error message using `picocolors`
  * (including a process exit code)
  */
 export function errorOutro(msg: string, title: string | null = null) {
   if (title) {
-    console.log(picocolors.bgRed(` ${title} `));
+    console.log(picocolors.bgRed(title));
     console.log(msg, "\n");
   } else console.log(picocolors.bgRed(` ${msg} `), "\n");
   process.exit(1);
 }
 
 /**
- * Display a error message with using clack
+ * Display a error message with using `picocolors`
  * (including a process exit code)
  */
 export function errorMessage(err: any, title: string = "An error occurred") {

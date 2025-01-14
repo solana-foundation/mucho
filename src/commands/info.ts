@@ -7,6 +7,8 @@ import ora from "ora";
 import { getCommandOutput } from "@/lib/shell";
 import { checkInstalledTools } from "@/lib/setup";
 import { getPlatformToolsVersions } from "@/lib/solana";
+import { DEFAULT_CLI_YAML_PATH, DEFAULT_KEYPAIR_PATH } from "@/const/solana";
+import { doesFileExist } from "@/lib/utils";
 
 /**
  * Command: `info`
@@ -62,6 +64,12 @@ export function infoCommand() {
           .join("\n"),
       );
 
+      info.push(
+        `Does CLI config.yml exist: ${await doesFileExist(
+          DEFAULT_CLI_YAML_PATH,
+        )}`,
+      );
+
       const testValidatorChecker = await getCommandOutput(
         // lsof limits the program name character length
         `ps aux | awk '/solana-test-validator/ && !/grep/ {$1=$2=$3=$4=$5=$6=$7=$8=$9=$10=""; print substr($0,11)}'`,
@@ -78,22 +86,27 @@ export function infoCommand() {
         }`;
       }
 
-      const address = await getCommandOutput("solana address");
-      info.push("Address: " + address);
+      // only attempt to fetch the address and balances if the user has a local keypair created
+      if (await doesFileExist(DEFAULT_KEYPAIR_PATH)) {
+        const address = await getCommandOutput("solana address");
+        info.push("Address: " + address);
 
-      const balances = {
-        devnet: (await getCommandOutput("solana balance -ud")) || false,
-        mainnet: (await getCommandOutput("solana balance -um")) || false,
-        testnet: (await getCommandOutput("solana balance -ut")) || false,
-        localnet:
-          (await getCommandOutput(
-            `solana balance --url ${localnetClusterUrl}`,
-          )) || false,
-      };
+        const balances = {
+          devnet: (await getCommandOutput("solana balance -ud")) || false,
+          mainnet: (await getCommandOutput("solana balance -um")) || false,
+          testnet: (await getCommandOutput("solana balance -ut")) || false,
+          localnet:
+            (await getCommandOutput(
+              `solana balance --url ${localnetClusterUrl}`,
+            )) || false,
+        };
 
-      info.push("Balances for address:");
-      for (const key in balances) {
-        info.push("  " + key + ": " + balances[key]);
+        info.push("Balances for address:");
+        for (const key in balances) {
+          info.push("  " + key + ": " + balances[key]);
+        }
+      } else {
+        info.push(`Default keypair file NOT found at: ${DEFAULT_KEYPAIR_PATH}`);
       }
 
       info.push("Is test-validator running? " + !!testValidatorChecker);
