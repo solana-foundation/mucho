@@ -6,7 +6,6 @@ export type ToolNames =
   | "avm"
   | "anchor"
   | "yarn"
-  | "mucho"
   | "zest"
   | "cargo-update"
   | "verify"
@@ -59,7 +58,7 @@ export type ShellExecInSessionArgs = {
 
 export type PackageUpdate = {
   name: string;
-  installed: string;
+  installed: string | false;
   latest: string;
   needsUpdate: boolean;
 };

@@ -13,6 +13,7 @@ import shellExec from "shell-exec";
 import ora from "ora";
 import { TOOL_CONFIG } from "@/const/setup";
 import picocolors from "picocolors";
+import { getCurrentNpmPackageVersion } from "./npm";
 
 /**
  * Install the mucho cli
@@ -21,25 +22,22 @@ import picocolors from "picocolors";
 export async function installMucho({
   updateAvailable,
 }: InstallCommandPropsBase = {}) {
-  const spinner = ora("Installing the mucho cli...").start();
+  const spinner = ora("Checking the mucho cli...").start();
   try {
-    let installedVersion = await installedToolVersion("mucho");
+    let installedVersion = await getCurrentNpmPackageVersion("mucho", true);
     if (installedVersion) {
-      let message = `mucho ${installedVersion} is already installed`;
-      if (updateAvailable) {
-        message = picocolors.yellow(
-          message + ` - v${updateAvailable.latest} available`,
-        );
+      if (!updateAvailable) {
+        spinner.info(`mucho ${installedVersion} is already installed`);
+        return true;
       }
-      spinner.info(message);
-      return true;
-    }
+      spinner.text = `Updating the mucho cli`;
+    } else spinner.text = `Installing the mucho cli`;
 
-    spinner.text = `Installing the mucho cli`;
-    await shellExec(`npm install -gy mucho@latest`);
+    await shellExec(`npm install -gy --force mucho@latest`);
 
     spinner.text = "Verifying mucho was installed";
-    installedVersion = await installedToolVersion("mucho");
+    installedVersion = await getCurrentNpmPackageVersion("mucho", true);
+
     if (installedVersion) {
       spinner.succeed(`mucho ${installedVersion} installed`);
       return installedVersion;
