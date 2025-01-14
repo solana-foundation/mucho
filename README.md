@@ -85,11 +85,11 @@ mucho clone --help
 
 The default behavior for fixture cloning is as follows:
 
-- All cloned fixtures are stored in the `fixtures` directory, unless overriden
+- All cloned fixtures are stored in the `fixtures` directory, unless overridden
   by your Solana.toml's `settings.accountDir`.
 - All fixtures are cloned from Solana's mainnet cluster or the declared
   `settings.cluster` in Solana.toml.
-- All fixtures are cloned from the same cluster, unless individually overriden.
+- All fixtures are cloned from the same cluster, unless individually overridden.
 - If any fixtures already exist, they are skipped from cloning.
 - If a Solana account is cloned, the `owner` program will automatically be
   cloned from the same cluster, unless the program is explicitly declared in the
@@ -135,7 +135,7 @@ mucho deploy --help
 The default behavior for deploying is as follows:
 
 - The `deploy` command will default to your Solana CLI declared cluster, unless
-  overriden with the `-u, --url` flag.
+  overridden with the `-u, --url` flag.
 
 ### validator
 
@@ -209,7 +209,7 @@ You can find an [example Solana.toml file](./tests/Solana.toml) here.
 Declare general defaults and configuration settings for use in various places.
 
 - `cluster` - Desired cluster to clone all fixtures from (if not individually
-  overriden per fixture). If not defined, defaults to Solana's mainnet.
+  overridden per fixture). If not defined, defaults to Solana's mainnet.
   - Type: `enum`
   - Default: `mainnet`
   - Values: `mainnet`, `devnet`, or `testnet`
