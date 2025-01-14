@@ -2,6 +2,7 @@ import { getAppInfo } from "@/lib/app-info";
 import { isVersionNewer } from "./node";
 import { titleMessage } from "./logs";
 import picocolors from "picocolors";
+import { getCommandOutput, VERSION_REGEX } from "./shell";
 
 type NpmRegistryResponse = {
   "dist-tags": {
@@ -14,6 +15,28 @@ type NpmRegistryResponse = {
     };
   };
 };
+
+/**
+ * Get the installed package version using the `npm list` command
+ */
+export async function getCurrentNpmPackageVersion(
+  packageName: string,
+  global: boolean = false,
+): Promise<string | false> {
+  // always check the global package for mucho to avoid issues when testing
+  if (packageName == "mucho") global = true;
+
+  return await getCommandOutput(
+    `npm list ${global ? "-g " : ""}${packageName}`,
+  ).then((res) => {
+    if (!res) return res;
+    return (
+      res
+        .match(new RegExp(`${packageName}@(.*)`, "gi"))?.[0]
+        .match(VERSION_REGEX)?.[1] || false
+    );
+  });
+}
 
 /**
  * Poll the npm registry to fetch the latest version of any package name
@@ -85,25 +108,24 @@ export async function getNpmRegistryPackageVersion(
  *
  */
 export async function checkForSelfUpdate() {
-  const res = await getNpmRegistryPackageVersion(getAppInfo().name);
+  const registry = await getNpmRegistryPackageVersion(getAppInfo().name);
+  const current = await getCurrentNpmPackageVersion(getAppInfo().name, true);
 
-  if ("error" in res) {
+  if ("error" in registry) {
     // console.error(`Unable to perform the mucho self update checks`);
     // console.error("Error:", npmVersion.error);
     return;
   }
 
   // do nothing if on the same version
-  if (res.latest == getAppInfo().version) {
+  if (registry.latest == current) {
     return;
   }
 
-  // console.log("latest", res.latest);
-  // console.log("current:", getAppInfo().version);
-
-  if (isVersionNewer(res.latest, getAppInfo().version)) {
+  // if not installed globally, we will prompt to install
+  if (!current || isVersionNewer(registry.latest, current)) {
     titleMessage(
-      `${getAppInfo().name} update available - v${res.latest}`,
+      `${getAppInfo().name} update available - v${registry.latest}`,
       (val) => picocolors.inverse(picocolors.green(val)),
     );
     // console.log(`A new version of ${getAppInfo().name} is available!`);
@@ -113,7 +135,7 @@ export async function checkForSelfUpdate() {
     );
     console.log(
       "  ",
-      picocolors.green(`npm install -gy ${getAppInfo().name}@latest`),
+      picocolors.green(`npx ${getAppInfo().name}@latest install`),
     );
 
     console.log(); // print a spacer

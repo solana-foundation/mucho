@@ -17,7 +17,6 @@ import {
 import { checkShellPathSource } from "@/lib/setup";
 import { PathSourceStatus, TOOL_CONFIG } from "@/const/setup";
 import { getCargoUpdateOutput, getNpmPackageUpdates } from "@/lib/update";
-import { getNpmRegistryPackageVersion } from "@/lib/npm";
 
 const toolNames: Array<ToolNames> = [
   "mucho",
@@ -75,17 +74,16 @@ export function installCommand() {
         // track which commands may require a path/session refresh
         const pathsToRefresh: string[] = [];
 
-        const updatesAvailable = await getNpmPackageUpdates("mucho");
+        const updatesAvailable = await getNpmPackageUpdates("mucho", true);
 
-        if (!toolName || toolName == "mucho") {
-          await installMucho({
-            os,
-            version,
-            updateAvailable: updatesAvailable.filter(
-              (data) => data.name.toLowerCase() == "mucho",
-            )[0],
-          });
-        }
+        // always check and install `mucho`
+        await installMucho({
+          os,
+          version,
+          updateAvailable: updatesAvailable.filter(
+            (data) => data.name.toLowerCase() == "mucho",
+          )[0],
+        });
 
         if (!toolName || toolName == "rust") {
           await installRust({

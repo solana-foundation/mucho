@@ -2,24 +2,35 @@ import { PackageUpdate } from "@/types";
 import { installCargoUpdate } from "./install";
 import { warnMessage } from "./logs";
 import { checkCommand } from "./shell";
-import { getNpmRegistryPackageVersion } from "./npm";
-import { getAppInfo } from "./app-info";
+import {
+  getCurrentNpmPackageVersion,
+  getNpmRegistryPackageVersion,
+} from "./npm";
 import { isVersionNewer } from "./node";
 
 /**
  * Check for updates to any npm package
+ *
  */
 export async function getNpmPackageUpdates(
   packageName: string,
+  global: boolean = false,
 ): Promise<PackageUpdate[]> {
   const updates: PackageUpdate[] = [];
 
-  const res = await getNpmRegistryPackageVersion(packageName);
-  if (res.latest && isVersionNewer(res.latest, getAppInfo().version)) {
+  // always check the global package for mucho to avoid issues when testing
+  if (packageName == "mucho") global = true;
+
+  const current = await getCurrentNpmPackageVersion(packageName, global);
+  const registry = await getNpmRegistryPackageVersion(packageName);
+  if (
+    !current ||
+    (registry.latest && isVersionNewer(registry.latest, current))
+  ) {
     updates.push({
-      installed: getAppInfo().version,
+      installed: current || "none",
       needsUpdate: true,
-      latest: res.latest,
+      latest: registry.latest,
       name: packageName,
     });
   }
