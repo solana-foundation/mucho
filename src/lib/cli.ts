@@ -16,6 +16,7 @@ import { SolanaToml, SolanaTomlWithConfigPath } from "@/types/config";
 import {
   DEFAULT_CLI_YAML_PATH,
   DEFAULT_CONFIG_FILE,
+  DEFAULT_KEYPAIR_PATH,
   DEFAULT_TEST_LEDGER_DIR,
 } from "@/const/solana";
 import { COMMON_OPTIONS } from "@/const/commands";
@@ -25,32 +26,40 @@ import { SolanaCliYaml } from "@/types/solana";
 /**
  * Load the Solana CLI's config file
  */
-export function loadSolanaCliConfig(filePath: string = DEFAULT_CLI_YAML_PATH) {
-  const cliConfig = loadYamlFile<SolanaCliYaml>(filePath);
+export function loadSolanaCliConfig(
+  filePath: string = DEFAULT_CLI_YAML_PATH,
+): SolanaCliYaml {
+  try {
+    const cliConfig = loadYamlFile<SolanaCliYaml>(filePath);
 
-  // auto convert the rpc url to the cluster moniker
-  if (cliConfig?.json_rpc_url) {
-    switch (cliConfig.json_rpc_url) {
-      case "https://api.devnet.solana.com": {
-        cliConfig.json_rpc_url = "devnet";
-        break;
-      }
-      case "https://api.testnet.solana.com": {
-        cliConfig.json_rpc_url = "testnet";
-        break;
-      }
-      case "https://api.mainnet-beta.solana.com": {
-        cliConfig.json_rpc_url = "mainnet";
-        break;
-      }
-      case "http://localhost:8899": {
-        cliConfig.json_rpc_url = "localhost";
-        break;
+    // auto convert the rpc url to the cluster moniker
+    if (cliConfig?.json_rpc_url) {
+      switch (cliConfig.json_rpc_url) {
+        case "https://api.devnet.solana.com": {
+          cliConfig.json_rpc_url = "devnet";
+          break;
+        }
+        case "https://api.testnet.solana.com": {
+          cliConfig.json_rpc_url = "testnet";
+          break;
+        }
+        case "https://api.mainnet-beta.solana.com": {
+          cliConfig.json_rpc_url = "mainnet";
+          break;
+        }
+        case "http://localhost:8899": {
+          cliConfig.json_rpc_url = "localhost";
+          break;
+        }
       }
     }
-  }
 
-  return cliConfig;
+    return cliConfig;
+  } catch (err) {
+    return {
+      keypair_path: DEFAULT_KEYPAIR_PATH,
+    };
+  }
 }
 
 /**
