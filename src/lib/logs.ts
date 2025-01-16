@@ -75,6 +75,9 @@ export function errorOutro(msg: string, title: string | null = null) {
     console.log(picocolors.bgRed(title));
     console.log(msg, "\n");
   } else console.log(picocolors.bgRed(` ${msg} `), "\n");
+
+  // add a line spacer at the end to make the terminal easier to read
+  console.log();
   process.exit(1);
 }
 
