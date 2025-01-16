@@ -1,17 +1,17 @@
-import { Keypair } from "@solana/web3.js";
 import { doesFileExist, loadJsonFile } from "@/lib/utils";
 import { DEFAULT_KEYPAIR_PATH } from "@/const/solana";
 import { ProgramsByClusterLabels, SolanaCluster } from "@/types/config";
 import { warnMessage } from "@/lib/logs";
 import { checkCommand, VERSION_REGEX } from "@/lib/shell";
 import { PlatformToolsVersions } from "@/types";
+import { createKeyPairSignerFromBytes, KeyPairSigner } from "@solana/web3.js";
 
 export function loadKeypairFromFile(
   filePath: string = DEFAULT_KEYPAIR_PATH,
-): Keypair | null {
+): Promise<KeyPairSigner | null> {
   if (!doesFileExist(filePath)) return null;
   const jsonBytes = loadJsonFile<Uint8Array>(filePath);
-  return Keypair.fromSecretKey(Buffer.from(jsonBytes));
+  return createKeyPairSignerFromBytes(Buffer.from(jsonBytes));
 }
 
 /**
