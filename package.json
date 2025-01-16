@@ -33,6 +33,7 @@
     "@solana/buffer-layout": "^4.0.1",
     "@solana/buffer-layout-utils": "^0.2.0",
     "@solana/web3.js": "^2.0.0",
+    "cli-table3": "^0.6.5",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
     "inquirer": "^12.0.0",
