@@ -92,9 +92,9 @@ export function validatorCommand() {
       let authorityAddress: string | null = null;
       if (config.settings.keypair) {
         if (doesFileExist(config.settings.keypair)) {
-          authorityAddress = loadKeypairFromFile(
-            config.settings.keypair,
-          )?.publicKey.toBase58();
+          authorityAddress = (
+            await loadKeypairFromFile(config.settings.keypair)
+          ).address;
         } else {
           warnMessage(
             `Unable to locate keypair file: ${config.settings.keypair}`,

@@ -141,7 +141,7 @@ export function deployCommand() {
         buildDir,
         `${options.programName}-keypair.json`,
       );
-      const programKeypair = loadKeypairFromFile(programIdPath);
+      const programKeypair = await loadKeypairFromFile(programIdPath);
 
       // process the user's config file if they have one
       if (config?.programs) {
@@ -178,7 +178,7 @@ export function deployCommand() {
         // todo: this
 
         if (programKeypair) {
-          programId = programKeypair.publicKey.toBase58();
+          programId = programKeypair.address;
           warnMessage(`Auto detected default program keypair file:`);
           console.log(` - keypair path: ${programIdPath}`);
           console.log(` - program id: ${programId}`);
@@ -211,7 +211,7 @@ export function deployCommand() {
           );
         }
 
-        const programIdFromKeypair = programKeypair.publicKey.toBase58();
+        const programIdFromKeypair = programKeypair.address;
         /**
          * since the initial deployment requires a keypair:
          * if the user has a mismatch between their declared program id
@@ -233,7 +233,9 @@ export function deployCommand() {
         programInfo = await getDeployedProgramInfo(programId, options.url);
       }
 
-      const authorityKeypair = loadKeypairFromFile(config.settings.keypair);
+      const authorityKeypair = await loadKeypairFromFile(
+        config.settings.keypair,
+      );
 
       /**
        * todo: assorted pre-deploy checks to add
@@ -250,9 +252,9 @@ export function deployCommand() {
           );
         }
 
-        if (programInfo.authority !== authorityKeypair.publicKey.toBase58()) {
+        if (programInfo.authority !== authorityKeypair.address) {
           return cancelMessage(
-            `Your keypair (${authorityKeypair.publicKey.toBase58()}) is not the upgrade authority for program ${programId}`,
+            `Your keypair (${authorityKeypair.address}) is not the upgrade authority for program ${programId}`,
           );
         }
 
