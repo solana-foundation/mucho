@@ -2,7 +2,7 @@
 
 import { assertRuntimeVersion } from "@/lib/node";
 import { checkForSelfUpdate } from "@/lib/npm";
-import { errorMessage } from "@/lib/logs";
+import { errorOutro } from "@/lib/logs";
 import { cliProgramRoot } from "@/commands";
 
 import { installCommand } from "@/commands/install";
@@ -45,10 +45,10 @@ async function main() {
 
       await program.parseAsync();
     } catch (err) {
-      errorMessage(err.toString());
+      errorOutro(err.toString());
     }
   } catch (err) {
-    errorMessage(err, "[mucho - unhandled error]");
+    errorOutro(err, "[mucho - unhandled error]");
   }
 
   // add a line spacer at the end to make the terminal easier to read
