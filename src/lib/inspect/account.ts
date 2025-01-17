@@ -10,9 +10,7 @@ export async function inspectAddress({
   address,
   commitment = "confirmed",
 }: InspectorBaseArgs & { address: Address }) {
-  console.log("address", address);
-
-  const spinner = ora("Fetching transaction").start();
+  const spinner = ora("Fetching account").start();
   try {
     const account = await rpc
       .getAccountInfo(address, {
@@ -34,6 +32,7 @@ export async function inspectAddress({
     warnMessage(err);
   }
 }
+
 function buildAccountOverview({
   value: account,
 }: ReturnType<GetAccountInfoApi["getAccountInfo"]>): CliTable3.Table {
