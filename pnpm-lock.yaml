@@ -17,6 +17,9 @@ importers:
       '@inquirer/prompts':
         specifier: ^7.0.0
         version: 7.0.0(@types/node@22.7.6)
+      '@solana-program/compute-budget':
+        specifier: ^0.6.1
+        version: 0.6.1(@solana/web3.js@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.6.3)(ws@7.5.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)))
       '@solana/buffer-layout':
         specifier: ^4.0.1
         version: 4.0.1
@@ -698,6 +701,11 @@ packages:
 
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
+
+  '@solana-program/compute-budget@0.6.1':
+    resolution: {integrity: sha512-PWcVmRx2gSQ8jd5va5HzSlKqQmR8Q1sYaPcqpCzhOHcApJ4YsVWY6QhaOD5Nx7z1UXkP12vNq3KDsSCZnT3Hkw==}
+    peerDependencies:
+      '@solana/web3.js': ^2.0.0
 
   '@solana/accounts@2.0.0':
     resolution: {integrity: sha512-1CE4P3QSDH5x+ZtSthMY2mn/ekROBnlT3/4f3CHDJicDvLQsgAq2yCvGHsYkK3ZA0mxhFLuhJVjuKASPnmG1rQ==}
@@ -3345,6 +3353,10 @@ snapshots:
   '@sinonjs/fake-timers@10.3.0':
     dependencies:
       '@sinonjs/commons': 3.0.1
+
+  '@solana-program/compute-budget@0.6.1(@solana/web3.js@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.6.3)(ws@7.5.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)))':
+    dependencies:
+      '@solana/web3.js': 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.6.3)(ws@7.5.10(bufferutil@4.0.8)(utf-8-validate@5.0.10))
 
   '@solana/accounts@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.6.3)':
     dependencies:
