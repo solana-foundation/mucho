@@ -4,6 +4,7 @@ import picocolors from "picocolors";
 import { warnMessage } from "@/lib/logs";
 import { InspectorBaseArgs } from "@/types/inspect";
 import { Address, GetTransactionApi, Signature } from "@solana/web3.js";
+import { unixTimestampToDate, lamportsToSol } from "@/lib/web3";
 
 export async function inspectSignature({
   rpc,
@@ -75,7 +76,7 @@ function buildTransactionOverview(
   //   console.log(tx.meta.err);
   // }
 
-  const blockTime = new Date(Number(tx.blockTime) * 1000);
+  const blockTime = unixTimestampToDate(tx.blockTime);
   table.push([
     "Timestamp",
     blockTime.toLocaleDateString() + blockTime.toLocaleTimeString(),
@@ -86,13 +87,7 @@ function buildTransactionOverview(
     "Compute units consumed",
     new Intl.NumberFormat().format(tx.meta.computeUnitsConsumed),
   ]);
-  table.push([
-    "Fee (SOL)",
-    "~" +
-      new Intl.NumberFormat("en-US", { maximumFractionDigits: 9 }).format(
-        Number(tx.meta.fee) / 1_000_000_000,
-      ),
-  ]);
+  table.push(["Fee (SOL)", "~" + lamportsToSol(tx.meta.fee)]);
 
   return table;
 }

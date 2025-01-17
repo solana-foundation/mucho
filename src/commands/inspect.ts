@@ -2,8 +2,8 @@ import { Argument, Command } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
 import { errorMessage, titleMessage, warningOutro } from "@/lib/logs";
 import { COMMON_OPTIONS } from "@/const/commands";
-import { getPublicSolanaRpcUrl } from "@/lib/solana";
 import { inspectAddress, inspectSignature } from "@/lib/inspect";
+import { getPublicSolanaRpcUrl } from "@/lib/web3";
 import {
   address,
   createSolanaRpc,
