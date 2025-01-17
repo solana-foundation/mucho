@@ -1,14 +1,9 @@
 import { Argument, Command } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
-import {
-  errorMessage,
-  titleMessage,
-  warningOutro,
-  warnMessage,
-} from "@/lib/logs";
-import ora from "ora";
+import { errorMessage, titleMessage, warningOutro } from "@/lib/logs";
 import { COMMON_OPTIONS } from "@/const/commands";
 import { getPublicSolanaRpcUrl } from "@/lib/solana";
+import { inspectAddress, inspectSignature } from "@/lib/inspect";
 import {
   address,
   createSolanaRpc,
@@ -16,7 +11,6 @@ import {
   isSignature,
   signature,
 } from "@solana/web3.js";
-import { inspectAddress, inspectSignature } from "@/lib/inspect";
 
 /**
  * Command: `inspect`
@@ -43,12 +37,6 @@ export function inspectCommand() {
           console.log("Inspect a transaction or account using the cli");
           process.exit();
         }
-
-        // let pubkey: PublicKey | null = null;
-        // let signature: Signature | null = null;
-
-        // try {
-        // } catch (err) {}
 
         // when an explorer url is provided, attempt to parse this and strip away the noise
         if (input.match(/^https?:\/\//gi)) {
@@ -78,20 +66,11 @@ export function inspectCommand() {
         // todo: selectable cluster
         const rpc = createSolanaRpc(getPublicSolanaRpcUrl("mainnet-beta"));
 
-        const spinner = ora("Fetching data from the blockchain").start();
-
-        try {
-          if (isAddress(input)) {
-            await inspectAddress({ rpc, address: address(input) });
-          } else if (isSignature(input)) {
-            await inspectSignature({ rpc, signature: signature(input) });
-          }
-        } catch (err) {
-          if (err instanceof Error) warnMessage(err.message);
-          else warnMessage("An unknown error occurred");
+        if (isAddress(input)) {
+          await inspectAddress({ rpc, address: address(input) });
+        } else if (isSignature(input)) {
+          await inspectSignature({ rpc, signature: signature(input) });
         }
-
-        spinner.stop();
       })
   );
 }
