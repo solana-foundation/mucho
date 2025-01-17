@@ -9,8 +9,10 @@ import {
   createSolanaRpc,
   isAddress,
   isSignature,
+  isStringifiedNumber,
   signature,
 } from "@solana/web3.js";
+import { inspectBlock } from "@/lib/inspect/block";
 
 /**
  * Command: `inspect`
@@ -70,6 +72,8 @@ export function inspectCommand() {
           await inspectAddress({ rpc, address: address(input) });
         } else if (isSignature(input)) {
           await inspectSignature({ rpc, signature: signature(input) });
+        } else if (isStringifiedNumber(input)) {
+          await inspectBlock({ rpc, block: input });
         }
       })
   );

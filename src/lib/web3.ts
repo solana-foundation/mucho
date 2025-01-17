@@ -56,8 +56,15 @@ export function unixTimestampToDate(
   return new Date(Number(blockTime) * 1000);
 }
 
+export function unixTimestampToRelativeDate(
+  time: UnixTimestamp | bigint | number,
+) {}
+
 export const COMPUTE_BUDGET_PROGRAM_ID = address(
   "ComputeBudget111111111111111111111111111111",
+);
+export const VOTE_PROGRAM_ID = address(
+  "Vote111111111111111111111111111111111111111",
 );
 
 type ComputeBudgetData = {
