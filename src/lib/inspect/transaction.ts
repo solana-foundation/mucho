@@ -4,7 +4,12 @@ import picocolors from "picocolors";
 import { warnMessage } from "@/lib/logs";
 import { InspectorBaseArgs } from "@/types/inspect";
 import { Address, GetTransactionApi, Signature } from "@solana/web3.js";
-import { unixTimestampToDate, lamportsToSol } from "@/lib/web3";
+import {
+  unixTimestampToDate,
+  lamportsToSol,
+  getComputeBudgetDataFromTransaction,
+} from "@/lib/web3";
+import { timeAgo } from "../utils";
 
 export async function inspectSignature({
   rpc,
@@ -23,34 +28,14 @@ export async function inspectSignature({
 
     if (!tx) throw "Transaction not found";
 
-    // console.log(tx);
-
-    if (tx.version !== "legacy") {
-      // return errorMessage("Version transactions are not supported yet");
-      // loaded is only for versioned transactions
-      // console.log("tx.meta.loadedAddresses");
-      // console.log(tx.meta.loadedAddresses);
-    }
-
-    // console.log(tx.meta);
-
-    // console.log("tx.transaction.message.instructions");
-    // console.log(tx.transaction.message.instructions);
-    // const instructionsTable = new CliTable3({
-    //   head: ["Index", "Account", "Details"],
-    //   style: tableStyle,
-    // });
-    // tx.transaction.message.instructions.map((ix) => {});
-    // console.log(instructionsTable.toString());
-
     const overviewTable = buildTransactionOverview(tx);
     const accountsTable = buildAccountsTable(tx);
 
     // we must the spinner before logging any thing or else the spinner will be displayed as frozen
     spinner.stop();
 
-    console.log(overviewTable.toString());
     console.log(accountsTable.toString());
+    console.log(overviewTable.toString());
   } catch (err) {
     spinner.stop();
     warnMessage(err);
@@ -79,15 +64,44 @@ function buildTransactionOverview(
   const blockTime = unixTimestampToDate(tx.blockTime);
   table.push([
     "Timestamp",
-    blockTime.toLocaleDateString() + blockTime.toLocaleTimeString(),
+    blockTime.toLocaleDateString(undefined, {
+      dateStyle: "medium",
+    }) +
+      " " +
+      blockTime.toLocaleTimeString(undefined, {
+        timeZoneName: "short",
+      }) +
+      `\n(${timeAgo(blockTime)})`,
   ]);
   table.push(["Version", tx.version]);
   table.push(["Slot", new Intl.NumberFormat().format(tx.slot)]);
+  table.push(["Fee (SOL)", "~" + lamportsToSol(tx.meta.fee)]);
+
+  const budget = getComputeBudgetDataFromTransaction(tx);
   table.push([
     "Compute units consumed",
-    new Intl.NumberFormat().format(tx.meta.computeUnitsConsumed),
+    new Intl.NumberFormat().format(budget.unitsConsumed),
   ]);
-  table.push(["Fee (SOL)", "~" + lamportsToSol(tx.meta.fee)]);
+  // table.push([
+  //   "Compute unit limit",
+  //   new Intl.NumberFormat().format(budget.unitLimit),
+  // ]);
+  table.push([
+    "Compute units requested",
+    budget.unitsRequested
+      ? new Intl.NumberFormat().format(budget.unitsRequested)
+      : picocolors.red(
+          `NONE SET - fallback to ${new Intl.NumberFormat().format(
+            200_000 * tx.transaction.message.instructions.length,
+          )}`,
+        ),
+  ]);
+  table.push([
+    "Compute unit price (in microLamports)",
+    budget.unitPrice
+      ? new Intl.NumberFormat().format(budget.unitPrice)
+      : picocolors.red("NONE"),
+  ]);
 
   return table;
 }
@@ -96,11 +110,13 @@ function buildAccountsTable(
   tx: ReturnType<GetTransactionApi["getTransaction"]>,
 ): CliTable3.Table {
   const table = new CliTable3({
-    head: ["Index", "Account", "Details"],
+    head: ["#", "Address", "Details"],
     style: {
       head: [!tx.meta.err ? "green" : "red"],
     },
   });
+
+  let counter = 1;
 
   const {
     numRequiredSignatures,
@@ -116,8 +132,7 @@ function buildAccountsTable(
     ),
   );
 
-  // console.log("Accounts:");
-  tx.transaction.message.accountKeys.map((account, index) => {
+  tx.transaction.message.accountKeys.map((address, index) => {
     let details: string[] = [];
 
     const numUnsignedAccounts = index - numRequiredSignatures;
@@ -150,9 +165,23 @@ function buildAccountsTable(
     // todo: should we note if they are read only?
     // if (details.length == 0) details.push("Read Only");
 
-    // todo: add support for custom labels for the 'account'
+    // todo: add support for custom labels for the 'address'
 
-    table.push([index, account, details.join(", ").trim()]);
+    table.push([counter, address, details.join(", ").trim()]);
+    counter++;
+  });
+
+  tx.meta.loadedAddresses.writable.map((address) => {
+    table.push([
+      counter,
+      address,
+      ["Address Lookup Table", "Writable"].join(", ").trim(),
+    ]);
+    counter++;
+  });
+  tx.meta.loadedAddresses.readonly.map((address) => {
+    table.push([counter, address, ["Address Lookup Table"].join(", ").trim()]);
+    counter++;
   });
 
   return table;
