@@ -8,22 +8,27 @@ import {
   unixTimestampToDate,
   VOTE_PROGRAM_ID,
 } from "@/lib/web3";
-import { timeAgo } from "@/lib/utils";
+import { numberStringToNumber, timeAgo } from "@/lib/utils";
 
 export async function inspectBlock({
   rpc,
   block: blockNumber,
   commitment = "confirmed",
 }: InspectorBaseArgs & { block: number | bigint | string }) {
-  const spinner = ora("Fetching block, this could take some time").start();
+  const spinner = ora("Fetching block, this could take a few moments").start();
 
   try {
     if (typeof blockNumber == "string") {
       try {
-        blockNumber = parseInt(blockNumber);
+        // accept locale based numbers (1,222 for US and 1.222 for EU, etc)
+        blockNumber = parseInt(numberStringToNumber(blockNumber).toString());
       } catch (err) {
         throw "Invalid block number provided";
       }
+    }
+
+    if (typeof blockNumber != "bigint" && typeof blockNumber != "number") {
+      throw "Provided block number is not an actual number";
     }
 
     const [block, leaders] = await Promise.all([
