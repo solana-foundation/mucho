@@ -39,6 +39,7 @@ mucho --help
 - [`deploy`](#deploy) - Deploy a Solana program in your workspace.
 - [`coverage`](#coverage) - Run code coverage tests on a Solana program.
 - [`info`](#info) - Gather helpful troubleshooting info about your setup.
+- [`docs`](#docs) - Show the documentation for the Solana development tools.
 
 ### install
 
