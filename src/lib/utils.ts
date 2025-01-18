@@ -374,3 +374,15 @@ export function timeAgo(date: Date | string | number): string {
     return `${years} ${years === 1 ? "year" : "years"} ago`;
   }
 }
+
+export function numberStringToNumber(localeString: string): number {
+  return Number(
+    localeString.replace(
+      new RegExp(
+        `[${new Intl.NumberFormat().format(11111).replace(/\d/g, "")}]`,
+        "g",
+      ),
+      "",
+    ),
+  );
+}

@@ -1,6 +1,11 @@
 import { Argument, Command } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
-import { errorMessage, titleMessage, warningOutro } from "@/lib/logs";
+import {
+  errorMessage,
+  titleMessage,
+  warningOutro,
+  warnMessage,
+} from "@/lib/logs";
 import { COMMON_OPTIONS } from "@/const/commands";
 import { inspectAddress, inspectSignature } from "@/lib/inspect";
 import { getPublicSolanaRpcUrl } from "@/lib/web3";
@@ -13,6 +18,7 @@ import {
   signature,
 } from "@solana/web3.js";
 import { inspectBlock } from "@/lib/inspect/block";
+import { numberStringToNumber } from "@/lib/utils";
 
 /**
  * Command: `inspect`
@@ -72,8 +78,14 @@ export function inspectCommand() {
           await inspectAddress({ rpc, address: address(input) });
         } else if (isSignature(input)) {
           await inspectSignature({ rpc, signature: signature(input) });
-        } else if (isStringifiedNumber(input)) {
+        } else if (
+          isStringifiedNumber(numberStringToNumber(input).toString())
+        ) {
           await inspectBlock({ rpc, block: input });
+        } else {
+          warnMessage(
+            "Unable to determine your 'INPUT'. Check it's formatting and try again :)",
+          );
         }
       })
   );
