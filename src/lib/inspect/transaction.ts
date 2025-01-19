@@ -8,6 +8,7 @@ import {
   unixTimestampToDate,
   lamportsToSol,
   getComputeBudgetDataFromTransaction,
+  getExplorerLink,
 } from "@/lib/web3";
 import { timeAgo } from "../utils";
 
@@ -65,6 +66,13 @@ export async function inspectSignature({
     console.log(accountsTable.toString());
     console.log(ixsTable.toString());
     console.log(overviewTable.toString());
+
+    console.log("Open on Solana Explorer:");
+    console.log(
+      getExplorerLink({
+        transaction: signature,
+      }).toString(),
+    );
   } catch (err) {
     spinner.stop();
     warnMessage(err);

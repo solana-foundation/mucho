@@ -5,6 +5,7 @@ import { InspectorBaseArgs } from "@/types/inspect";
 import { Address, GetBlockApi } from "@solana/web3.js";
 import {
   COMPUTE_BUDGET_PROGRAM_ID,
+  getExplorerLink,
   unixTimestampToDate,
   VOTE_PROGRAM_ID,
 } from "@/lib/web3";
@@ -50,6 +51,13 @@ export async function inspectBlock({
     spinner.stop();
 
     console.log(overviewTable.toString());
+
+    console.log("Open on Solana Explorer:");
+    console.log(
+      getExplorerLink({
+        block: blockNumber.toString(),
+      }).toString(),
+    );
   } catch (err) {
     spinner.stop();
     warnMessage(err);

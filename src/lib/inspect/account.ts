@@ -3,7 +3,7 @@ import CliTable3 from "cli-table3";
 import { warnMessage } from "@/lib/logs";
 import { InspectorBaseArgs } from "@/types/inspect";
 import { Address, GetAccountInfoApi } from "@solana/web3.js";
-import { lamportsToSol } from "@/lib/web3";
+import { getExplorerLink, lamportsToSol } from "@/lib/web3";
 
 export async function inspectAddress({
   rpc,
@@ -27,6 +27,13 @@ export async function inspectAddress({
     spinner.stop();
 
     console.log(overviewTable.toString());
+
+    console.log("Open on Solana Explorer:");
+    console.log(
+      getExplorerLink({
+        address,
+      }).toString(),
+    );
   } catch (err) {
     spinner.stop();
     warnMessage(err);
