@@ -194,6 +194,25 @@ and general info about your operating system and Solana CLI configuration.
 npx mucho info
 ```
 
+### docs
+
+Open documentation websites for Solana development tools. Without any arguments,
+opens the Mucho documentation. With a tool name argument, opens documentation
+for that specific tool.
+
+**Usage:**
+
+```shell
+mucho docs --help
+```
+
+Examples:
+
+```shell
+mucho docs         # open Mucho documentation
+mucho docs solana  # open Solana documentation
+```
+
 ## Solana.toml
 
 The `Solana.toml` file is a framework agnostic manifest file containing metadata
