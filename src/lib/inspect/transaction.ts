@@ -11,6 +11,12 @@ import {
 } from "@/lib/web3";
 import { timeAgo } from "../utils";
 
+type BuildTableInput = {
+  tx: ReturnType<GetTransactionApi["getTransaction"]>;
+  allAccounts: Address[];
+  indexToProgramIds: Map<number, Address>;
+};
+
 export async function inspectSignature({
   rpc,
   signature,
@@ -28,9 +34,30 @@ export async function inspectSignature({
 
     if (!tx) throw "Transaction not found";
 
-    const overviewTable = buildTransactionOverview(tx);
-    const accountsTable = buildAccountsTable(tx);
-    const ixsTable = buildInstructionsTable(tx);
+    const allAccounts = tx.transaction.message.accountKeys
+      .concat(tx.meta.loadedAddresses.writable)
+      .concat(tx.meta.loadedAddresses.readonly);
+
+    const indexToProgramIds = new Map<number, Address>();
+    tx.transaction.message.instructions.map((ix) =>
+      indexToProgramIds.set(ix.programIdIndex, allAccounts[ix.programIdIndex]),
+    );
+
+    const overviewTable = buildTransactionOverview({
+      tx,
+      allAccounts,
+      indexToProgramIds,
+    });
+    const accountsTable = buildAccountsTable({
+      tx,
+      allAccounts,
+      indexToProgramIds,
+    });
+    const ixsTable = buildInstructionsTable({
+      tx,
+      allAccounts,
+      indexToProgramIds,
+    });
 
     // we must the spinner before logging any thing or else the spinner will be displayed as frozen
     spinner.stop();
@@ -44,9 +71,7 @@ export async function inspectSignature({
   }
 }
 
-function buildTransactionOverview(
-  tx: ReturnType<GetTransactionApi["getTransaction"]>,
-): CliTable3.Table {
+function buildTransactionOverview({ tx }: BuildTableInput): CliTable3.Table {
   const table = new CliTable3({
     head: [
       "Transaction Overview",
@@ -108,18 +133,11 @@ function buildTransactionOverview(
   return table;
 }
 
-function buildInstructionsTable(
-  tx: ReturnType<GetTransactionApi["getTransaction"]>,
-): CliTable3.Table {
-  const allAccounts = tx.transaction.message.accountKeys
-    .concat(tx.meta.loadedAddresses.writable)
-    .concat(tx.meta.loadedAddresses.readonly);
-
-  const indexToProgramIds = new Map<number, Address>();
-  tx.transaction.message.instructions.map((ix) =>
-    indexToProgramIds.set(ix.programIdIndex, allAccounts[ix.programIdIndex]),
-  );
-
+function buildInstructionsTable({
+  tx,
+  allAccounts,
+  indexToProgramIds,
+}: BuildTableInput): CliTable3.Table {
   const logs = parseProgramLogs(tx.meta.logMessages, tx.meta.err);
 
   const failedIx = logs.findIndex((ix) => ix.failed);
@@ -159,7 +177,8 @@ function buildInstructionsTable(
     // debugging failed transactions could be aided by knowing which
     // accounts are actually included in the instruction that errored
     if (failedIx == index) {
-      content.push("Accounts Used:");
+      // todo: should be give a breakdown of how many accounts came from a ALT/LUT?
+      content.push(`Accounts Used (${ix.accounts.length}):`);
       ix.accounts.map((index) => {
         content.push(
           "  #" +
@@ -176,9 +195,7 @@ function buildInstructionsTable(
   return table;
 }
 
-function buildAccountsTable(
-  tx: ReturnType<GetTransactionApi["getTransaction"]>,
-): CliTable3.Table {
+function buildAccountsTable({ tx }: BuildTableInput): CliTable3.Table {
   const table = new CliTable3({
     head: ["#", "Address", "Details"],
     style: {
@@ -201,6 +218,15 @@ function buildAccountsTable(
       tx.transaction.message.accountKeys[ix.programIdIndex],
     ),
   );
+
+  function isInFailedIx(index: number) {
+    return tx.meta.err &&
+      tx.transaction.message.instructions[
+        tx.transaction.message.instructions.length - 1
+      ].accounts.includes(index)
+      ? true
+      : false;
+  }
 
   tx.transaction.message.accountKeys.map((address, index) => {
     let details: string[] = [];
@@ -237,20 +263,28 @@ function buildAccountsTable(
 
     // todo: add support for custom labels for the 'address'
 
-    table.push([counter, address, details.join(", ").trim()]);
+    table.push([
+      counter,
+      isInFailedIx(index) ? picocolors.red(address) : address,
+      details.join(", ").trim(),
+    ]);
     counter++;
   });
 
-  tx.meta.loadedAddresses.writable.map((address) => {
+  tx.meta.loadedAddresses.writable.map((address, index) => {
     table.push([
       counter,
-      address,
+      isInFailedIx(index) ? picocolors.red(address) : address,
       ["Address Lookup Table", "Writable"].join(", ").trim(),
     ]);
     counter++;
   });
-  tx.meta.loadedAddresses.readonly.map((address) => {
-    table.push([counter, address, ["Address Lookup Table"].join(", ").trim()]);
+  tx.meta.loadedAddresses.readonly.map((address, index) => {
+    table.push([
+      counter,
+      isInFailedIx(index) ? picocolors.red(address) : address,
+      ["Address Lookup Table"].join(", ").trim(),
+    ]);
     counter++;
   });
 
