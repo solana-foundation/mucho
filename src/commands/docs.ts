@@ -1,6 +1,8 @@
 import { Argument, Command } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
+import { titleMessage } from "@/lib/logs";
 import { shellExecInSession } from "@/lib/shell";
+import { COMMON_OPTIONS } from "@/const/commands";
 
 type DocInfo = {
   url: string;
@@ -89,47 +91,36 @@ export function docsCommand() {
   return new Command("docs")
     .configureOutput(cliOutputConfig)
     .description("open documentation websites for Solana development tools")
+    .usage("[options] [tool]")
     .addArgument(
       new Argument("[tool]", "tool to open docs for")
-        .choices([...TOOLS, "help"])
-        .argOptional(),
+        .choices(TOOLS)
+        .default("mucho"),
     )
-    .action(async (tool?: string) => {
-      // Open mucho docs by default
-      if (!tool) {
-        shellExecInSession({
-          command: `${openCommand} ${DOCS_INFO.mucho.url}`,
-          outputOnly: false,
-          args: [],
-        });
-        return;
+    .addOption(COMMON_OPTIONS.outputOnly)
+    .addHelpText(
+      "after",
+      `
+Available documentation:
+${Object.entries(DOCS_INFO)
+  .map(
+    ([name, { desc, url }]) =>
+      `  ${name.padEnd(14)}${desc}\n  ${" ".repeat(14)}${url}`,
+  )
+  .join("\n\n")}
+
+Examples:
+  $ mucho docs         # open Mucho documentation
+  $ mucho docs solana  # open Solana documentation`,
+    )
+    .action(async (tool, options) => {
+      if (!options.outputOnly) {
+        titleMessage("Open documentation");
       }
 
-      // Show help menu
-      if (tool === "help") {
-        const maxLength = Math.max(...TOOLS.map((name) => name.length));
-
-        console.log(
-          "Usage: mucho docs [tool] - Open documentation for Solana development tools\n",
-        );
-        console.log("Available documentation:\n");
-
-        Object.entries(DOCS_INFO).forEach(([name, { desc, url }]) => {
-          console.log(`${name.padEnd(maxLength + 2)}${desc}`);
-          console.log(`${" ".repeat(maxLength + 2)}${url}\n`);
-        });
-
-        console.log("Examples:");
-        console.log("  mucho docs         - Open Mucho documentation");
-        console.log("  mucho docs solana  - Open Solana documentation");
-        console.log("  mucho docs help    - Show this help message");
-        return;
-      }
-
-      // Open specified tool docs
       shellExecInSession({
         command: `${openCommand} ${DOCS_INFO[tool].url}`,
-        outputOnly: false,
+        outputOnly: options.outputOnly,
         args: [],
       });
     });
