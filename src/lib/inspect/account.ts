@@ -2,8 +2,21 @@ import ora from "ora";
 import CliTable3 from "cli-table3";
 import { warnMessage } from "@/lib/logs";
 import { InspectorBaseArgs } from "@/types/inspect";
-import { Address, GetAccountInfoApi } from "@solana/web3.js";
+import {
+  AccountInfoBase,
+  AccountInfoWithBase64EncodedData,
+  Address,
+  SolanaRpcResponse,
+} from "@solana/web3.js";
 import { getExplorerLink, lamportsToSol } from "@/lib/web3";
+
+type GetAccountInfoApiResponse<T> = (AccountInfoBase & T) | null;
+
+type BuildTableInput = {
+  account: SolanaRpcResponse<
+    GetAccountInfoApiResponse<AccountInfoWithBase64EncodedData>
+  >;
+};
 
 export async function inspectAddress({
   rpc,
@@ -15,13 +28,15 @@ export async function inspectAddress({
     const account = await rpc
       .getAccountInfo(address, {
         commitment,
-        // encoding: "jsonParsed",
+        // base58 is the default, but also deprecated and causes errors
+        // for large 'data' values (like with program accounts)
+        encoding: "base64",
       })
       .send();
 
     if (!account) throw "Account not found";
 
-    const overviewTable = buildAccountOverview(account);
+    const overviewTable = buildAccountOverview({ account });
 
     // we must the spinner before logging any thing or else the spinner will be displayed as frozen
     spinner.stop();
@@ -41,8 +56,8 @@ export async function inspectAddress({
 }
 
 function buildAccountOverview({
-  value: account,
-}: ReturnType<GetAccountInfoApi["getAccountInfo"]>): CliTable3.Table {
+  account: { value: account },
+}: BuildTableInput): CliTable3.Table {
   const table = new CliTable3({
     head: ["Account Overview"],
     style: {
