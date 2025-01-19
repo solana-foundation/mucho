@@ -10,6 +10,7 @@ type DocInfo = {
 };
 
 const DOCS_INFO = {
+  // Core Development Tools
   mucho: {
     url: "https://github.com/solana-developers/mucho",
     desc: "A superset of popular Solana developer tools to simplify Solana program development and testing",
@@ -22,6 +23,7 @@ const DOCS_INFO = {
     url: "https://solana.com/docs/intro/installation#install-the-solana-cli",
     desc: "The Agave CLI tool suite required to build and deploy Solana programs (formerly known as Solana CLI tool suite)",
   },
+  // Programming Languages & Runtimes
   rust: {
     url: "https://www.rust-lang.org/learn",
     desc: "Programming language for writing Solana smart contracts",
@@ -34,6 +36,7 @@ const DOCS_INFO = {
     url: "https://www.typescriptlang.org/docs",
     desc: "TypeScript language for writing Solana client applications",
   },
+  // Smart Contract Development
   anchor: {
     url: "https://www.anchor-lang.com",
     desc: "Solana's most popular smart contract framework",
@@ -50,25 +53,35 @@ const DOCS_INFO = {
     url: "https://docs.metaplex.com",
     desc: "Metaplex NFT standard documentation",
   },
+  // Testing & Verification Tools
   "solana-verify": {
     url: "https://github.com/Ellipsis-Labs/solana-verifiable-build",
-    desc: "A CLI tool to build and verify Solana programs",
+    desc: "CLI tool for verifying Solana program builds match on-chain deployments",
   },
   trident: {
     url: "https://ackee.xyz/trident/docs/latest",
-    desc: "Rust-based Fuzzing framework for Solana programs",
+    desc: "Rust-based fuzzing framework for testing Solana programs",
   },
   zest: {
     url: "https://github.com/LimeChain/zest",
     desc: "Code coverage CLI tool for Solana programs",
   },
+  // Node Related Tools
+  nvm: {
+    url: "https://github.com/nvm-sh/nvm",
+    desc: "Node Version Manager for managing multiple versions of Node.js",
+  },
+  npm: {
+    url: "https://docs.npmjs.com/cli/v11",
+    desc: "Default package manager for Node.js - manages dependencies and project scripts",
+  },
   pnpm: {
     url: "https://pnpm.io/installation",
-    desc: "Fast, disk space efficient package manager for Node.js (alternative to npm)",
+    desc: "Fast, disk space efficient package manager for Node.js - alternative to npm",
   },
   yarn: {
     url: "https://yarnpkg.com/getting-started",
-    desc: "Node.js package manager (dependency for Anchor)",
+    desc: "Alternative Node.js package manager - dependency for Anchor",
   },
 } as const satisfies Record<string, DocInfo>;
 
