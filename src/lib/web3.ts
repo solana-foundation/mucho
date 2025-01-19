@@ -10,10 +10,13 @@ import {
 import {
   address,
   devnet,
+  DevnetUrl,
   getBase58Encoder,
   GetTransactionApi,
   mainnet,
+  MainnetUrl,
   testnet,
+  TestnetUrl,
   UnixTimestamp,
 } from "@solana/web3.js";
 
@@ -23,6 +26,16 @@ export type SolanaClusterMoniker =
   | "devnet"
   | "testnet"
   | "localnet";
+
+type GenericUrl = string & {};
+
+export type ModifiedClusterUrl =
+  | DevnetUrl
+  | MainnetUrl
+  | TestnetUrl
+  | GenericUrl;
+
+export type SolanaUrlOrMoniker = SolanaClusterMoniker | ModifiedClusterUrl;
 
 /**
  * Get a public Solana RPC endpoint for a cluster based on its moniker
@@ -48,6 +61,51 @@ export function lamportsToSol(lamports: bigint | number) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 9 }).format(
     Number(lamports) / 1_000_000_000,
   );
+}
+
+type ExplorerLinkAccount = {
+  address: string;
+};
+type ExplorerLinkTransaction = {
+  transaction: string;
+};
+type ExplorerLinkBlock = {
+  block: string;
+};
+
+export type GetExplorerLinkArgs = {
+  cluster?: SolanaUrlOrMoniker;
+} & (ExplorerLinkAccount | ExplorerLinkTransaction | ExplorerLinkBlock);
+
+/**
+ * Craft a Solana Explorer link on any cluster
+ */
+export function getExplorerLink(props: GetExplorerLinkArgs): URL {
+  let url: URL | null = null;
+
+  if (!props.cluster) props.cluster = "mainnet-beta";
+
+  if ("address" in props) {
+    url = new URL(`https://explorer.solana.com/address/${props.address}`);
+  } else if ("transaction" in props) {
+    url = new URL(`https://explorer.solana.com/tx/${props.transaction}`);
+  } else if ("block" in props) {
+    url = new URL(`https://explorer.solana.com/block/${props.block}`);
+  }
+
+  if (!url) throw new Error("Invalid Solana Explorer URL created");
+
+  if (props.cluster !== "mainnet-beta") {
+    if (props.cluster === "localnet") {
+      // localnet technically isn't a cluster, so requires special handling
+      url.searchParams.set("cluster", "custom");
+      url.searchParams.set("customUrl", "http://localhost:8899");
+    } else {
+      url.searchParams.set("cluster", props.cluster);
+    }
+  }
+
+  return url;
 }
 
 export function unixTimestampToDate(
