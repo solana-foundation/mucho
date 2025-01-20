@@ -4,7 +4,28 @@ import { ProgramsByClusterLabels, SolanaCluster } from "@/types/config";
 import { warnMessage } from "@/lib/logs";
 import { checkCommand, getCommandOutputSync, VERSION_REGEX } from "@/lib/shell";
 import { PlatformToolsVersions } from "@/types";
-import { createKeyPairSignerFromBytes, KeyPairSigner } from "@solana/web3.js";
+import { Commitment, CompilableTransactionMessage, createKeyPairSignerFromBytes, getSignatureFromTransaction, KeyPairSigner, Rpc, RpcSubscriptions, sendAndConfirmTransactionFactory, signTransactionMessageWithSigners, SolanaRpcApi, SolanaRpcSubscriptionsApi, TransactionMessageWithBlockhashLifetime } from "@solana/web3.js";
+
+
+type Client = {
+  rpc: Rpc<SolanaRpcApi>;
+  rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
+};
+
+export const signAndSendTransaction = async (
+  client: Client,
+  transactionMessage: CompilableTransactionMessage &
+    TransactionMessageWithBlockhashLifetime,
+  commitment: Commitment = 'confirmed'
+) => {
+  const signedTransaction =
+    await signTransactionMessageWithSigners(transactionMessage);
+  const signature = getSignatureFromTransaction(signedTransaction);
+  await sendAndConfirmTransactionFactory(client)(signedTransaction, {
+    commitment,
+  });
+  return signature;
+};
 
 export function loadKeypairFromFile(
   filePath: string = DEFAULT_KEYPAIR_PATH,
