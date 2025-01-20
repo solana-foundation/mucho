@@ -107,3 +107,15 @@ export function getPlatformToolsVersions(): PlatformToolsVersions {
 
   return tools;
 }
+
+export function getExplorerUrl(cluster: SolanaCluster | string): URL {
+  if (getSafeClusterMoniker(cluster) === "mainnet") {
+    return new URL("https://explorer.solana.com");
+  }
+
+  const rpcUrl = parseRpcUrlOrMoniker(cluster);
+
+  const explorerUrl = new URL("https://explorer.solana.com/?cluster=custom");
+  explorerUrl.searchParams.set("customUrl", rpcUrl);
+  return explorerUrl;
+}
