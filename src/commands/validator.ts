@@ -180,7 +180,7 @@ export function validatorCommand() {
           "programs into the local validator",
         );
       }
-      
+
       console.log("\nSolana Explorer for your local test validator:");
       console.log(
         "(on Brave Browser, you may need to turn Shields down for the Explorer website)",

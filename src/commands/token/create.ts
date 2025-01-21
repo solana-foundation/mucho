@@ -3,15 +3,36 @@ import { cliOutputConfig, loadSolanaCliConfig } from "@/lib/cli";
 import { COMMON_OPTIONS } from "@/const/commands";
 import { titleMessage, warnMessage } from "@/lib/logs";
 import ora from "ora";
-import { findAssociatedTokenPda, getCreateAssociatedTokenIdempotentInstructionAsync, getInitializeMintInstruction, getMintSize, getMintToInstruction, TOKEN_PROGRAM_ADDRESS } from "@solana-program/token";
-import { appendTransactionMessageInstructions, createSolanaRpc, createSolanaRpcSubscriptions, createTransactionMessage, generateKeyPairSigner, pipe, setTransactionMessageFeePayerSigner, setTransactionMessageLifetimeUsingBlockhash } from "@solana/web3.js";
-import { getExplorerUrl, getRpcUrlFromMoniker, loadKeypairFromFile, parseRpcUrlOrMoniker, signAndSendTransaction } from "@/lib/solana";
+import {
+  findAssociatedTokenPda,
+  getCreateAssociatedTokenIdempotentInstructionAsync,
+  getInitializeMintInstruction,
+  getMintSize,
+  getMintToInstruction,
+  TOKEN_PROGRAM_ADDRESS,
+} from "@solana-program/token";
+import {
+  appendTransactionMessageInstructions,
+  createSolanaRpc,
+  createSolanaRpcSubscriptions,
+  createTransactionMessage,
+  generateKeyPairSigner,
+  pipe,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+} from "@solana/web3.js";
+import {
+  getExplorerUrl,
+  getRpcUrlFromMoniker,
+  loadKeypairFromFile,
+  parseRpcUrlOrMoniker,
+  signAndSendTransaction,
+} from "@/lib/solana";
 import { getCreateAccountInstruction } from "@solana-program/system";
-
 
 export function createTokenCommand() {
   return new Command("create")
-  .configureOutput(cliOutputConfig)
+    .configureOutput(cliOutputConfig)
     .description("create a new token")
     .usage("[options] [-- <CREATE_TOKEN_ARGS>...]")
     .addOption(
@@ -32,12 +53,7 @@ export function createTokenCommand() {
         `argument to pass the decimals of the token you want to create`,
       ),
     )
-    .addOption(
-      new Option(
-        "-a --amount <AMOUNT>",
-        `amount of tokens to create`,
-      ),
-    )
+    .addOption(new Option("-a --amount <AMOUNT>", `amount of tokens to create`))
     .addOption(
       new Option(
         "-l --logo <LOGO_FILEPATH>",
@@ -80,13 +96,15 @@ export function createTokenCommand() {
         warnMessage("\nNo decimals provided, setting default to 9\n");
         options.decimals = "9";
       }
-      
+
       const websocketUrl = new URL(cliConfig.json_rpc_url);
       websocketUrl.protocol = "ws";
       cliConfig.websocket_url = websocketUrl.toString();
 
       const rpc = createSolanaRpc(parseRpcUrlOrMoniker(cliConfig.json_rpc_url));
-      const rpcSubscriptions = createSolanaRpcSubscriptions(cliConfig.websocket_url);
+      const rpcSubscriptions = createSolanaRpcSubscriptions(
+        cliConfig.websocket_url,
+      );
       const authority = await loadKeypairFromFile();
       const mint = await generateKeyPairSigner();
 
@@ -104,23 +122,30 @@ export function createTokenCommand() {
           mint: mint.address,
           decimals: Number(options.decimals),
           mintAuthority: authority.address,
-          freezeAuthority: authority.address
+          freezeAuthority: authority.address,
         }),
       ];
 
-      const { value: latestBlockhash } = await rpc
-        .getLatestBlockhash()
-        .send();
-        
+      const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
       const createMintTransaction = await pipe(
         createTransactionMessage({ version: 0 }),
         (tx) => setTransactionMessageFeePayerSigner(authority, tx),
-        (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-        (tx) => appendTransactionMessageInstructions(instructions, tx)
+        (tx) =>
+          setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+        (tx) => appendTransactionMessageInstructions(instructions, tx),
       );
 
-      const createMintSignature = await signAndSendTransaction({rpc, rpcSubscriptions}, createMintTransaction);
-      console.log(`\nMint Account Created: ${getExplorerUrl(cliConfig.json_rpc_url, createMintSignature)}\n`);
+      const createMintSignature = await signAndSendTransaction(
+        { rpc, rpcSubscriptions },
+        createMintTransaction,
+      );
+      console.log(
+        `\nMint Account Created: ${getExplorerUrl(
+          cliConfig.json_rpc_url,
+          createMintSignature,
+        )}\n`,
+      );
 
       const [ata, bump] = await findAssociatedTokenPda({
         owner: authority.address,
@@ -128,17 +153,20 @@ export function createTokenCommand() {
         mint: mint.address,
       });
 
-      const createATA = await getCreateAssociatedTokenIdempotentInstructionAsync({
-        mint: mint.address,
-        payer: authority,
-        owner: authority.address,
-      })
-
-      
+      const createATA =
+        await getCreateAssociatedTokenIdempotentInstructionAsync({
+          mint: mint.address,
+          payer: authority,
+          owner: authority.address,
+        });
 
       if (!options.amount) {
-        warnMessage("No amount provided, skipping minting tokens to your account");
-        warnMessage("Please provide an amount to mint tokens to your account with -a <AMOUNT>");
+        warnMessage(
+          "No amount provided, skipping minting tokens to your account",
+        );
+        warnMessage(
+          "Please provide an amount to mint tokens to your account with -a <AMOUNT>",
+        );
         spinner.stop();
         return;
       }
@@ -148,20 +176,26 @@ export function createTokenCommand() {
         token: ata,
         amount: BigInt(Number(options.amount) * 10 ** Number(options.decimals)),
         mintAuthority: authority.address,
-      })
-
-      
+      });
 
       const createTokens = await pipe(
         createTransactionMessage({ version: 0 }),
         (tx) => setTransactionMessageFeePayerSigner(authority, tx),
-        (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+        (tx) =>
+          setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
         (tx) => appendTransactionMessageInstructions([createATA, mintTo], tx),
       );
 
-      const createTokensSignature = await signAndSendTransaction({rpc, rpcSubscriptions}, createTokens);
-      console.log(`\nTokens minted to your account: ${getExplorerUrl(cliConfig.json_rpc_url, createTokensSignature)}\n`);
+      const createTokensSignature = await signAndSendTransaction(
+        { rpc, rpcSubscriptions },
+        createTokens,
+      );
+      console.log(
+        `\nTokens minted to your account: ${getExplorerUrl(
+          cliConfig.json_rpc_url,
+          createTokensSignature,
+        )}\n`,
+      );
       spinner.stop();
     });
 }
-
