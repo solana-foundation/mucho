@@ -63,6 +63,8 @@ export function inspectCommand() {
               input = url.pathname.match(/^\/address\/(.*)\/?/i)[1];
             } else if (url.pathname.match(/^\/(tx|transaction)\//gi)) {
               input = url.pathname.match(/^\/(tx|transaction)\/(.*)\/?/i)[2];
+            } else if (url.pathname.match(/^\/(block)\//gi)) {
+              input = url.pathname.match(/^\/block\/(.*)\/?/i)[1];
             } else {
               return warningOutro("Unsupported explorer URL");
             }
