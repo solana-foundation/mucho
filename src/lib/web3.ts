@@ -18,7 +18,6 @@ import {
   GetTransactionApi,
   mainnet,
   MainnetUrl,
-  Rpc,
   testnet,
   TestnetUrl,
   UnixTimestamp,
@@ -198,9 +197,7 @@ export function getComputeBudgetDataFromTransaction(
   tx.transaction.message.instructions
     .filter((ix) => ix.programIdIndex == computeBudgetIndex)
     .map((ix) => {
-      const data = getBase58Encoder().encode(
-        ix.data,
-      ) as Uint8Array<ArrayBufferLike>;
+      const data = getBase58Encoder().encode(ix.data) as Uint8Array;
       const type = identifyComputeBudgetInstruction(data);
       switch (type) {
         case ComputeBudgetInstruction.SetComputeUnitPrice: {
