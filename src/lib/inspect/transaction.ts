@@ -75,9 +75,8 @@ export async function inspectSignature({
         transaction: signature,
       }).toString(),
     );
-  } catch (err) {
+  } finally {
     spinner.stop();
-    warnMessage(err);
   }
 }
 

@@ -60,9 +60,8 @@ export async function inspectBlock({
         block: blockNumber.toString(),
       }).toString(),
     );
-  } catch (err) {
+  } finally {
     spinner.stop();
-    warnMessage(err);
   }
 }
 

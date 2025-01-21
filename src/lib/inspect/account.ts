@@ -51,9 +51,8 @@ export async function inspectAddress({
         cluster,
       }).toString(),
     );
-  } catch (err) {
+  } finally {
     spinner.stop();
-    warnMessage(err);
   }
 }
 

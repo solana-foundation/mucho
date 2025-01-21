@@ -94,38 +94,50 @@ export function inspectCommand() {
           }
         }
 
-        const rpc = createSolanaRpc(
-          clusterUrl.startsWith("http")
-            ? clusterUrl
-            : getPublicSolanaRpcUrl(clusterUrl as SolanaCluster),
-        );
+        clusterUrl = clusterUrl.startsWith("http")
+          ? clusterUrl
+          : getPublicSolanaRpcUrl(clusterUrl as SolanaCluster);
+        const rpc = createSolanaRpc(clusterUrl);
 
-        const selectedCluster = await getMonikerFromGenesisHash({ rpc });
+        try {
+          const selectedCluster = await getMonikerFromGenesisHash({ rpc });
 
-        if (isAddress(input)) {
-          await inspectAddress({
-            rpc,
-            cluster: selectedCluster,
-            address: address(input),
-          });
-        } else if (isSignature(input)) {
-          await inspectSignature({
-            rpc,
-            cluster: selectedCluster,
-            signature: signature(input),
-          });
-        } else if (
-          isStringifiedNumber(numberStringToNumber(input).toString())
-        ) {
-          await inspectBlock({
-            rpc,
-            cluster: selectedCluster,
-            block: input,
-          });
-        } else {
-          warnMessage(
-            "Unable to determine your 'INPUT'. Check it's formatting and try again :)",
-          );
+          if (isAddress(input)) {
+            await inspectAddress({
+              rpc,
+              cluster: selectedCluster,
+              address: address(input),
+            });
+          } else if (isSignature(input)) {
+            await inspectSignature({
+              rpc,
+              cluster: selectedCluster,
+              signature: signature(input),
+            });
+          } else if (
+            isStringifiedNumber(numberStringToNumber(input).toString())
+          ) {
+            await inspectBlock({
+              rpc,
+              cluster: selectedCluster,
+              block: input,
+            });
+          } else {
+            warnMessage(
+              "Unable to determine your 'INPUT'. Check it's formatting and try again :)",
+            );
+          }
+        } catch (err) {
+          // node js fetch throws a TypeError for network errors (for some reason...)
+          if (err instanceof TypeError) {
+            warnMessage(
+              "A network error occurred while connecting to your configured RPC endpoint." +
+                "\nIs your RPC connection available at: " +
+                clusterUrl,
+            );
+          } else {
+            warnMessage(err);
+          }
         }
       })
   );
