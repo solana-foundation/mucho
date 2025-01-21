@@ -4,7 +4,7 @@ import { ProgramsByClusterLabels, SolanaCluster } from "@/types/config";
 import { warnMessage } from "@/lib/logs";
 import { checkCommand, getCommandOutputSync, VERSION_REGEX } from "@/lib/shell";
 import { PlatformToolsVersions } from "@/types";
-import { Commitment, CompilableTransactionMessage, createKeyPairSignerFromBytes, getSignatureFromTransaction, KeyPairSigner, Rpc, RpcSubscriptions, sendAndConfirmTransactionFactory, signTransactionMessageWithSigners, SolanaRpcApi, SolanaRpcSubscriptionsApi, TransactionMessageWithBlockhashLifetime } from "@solana/web3.js";
+import { Commitment, CompilableTransactionMessage, createKeyPairSignerFromBytes, getSignatureFromTransaction, KeyPairSigner, Rpc, RpcSubscriptions, sendAndConfirmTransactionFactory, signature, signTransactionMessageWithSigners, SolanaRpcApi, SolanaRpcSubscriptionsApi, TransactionMessageWithBlockhashLifetime } from "@solana/web3.js";
 
 
 type Client = {
@@ -129,14 +129,33 @@ export function getPlatformToolsVersions(): PlatformToolsVersions {
   return tools;
 }
 
-export function getExplorerUrl(cluster: SolanaCluster | string): URL {
-  if (getSafeClusterMoniker(cluster) === "mainnet") {
-    return new URL("https://explorer.solana.com");
+export function getRpcUrlFromMoniker(moniker: string): string {
+
+  switch (moniker) {
+    case "mainnet":
+      return "https://api.mainnet-beta.solana.com";
+    case "testnet":
+      return "https://api.testnet.solana.com";
+    case "devnet":
+      return "https://api.devnet.solana.com";
+    case "localnet":
+    case "localhost":
+      return "http://localhost:8899";
+    default:
+      return moniker;
   }
+}
 
-  const rpcUrl = parseRpcUrlOrMoniker(cluster);
-
-  const explorerUrl = new URL("https://explorer.solana.com/?cluster=custom");
+export function getExplorerUrl(cluster: SolanaCluster | string, txSignature?: string): URL {
+  const rpcUrl = getRpcUrlFromMoniker(cluster);
+  const explorerUrl = new URL(`https://explorer.solana.com/tx/${txSignature}?cluster=custom`);
   explorerUrl.searchParams.set("customUrl", rpcUrl);
   return explorerUrl;
+}
+
+export function getWebsocketUrl(cluster: SolanaCluster | string): URL {
+  const rpcUrl = getRpcUrlFromMoniker(cluster);
+  const websocketUrl = new URL(rpcUrl);
+  websocketUrl.protocol = "ws";
+  return websocketUrl;
 }
