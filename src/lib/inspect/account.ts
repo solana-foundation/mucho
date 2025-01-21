@@ -20,6 +20,7 @@ type BuildTableInput = {
 
 export async function inspectAddress({
   rpc,
+  cluster,
   address,
   commitment = "confirmed",
 }: InspectorBaseArgs & { address: Address }) {
@@ -47,6 +48,7 @@ export async function inspectAddress({
     console.log(
       getExplorerLink({
         address,
+        cluster,
       }).toString(),
     );
   } catch (err) {

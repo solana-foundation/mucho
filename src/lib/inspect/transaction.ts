@@ -20,6 +20,7 @@ type BuildTableInput = {
 
 export async function inspectSignature({
   rpc,
+  cluster,
   signature,
 }: InspectorBaseArgs & { signature: Signature }) {
   const spinner = ora("Fetching transaction").start();
@@ -70,6 +71,7 @@ export async function inspectSignature({
     console.log("Open on Solana Explorer:");
     console.log(
       getExplorerLink({
+        cluster,
         transaction: signature,
       }).toString(),
     );

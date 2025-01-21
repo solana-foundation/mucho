@@ -13,6 +13,7 @@ import { numberStringToNumber, timeAgo } from "@/lib/utils";
 
 export async function inspectBlock({
   rpc,
+  cluster,
   block: blockNumber,
   commitment = "confirmed",
 }: InspectorBaseArgs & { block: number | bigint | string }) {
@@ -55,6 +56,7 @@ export async function inspectBlock({
     console.log("Open on Solana Explorer:");
     console.log(
       getExplorerLink({
+        cluster,
         block: blockNumber.toString(),
       }).toString(),
     );
