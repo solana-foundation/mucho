@@ -300,25 +300,35 @@ export async function installAnchorVersionManager({
 export async function installAnchorUsingAvm({
   verifyParentCommand = true,
   version = "latest",
+  updateAvailable,
 }: InstallCommandPropsBase = {}) {
   const spinner = ora("Installing anchor using avm...").start();
   try {
     let installedVersion = await installedToolVersion("anchor");
-    if (installedVersion && installedVersion == version) {
-      spinner.info(`anchor ${installedVersion} is already installed`);
+
+    if (installedVersion) {
+      let message = `anchor ${installedVersion} is already installed`;
+      if (updateAvailable) {
+        message = picocolors.yellow(
+          message + ` - v${updateAvailable.latest} available`,
+        );
+      }
+      spinner.info(message);
       return true;
     }
 
-    spinner.text = `Verifying avm is installed`;
-    const avmVersion = await installedToolVersion("avm");
+    if (verifyParentCommand) {
+      spinner.text = `Verifying avm is installed`;
+      const avmVersion = await installedToolVersion("avm");
 
-    if (!avmVersion) {
-      // todo: smart install avm?
-      throw `avm is NOT already installed`;
-      // todo: better error response handling
-    } else {
-      // todo: support other versions of anchor via avm
-      version = avmVersion;
+      if (!avmVersion) {
+        // todo: smart install avm?
+        throw `avm is NOT already installed`;
+        // todo: better error response handling
+      } else {
+        // todo: support other versions of anchor via avm
+        version = avmVersion;
+      }
     }
 
     // note: intentionally recheck the version due to avm allowing tags like `stable`
