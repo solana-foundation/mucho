@@ -1,6 +1,5 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
-import { warnMessage } from "@/lib/logs";
 import { InspectorBaseArgs } from "@/types/inspect";
 import { Address, GetBlockApi } from "@solana/web3.js";
 import {
@@ -33,6 +32,11 @@ export async function inspectBlock({
       throw "Provided block number is not an actual number";
     }
 
+    const explorerUrl = getExplorerLink({
+      cluster,
+      block: blockNumber.toString(),
+    }).toString();
+
     const [block, leaders] = await Promise.all([
       await rpc
         .getBlock(BigInt(blockNumber), {
@@ -44,7 +48,9 @@ export async function inspectBlock({
       rpc.getSlotLeaders(BigInt(blockNumber), 1).send(),
     ]);
 
-    if (!block) throw "Block not found";
+    if (!block) {
+      throw "Block not found. Try the Solana Explorer:\n" + explorerUrl;
+    }
 
     const overviewTable = buildBlockOverview({ block, leader: leaders[0] });
 
@@ -54,12 +60,7 @@ export async function inspectBlock({
     console.log(overviewTable.toString());
 
     console.log("Open on Solana Explorer:");
-    console.log(
-      getExplorerLink({
-        cluster,
-        block: blockNumber.toString(),
-      }).toString(),
-    );
+    console.log(explorerUrl);
   } finally {
     spinner.stop();
   }

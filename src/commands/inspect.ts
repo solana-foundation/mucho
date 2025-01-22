@@ -22,8 +22,6 @@ import { numberStringToNumber } from "@/lib/utils";
 import { parseRpcUrlOrMoniker } from "@/lib/solana";
 import { SolanaCluster } from "@/types/config";
 
-// console.log(Intl.NumberFormat("DE").format(315667873));
-
 const helpText: string[] = [
   "Examples:",
   "  Account:",

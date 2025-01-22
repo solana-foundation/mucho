@@ -1,6 +1,5 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
-import { warnMessage } from "@/lib/logs";
 import { InspectorBaseArgs } from "@/types/inspect";
 import {
   AccountInfoBase,
@@ -26,6 +25,11 @@ export async function inspectAddress({
 }: InspectorBaseArgs & { address: Address }) {
   const spinner = ora("Fetching account").start();
   try {
+    const explorerUrl = getExplorerLink({
+      cluster,
+      address,
+    }).toString();
+
     const account = await rpc
       .getAccountInfo(address, {
         commitment,
@@ -35,7 +39,9 @@ export async function inspectAddress({
       })
       .send();
 
-    if (!account) throw "Account not found";
+    if (!account) {
+      throw "Account not found. Try the Solana Explorer:\n" + explorerUrl;
+    }
 
     const overviewTable = buildAccountOverview({ account });
 
@@ -45,12 +51,7 @@ export async function inspectAddress({
     console.log(overviewTable.toString());
 
     console.log("Open on Solana Explorer:");
-    console.log(
-      getExplorerLink({
-        address,
-        cluster,
-      }).toString(),
-    );
+    console.log(explorerUrl);
   } finally {
     spinner.stop();
   }

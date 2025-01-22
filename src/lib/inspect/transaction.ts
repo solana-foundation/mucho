@@ -1,7 +1,6 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
 import picocolors from "picocolors";
-import { warnMessage } from "@/lib/logs";
 import { InspectorBaseArgs } from "@/types/inspect";
 import { Address, GetTransactionApi, Signature } from "@solana/web3.js";
 import {
@@ -25,6 +24,11 @@ export async function inspectSignature({
 }: InspectorBaseArgs & { signature: Signature }) {
   const spinner = ora("Fetching transaction").start();
   try {
+    const explorerUrl = getExplorerLink({
+      cluster,
+      transaction: signature,
+    }).toString();
+
     const tx = await rpc
       .getTransaction(signature, {
         // always set the lowest commitment level - `processed` is not supported here for some reason?
@@ -34,7 +38,9 @@ export async function inspectSignature({
       })
       .send();
 
-    if (!tx) throw "Transaction not found";
+    if (!tx) {
+      throw "Transaction not found. Try the Solana Explorer:\n" + explorerUrl;
+    }
 
     const allAccounts = tx.transaction.message.accountKeys
       .concat(tx.meta.loadedAddresses.writable)
@@ -69,12 +75,7 @@ export async function inspectSignature({
     console.log(overviewTable.toString());
 
     console.log("Open on Solana Explorer:");
-    console.log(
-      getExplorerLink({
-        cluster,
-        transaction: signature,
-      }).toString(),
-    );
+    console.log(explorerUrl);
   } finally {
     spinner.stop();
   }
