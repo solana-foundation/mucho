@@ -1,5 +1,13 @@
 # mucho
 
+## 0.5.1
+
+### Patch Changes
+
+- [#40](https://github.com/solana-developers/mucho/pull/40)
+  [`76788a9`](https://github.com/solana-developers/mucho/commit/76788a94ee73231e61887dea9af220c39549072b)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - fix no warning breakage
+
 ## 0.5.0
 
 ### Minor Changes
