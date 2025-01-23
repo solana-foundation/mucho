@@ -18,3 +18,10 @@ export type AnchorToml = {
 
 export type AnchorTomlWithConfigPath = Omit<AnchorToml, "configPath"> &
   NonNullable<{ configPath: AnchorToml["configPath"] }>;
+
+export type AnchorVersionData = {
+  current: null | string;
+  latest: null | string;
+  installed: string[];
+  available: string[];
+};
