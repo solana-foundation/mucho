@@ -1,5 +1,40 @@
 # mucho
 
+## 0.5.0
+
+### Minor Changes
+
+- [#23](https://github.com/solana-developers/mucho/pull/23)
+  [`ecceb3d`](https://github.com/solana-developers/mucho/commit/ecceb3d55f912d0c271ecd82c126c8913a1c913f)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - improved version info
+  and listing node version with the 'info' command
+
+- [#34](https://github.com/solana-developers/mucho/pull/34)
+  [`4119090`](https://github.com/solana-developers/mucho/commit/411909086c4a796279b23c1dcb7b54f22ec598ab)
+  Thanks [@arrayappy](https://github.com/arrayappy)! - add the docs command that
+  opens websites for each of the tools used by mucho
+
+- [#30](https://github.com/solana-developers/mucho/pull/30)
+  [`bea50ff`](https://github.com/solana-developers/mucho/commit/bea50ff2ed8773de976a6483eccf7e8ce370d758)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - add the inspect command
+
+### Patch Changes
+
+- [#32](https://github.com/solana-developers/mucho/pull/32)
+  [`fbd29d7`](https://github.com/solana-developers/mucho/commit/fbd29d701f71c9410232ab08f360dcec66b150bc)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - refactor the
+  warnMessage vs warnOutro
+
+- [#39](https://github.com/solana-developers/mucho/pull/39)
+  [`fa402c6`](https://github.com/solana-developers/mucho/commit/fa402c6e2c47cad08a499e76cd6a6513b8c82c00)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - fix `install` command
+  force changing anchor version to match avm version
+
+- [#27](https://github.com/solana-developers/mucho/pull/27)
+  [`d8e8156`](https://github.com/solana-developers/mucho/commit/d8e81561bced8feff6ee446bf2601efceb8097bd)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - upgrade web3js to using
+  v2
+
 ## 0.4.1
 
 ### Patch Changes
