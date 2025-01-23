@@ -39,6 +39,7 @@ mucho --help
 - [`deploy`](#deploy) - Deploy a Solana program in your workspace.
 - [`coverage`](#coverage) - Run code coverage tests on a Solana program.
 - [`info`](#info) - Gather helpful troubleshooting info about your setup.
+- [`docs`](#docs) - Show the documentation for the Solana development tools.
 - [`inspect`](#inspect) - Inspect transactions, accounts, and block in the cli
   (like a block explorer)
 
@@ -242,6 +243,25 @@ and general info about your operating system and Solana CLI configuration.
 
 ```shell
 npx mucho info
+```
+
+### docs
+
+Open documentation websites for Solana development tools. Without any arguments,
+opens the Mucho documentation. With a tool name argument, opens documentation
+for that specific tool.
+
+**Usage:**
+
+```shell
+mucho docs --help
+```
+
+Examples:
+
+```shell
+mucho docs         # open Mucho documentation
+mucho docs solana  # open Solana documentation
 ```
 
 ## Solana.toml

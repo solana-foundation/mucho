@@ -13,6 +13,7 @@ import { validatorCommand } from "@/commands/validator";
 import { buildCommand } from "@/commands/build";
 import { coverageCommand } from "@/commands/coverage";
 import { deployCommand } from "@/commands/deploy";
+import { docsCommand } from "@/commands/docs";
 import { inspectCommand } from "@/commands/inspect";
 
 // ensure the user running the cli tool is on a supported javascript runtime version
@@ -36,7 +37,8 @@ async function main() {
         .addCommand(buildCommand())
         .addCommand(deployCommand())
         .addCommand(coverageCommand())
-        .addCommand(infoCommand());
+        .addCommand(infoCommand())
+        .addCommand(docsCommand());
 
       // set the default action to `help` without an error
       if (process.argv.length === 2) {
