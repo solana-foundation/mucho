@@ -40,6 +40,8 @@ mucho --help
 - [`coverage`](#coverage) - Run code coverage tests on a Solana program.
 - [`info`](#info) - Gather helpful troubleshooting info about your setup.
 - [`docs`](#docs) - Show the documentation for the Solana development tools.
+- [`inspect`](#inspect) - Inspect transactions, accounts, and block in the cli
+  (like a block explorer)
 
 ### install
 
@@ -72,6 +74,55 @@ The Solana Toolkit includes the following tools:
   framework for Solana programs to help you ship secure code.
 - [Zest](https://github.com/LimeChain/zest?tab=readme-ov-file) - Code coverage
   CLI tool for Solana programs.
+
+### inspect
+
+Inspect transactions, accounts, and block in the cli (like a block explorer)
+
+```shell
+mucho inspect <INPUT>
+```
+
+The `<INPUT>` value should be one of the following:
+
+- account address
+- transaction signature
+- block number
+
+By default, `inspect` will use your Solana CLI configured cluster unless
+overriden with the `--url` or `-u` flag.
+
+**Examples:**
+
+Solana wallet account:
+
+```shell
+mucho inspect --url mainnet GQuioVe2yA6KZfstgmirAvugfUZBcdxSi7sHK7JGk3gk
+```
+
+Program account:
+
+```shell
+mucho inspect --url mainnet TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+```
+
+Successful transaction:
+
+```shell
+mucho inspect --url mainnet 58cX3fXzRcUEcjVJ7mGxPH9jsLRwDtbkkKp6ypE1iagcZXaQSyQp3o9aWUAoQhCevLKMtgzgwvT7e56YdGdh3NXs
+```
+
+Failed transaction:
+
+```shell
+mucho inspect --url mainnet 5tb4d17U4ZsBa2gkNFEmVsrnaQ6wCzQ51i4iPkh2p9S2mnfZezcmWQUogVMK3mBZBtgMxKSqe242vAxuV6FyTYPf
+```
+
+Block:
+
+```shell
+mucho inspect --url mainnet 315667873
+```
 
 ### clone
 

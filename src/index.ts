@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-warnings
 
 import { assertRuntimeVersion } from "@/lib/node";
 import { checkForSelfUpdate } from "@/lib/npm";
@@ -14,6 +14,7 @@ import { buildCommand } from "@/commands/build";
 import { coverageCommand } from "@/commands/coverage";
 import { deployCommand } from "@/commands/deploy";
 import { docsCommand } from "@/commands/docs";
+import { inspectCommand } from "@/commands/inspect";
 
 // ensure the user running the cli tool is on a supported javascript runtime version
 assertRuntimeVersion();
@@ -31,6 +32,7 @@ async function main() {
         .addCommand(installCommand())
         // .addCommand(doctorCommand())
         .addCommand(validatorCommand())
+        .addCommand(inspectCommand())
         .addCommand(cloneCommand())
         .addCommand(buildCommand())
         .addCommand(deployCommand())
@@ -50,6 +52,9 @@ async function main() {
   } catch (err) {
     errorOutro(err, "[mucho - unhandled error]");
   }
+
+  // add a line spacer at the end to make the terminal easier to read
+  console.log();
 }
 
 main();
