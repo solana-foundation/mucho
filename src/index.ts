@@ -1,4 +1,4 @@
-#!/usr/bin/env node --no-warnings
+#!/usr/bin/env node
 
 import { assertRuntimeVersion } from "@/lib/node";
 import { checkForSelfUpdate } from "@/lib/npm";
