@@ -1,8 +1,7 @@
 import { Argument, Command } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
-import { titleMessage } from "@/lib/logs";
-import { shellExecInSession } from "@/lib/shell";
-import { COMMON_OPTIONS } from "@/const/commands";
+import shellExec from "shell-exec";
+import pc from "picocolors";
 
 type DocInfo = {
   url: string;
@@ -12,7 +11,7 @@ type DocInfo = {
 const DOCS_INFO = {
   // Core Development Tools
   mucho: {
-    url: "https://github.com/solana-developers/mucho",
+    url: "https://github.com/solana-developers/mucho?tab=readme-ov-file#mucho",
     desc: "A superset of popular Solana developer tools to simplify Solana program development and testing",
   },
   solana: {
@@ -50,7 +49,7 @@ const DOCS_INFO = {
     desc: "The Solana Program Library (SPL) is a collection of standard smart contracts for Solana",
   },
   metaplex: {
-    url: "https://docs.metaplex.com",
+    url: "https://developers.metaplex.com",
     desc: "Metaplex NFT standard documentation",
   },
   // Testing & Verification Tools
@@ -72,7 +71,7 @@ const DOCS_INFO = {
     desc: "Node Version Manager for managing multiple versions of Node.js",
   },
   npm: {
-    url: "https://docs.npmjs.com/cli/v11",
+    url: "https://docs.npmjs.com/cli",
     desc: "Default package manager for Node.js - manages dependencies and project scripts",
   },
   pnpm: {
@@ -103,14 +102,13 @@ export function docsCommand() {
 
   return new Command("docs")
     .configureOutput(cliOutputConfig)
-    .description("open documentation websites for Solana development tools")
+    .description("Open documentation websites for Solana development tools")
     .usage("[options] [tool]")
     .addArgument(
       new Argument("[tool]", "tool to open docs for")
         .choices(TOOLS)
         .default("mucho"),
     )
-    .addOption(COMMON_OPTIONS.outputOnly)
     .addHelpText(
       "after",
       `
@@ -127,14 +125,8 @@ Examples:
   $ mucho docs solana  # open Solana documentation`,
     )
     .action(async (tool, options) => {
-      if (!options.outputOnly) {
-        titleMessage("Open documentation");
-      }
+      console.log(pc.dim(`Opening: ${DOCS_INFO[tool].url}`));
 
-      shellExecInSession({
-        command: `${openCommand} ${DOCS_INFO[tool].url}`,
-        outputOnly: options.outputOnly,
-        args: [],
-      });
+      await shellExec(`${openCommand} ${DOCS_INFO[tool].url}`);
     });
 }
