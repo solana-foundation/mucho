@@ -1,7 +1,7 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliOutputConfig, loadSolanaCliConfig } from "@/lib/cli";
 import { COMMON_OPTIONS } from "@/const/commands";
-import { titleMessage, warnMessage } from "@/lib/logs";
+import { errorMessage, titleMessage, warnMessage } from "@/lib/logs";
 import ora from "ora";
 import {
   findAssociatedTokenPda,
@@ -20,6 +20,9 @@ import {
   pipe,
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
+  getProgramDerivedAddress,
+  type Address,
+  getAddressEncoder,
 } from "@solana/web3.js";
 import {
   getExplorerUrl,
@@ -29,6 +32,10 @@ import {
   signAndSendTransaction,
 } from "@/lib/solana";
 import { getCreateAccountInstruction } from "@solana-program/system";
+import { 
+  getCreateMetadataAccountV3Instruction,
+  TOKEN_METADATA_PROGRAM_ADDRESS,
+} from "@/lib/codama/metadata/instructions/createMetadataAccountV3";
 
 export function createTokenCommand() {
   return new Command("create")
@@ -56,8 +63,8 @@ export function createTokenCommand() {
     .addOption(new Option("-a --amount <AMOUNT>", `amount of tokens to create`))
     .addOption(
       new Option(
-        "-l --logo <LOGO_FILEPATH>",
-        `filepath to logo image for your token`,
+        "-m --metadata <METADATA_URI>",
+        `URI to metadata for your token`,
       ),
     )
     .addOption(
@@ -79,11 +86,34 @@ export function createTokenCommand() {
     .addOption(COMMON_OPTIONS.outputOnly)
     .action(async (options) => {
       titleMessage("Create a new token");
-      console.log();
 
       const spinner = ora("Creating token").start();
 
       let cliConfig = loadSolanaCliConfig();
+
+      if (!options.metadata) {
+        errorMessage("\nNo metadata URI provided\nPlease provide a metadata URI with -m <METADATA_URI>");
+        spinner.stop();
+        return;
+      }
+
+      if (!options.name) {
+        errorMessage("\nNo name provided\nPlease provide a name with -n <NAME>");
+        spinner.stop();
+        return;
+      }
+
+      if (!options.symbol) {
+        errorMessage("\nNo symbol provided\nPlease provide a symbol with -s <SYMBOL>");
+        spinner.stop();
+        return;
+      }
+
+      if (!options.amount) {
+        errorMessage("\nNo amount provided\nPlease provide an amount with -a <AMOUNT>");
+        spinner.stop();
+        return;
+      }
 
       if (options.url) {
         cliConfig.json_rpc_url = options.url;
@@ -147,6 +177,53 @@ export function createTokenCommand() {
         )}\n`,
       );
 
+      // Create metadata account
+      const [metadataPda] = await getProgramDerivedAddress({
+        programAddress: TOKEN_METADATA_PROGRAM_ADDRESS,
+        seeds: [
+          Buffer.from('metadata'),
+          getAddressEncoder().encode(TOKEN_METADATA_PROGRAM_ADDRESS),
+          getAddressEncoder().encode(mint.address),
+        ],
+      });
+
+      const metadataInstruction = getCreateMetadataAccountV3Instruction({
+        metadata: metadataPda,
+        mint: mint.address,
+        mintAuthority: authority,
+        payer: authority,
+        updateAuthority: authority.address,
+        data: {
+          name: options.name,
+          symbol: options.symbol,
+          uri: options.metadata,
+          sellerFeeBasisPoints: 0,
+          creators: null,
+          collection: null,
+          uses: null
+        },
+        isMutable: true,
+        collectionDetails: null
+      });
+
+      const createMetadataTransaction = await pipe(
+        createTransactionMessage({ version: 0 }),
+        (tx) => setTransactionMessageFeePayerSigner(authority, tx),
+        (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+        (tx) => appendTransactionMessageInstructions([metadataInstruction], tx),
+      );
+
+      const createMetadataSignature = await signAndSendTransaction(
+        { rpc, rpcSubscriptions },
+        createMetadataTransaction,
+      );
+      console.log(
+        `\nMetadata Account Created: ${getExplorerUrl(
+          cliConfig.json_rpc_url,
+          createMetadataSignature,
+        )}\n`,
+      );
+
       const [ata, bump] = await findAssociatedTokenPda({
         owner: authority.address,
         tokenProgram: TOKEN_PROGRAM_ADDRESS,
@@ -196,6 +273,7 @@ export function createTokenCommand() {
           createTokensSignature,
         )}\n`,
       );
+
       spinner.stop();
     });
 }
