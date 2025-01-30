@@ -8,6 +8,9 @@ export const TOOL_CONFIG: { [key in ToolNames]: ToolCommandConfig } = {
     pathSource: "$HOME/.cargo/env",
     version: "rustc --version",
   },
+  rustup: {
+    version: "rustup --version",
+  },
   solana: {
     dependencies: ["rust"],
     pathSource: "$HOME/.local/share/solana/install/active_release/bin",
