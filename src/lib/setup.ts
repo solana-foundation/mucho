@@ -20,6 +20,7 @@ export async function checkInstalledTools({
   let allInstalled = true;
 
   let status: { [key in ToolNames]: string | boolean } = {
+    rustup: false,
     rust: false,
     solana: false,
     avm: false,

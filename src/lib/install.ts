@@ -140,11 +140,18 @@ export async function installRust({ version }: InstallCommandPropsBase = {}) {
       }
     }
 
-    let installedVersion = await installedToolVersion("rust");
-    if (installedVersion) {
-      spinner.info(`rust ${installedVersion} is already installed`);
-      // todo: detect if the $PATH is actually loaded
-      return true;
+    let [installedVersion, rustupVersion] = await Promise.all([
+      installedToolVersion("rust"),
+      installedToolVersion("rustup"),
+    ]);
+
+    if (rustupVersion) {
+      installedVersion = await installedToolVersion("rust");
+      if (installedVersion) {
+        spinner.info(`rust ${installedVersion} is already installed`);
+        // todo: detect if the $PATH is actually loaded
+        return true;
+      }
     }
 
     spinner.text = "Installing the rust toolchain using rustup";

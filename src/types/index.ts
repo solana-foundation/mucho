@@ -2,6 +2,7 @@ export type PlatformOS = "unknown" | "linux" | "mac" | "windows";
 
 export type ToolNames =
   | "rust"
+  | "rustup"
   | "solana"
   | "avm"
   | "anchor"
