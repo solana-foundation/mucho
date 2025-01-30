@@ -51,4 +51,11 @@ export const COMMON_OPTIONS = {
     "--manifest-path <PATH>",
     "path to Cargo.toml",
   ).default(join(process.cwd(), "Cargo.toml")),
+  /**
+   * priority fee in micro-lamports to add to transactions
+   */
+  priorityFee: new Option(
+    "--priority-fee <MICRO_LAMPORTS>",
+    "priority fee in micro-lamports to add to transactions",
+  ),
 };

@@ -44,6 +44,7 @@ export function deployCommand() {
     .addOption(COMMON_OPTIONS.keypair)
     .addOption(COMMON_OPTIONS.config)
     .addOption(COMMON_OPTIONS.outputOnly)
+    .addOption(COMMON_OPTIONS.priorityFee)
     .action(async (options, { args: passThroughArgs }) => {
       if (!options.outputOnly) {
         titleMessage("Deploy a Solana program");
@@ -268,6 +269,7 @@ export function deployCommand() {
         programId: programIdPath || programId,
         url: options.url,
         keypair: options.keypair,
+        priorityFee: options.priorityFee,
       });
 
       // todo: if options.url is localhost, verify the test validator is running
