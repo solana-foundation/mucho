@@ -40,7 +40,7 @@ export function listLocalPrograms({
   }
 
   if (!directoryExists(buildDir)) {
-    warnMessage(`Unable to locate build output directory: ${buildDir}`);
+    // warnMessage(`Unable to locate build output directory: ${buildDir}`);
     return { locatedPrograms, buildDirListing, allFound };
   }
 

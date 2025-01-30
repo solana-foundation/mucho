@@ -7,7 +7,7 @@ import { OutputConfiguration } from "@commander-js/extra-typings";
 import {
   directoryExists,
   doesFileExist,
-  findFileInRepo,
+  findClosestFile,
   isInCurrentDir,
   loadTomlFile,
   loadYamlFile,
@@ -77,13 +77,15 @@ export function loadConfigToml(
 
   // attempt to locate the closest config file
   if (configPath === DEFAULT_CONFIG_FILE) {
-    // accept both `Solana.toml` and `solana.toml` (case insensitive)
-    const newPath = findFileInRepo(DEFAULT_CONFIG_FILE);
+    // accepts both `Solana.toml` and `solana.toml` (case insensitive)
+    const newPath = findClosestFile({
+      fileName: DEFAULT_CONFIG_FILE,
+    });
     if (newPath) {
       configPath = newPath;
       if (!isInCurrentDir(newPath)) {
         // todo: should we prompt the user if they want to use this one?
-        warnMessage(`Using closest Solana.toml located at: ${newPath}`);
+        warnMessage(`Using Solana.toml located at: ${newPath}`);
       }
     }
   }
@@ -95,7 +97,8 @@ export function loadConfigToml(
   } else {
     if (isConfigRequired) {
       warningOutro(`No Solana.toml config file found. Operation canceled.`);
-    } else warnMessage(`No Solana.toml config file found. Skipping.`);
+      process.exit();
+    }
   }
 
   const defaultSettings: SolanaToml["settings"] = {
