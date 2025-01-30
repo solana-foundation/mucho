@@ -52,10 +52,10 @@ export const COMMON_OPTIONS = {
     "path to Cargo.toml",
   ).default(join(process.cwd(), "Cargo.toml")),
   /**
-   * priority fees in microlamports to add to transactions
+   * priority fee in micro-lamports to add to transactions
    */
-  priorityFees: new Option(
-    "--priority-fees <MICROLAMPORTS>",
-    "priority fees in microlamports to add to transactions",
+  priorityFee: new Option(
+    "--priority-fee <MICRO_LAMPORTS>",
+    "priority fee in micro-lamports to add to transactions",
   ),
 };

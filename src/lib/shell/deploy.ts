@@ -13,7 +13,7 @@ type DeployProgramCommandInput = {
   upgradeAuthority?: string;
   keypair?: string;
   url?: SolanaCluster | string;
-  priorityFees?: string;
+  priorityFee?: string;
 };
 
 export function buildDeployProgramCommand({
@@ -25,7 +25,7 @@ export function buildDeployProgramCommand({
   url,
   keypair,
   upgradeAuthority,
-  priorityFees,
+  priorityFee,
 }: DeployProgramCommandInput) {
   const command: string[] = ["solana program deploy"];
 
@@ -55,9 +55,9 @@ export function buildDeployProgramCommand({
     command.push(`--program-id ${programId}`);
   }
 
-  // Add priority fees if specified
-  if (priorityFees) {
-    command.push(`--with-compute-unit-price ${priorityFees}`);
+  // Add priority fee if specified
+  if (priorityFee) {
+    command.push(`--with-compute-unit-price ${priorityFee}`);
   }
 
   // todo: validate the `programPath` file exists
