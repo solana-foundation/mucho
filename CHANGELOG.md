@@ -1,5 +1,31 @@
 # mucho
 
+## 0.6.0
+
+### Minor Changes
+
+- [#47](https://github.com/solana-developers/mucho/pull/47)
+  [`1bd7b41`](https://github.com/solana-developers/mucho/commit/1bd7b413875cff694b428f40cf28c8a3e43bd824)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - add option flags to the
+  `install` command for core tools or all tools
+
+- [#43](https://github.com/solana-developers/mucho/pull/43)
+  [`df39fac`](https://github.com/solana-developers/mucho/commit/df39facb7e9fccd90b86933df963c70772aef99f)
+  Thanks [@arrayappy](https://github.com/arrayappy)! - add priority-fee optional
+  command flag and updated deploy command to use it
+
+### Patch Changes
+
+- [#50](https://github.com/solana-developers/mucho/pull/50)
+  [`d2a27fe`](https://github.com/solana-developers/mucho/commit/d2a27fe2eac66ec02dd969aed87354887d031901)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - optimize the file
+  finder code
+
+- [#49](https://github.com/solana-developers/mucho/pull/49)
+  [`e1478c2`](https://github.com/solana-developers/mucho/commit/e1478c20332f8886ea2daec7fadf98ec184aade0)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - ensure the installer
+  checks for rustup AND rustc
+
 ## 0.5.1
 
 ### Patch Changes
