@@ -17,6 +17,8 @@ import {
 import { checkShellPathSource } from "@/lib/setup";
 import { PathSourceStatus, TOOL_CONFIG } from "@/const/setup";
 import { getCargoUpdateOutput, getNpmPackageUpdates } from "@/lib/update";
+import { getAvailableAnchorVersions } from "@/lib/anchor";
+import { isVersionNewer } from "@/lib/node";
 
 const toolNames: Array<ToolNames> = [
   "rust",
@@ -100,6 +102,20 @@ export function installCommand() {
           );
         }
 
+        const anchorVersions = await getAvailableAnchorVersions();
+        if (
+          anchorVersions.current &&
+          anchorVersions.latest &&
+          isVersionNewer(anchorVersions.latest, anchorVersions.current)
+        ) {
+          updatesAvailable.push({
+            installed: anchorVersions.current,
+            latest: anchorVersions.latest,
+            name: "anchor",
+            needsUpdate: true,
+          });
+        }
+
         // this requires cargo to already be installed, so we must do it after
         updatesAvailable.push(...(await getCargoUpdateOutput()));
 
@@ -136,6 +152,9 @@ export function installCommand() {
           await installAnchorUsingAvm({
             os,
             version,
+            updateAvailable: updatesAvailable.filter(
+              (data) => data.name.toLowerCase() == "anchor",
+            )[0],
           });
         }
         if (!toolName || toolName == "trident") {

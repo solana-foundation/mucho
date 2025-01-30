@@ -1,5 +1,9 @@
 import { join, dirname } from "path";
-import { AnchorToml, AnchorTomlWithConfigPath } from "@/types/anchor";
+import {
+  AnchorToml,
+  AnchorTomlWithConfigPath,
+  AnchorVersionData,
+} from "@/types/anchor";
 import {
   directoryExists,
   doesFileExist,
@@ -9,6 +13,8 @@ import {
 import { loadConfigToml } from "@/lib/cli";
 import { warningOutro, warnMessage } from "@/lib/logs";
 import { SolanaTomlCloneLocalProgram } from "@/types/config";
+import { checkCommand, VERSION_REGEX } from "./shell";
+import { installAnchorVersionManager } from "./install";
 
 const ANCHOR_TOML = "Anchor.toml";
 
@@ -155,4 +161,43 @@ export function locateLocalAnchorPrograms(
   }
 
   return localPrograms;
+}
+
+/**
+ * Use the `avm list` command to fetch the latest anchor version available
+ */
+export async function getAvailableAnchorVersions(): Promise<AnchorVersionData> {
+  const res = await checkCommand("avm list", {
+    exit: true,
+    onError: async () => {
+      warnMessage("Unable to detect the 'avm' command. Installing...");
+
+      await installAnchorVersionManager();
+    },
+    doubleCheck: true,
+  });
+
+  const data: AnchorVersionData = {
+    latest: null,
+    current: null,
+    installed: [],
+    available: [],
+  };
+
+  if (!res) return data;
+
+  res.split("\n").map((line) => {
+    line = line.trim().toLowerCase();
+    if (!line) return;
+    const version = VERSION_REGEX.exec(line)[1];
+    if (!version) return;
+
+    if (line.includes("current")) data.current = version;
+    if (line.includes("latest")) data.latest = version;
+    if (line.includes("installed")) data.installed.push(version);
+
+    data.available.push(version);
+  });
+
+  return data;
 }

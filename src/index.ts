@@ -13,7 +13,12 @@ import { validatorCommand } from "@/commands/validator";
 import { buildCommand } from "@/commands/build";
 import { coverageCommand } from "@/commands/coverage";
 import { deployCommand } from "@/commands/deploy";
+<<<<<<< HEAD
 import { tokenCommand } from "./commands/token";
+=======
+import { docsCommand } from "@/commands/docs";
+import { inspectCommand } from "@/commands/inspect";
+>>>>>>> 4b94cf91dc6be14bd319ca7837e7b9f6e0897fc7
 
 // ensure the user running the cli tool is on a supported javascript runtime version
 assertRuntimeVersion();
@@ -31,12 +36,14 @@ async function main() {
         .addCommand(installCommand())
         // .addCommand(doctorCommand())
         .addCommand(validatorCommand())
+        .addCommand(inspectCommand())
         .addCommand(cloneCommand())
         .addCommand(buildCommand())
         .addCommand(deployCommand())
         .addCommand(tokenCommand())
         .addCommand(coverageCommand())
-        .addCommand(infoCommand());
+        .addCommand(infoCommand())
+        .addCommand(docsCommand());
 
       // set the default action to `help` without an error
       if (process.argv.length === 2) {
@@ -50,6 +57,9 @@ async function main() {
   } catch (err) {
     errorOutro(err, "[mucho - unhandled error]");
   }
+
+  // add a line spacer at the end to make the terminal easier to read
+  console.log();
 }
 
 main();
