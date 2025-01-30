@@ -13,12 +13,9 @@ import { validatorCommand } from "@/commands/validator";
 import { buildCommand } from "@/commands/build";
 import { coverageCommand } from "@/commands/coverage";
 import { deployCommand } from "@/commands/deploy";
-<<<<<<< HEAD
 import { tokenCommand } from "./commands/token";
-=======
 import { docsCommand } from "@/commands/docs";
 import { inspectCommand } from "@/commands/inspect";
->>>>>>> 4b94cf91dc6be14bd319ca7837e7b9f6e0897fc7
 
 // ensure the user running the cli tool is on a supported javascript runtime version
 assertRuntimeVersion();
