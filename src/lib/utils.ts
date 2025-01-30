@@ -241,67 +241,95 @@ export function updateGitignore(
   }
 }
 
-export function findFileInRepo(
-  targetFilename: string,
-  startDir: string = process.cwd(),
-  maxDepth: number = 5 /* depth=5 should be good enough to handle most repos? */,
-  skipDirs: string[] = ["node_modules", ".cache"],
-): string | null {
-  let currentDir = startDir;
-  let depth = 0;
+export function findClosestFile({
+  fileName,
+  maxDepth = 5,
+  maxLevelsUp = 5,
+  stopMarkers = [".git", "package.json", "cargo.toml"],
+  startDir = process.cwd(),
+  skipDirs = ["node_modules"],
+}: {
+  fileName: string;
+  maxDepth?: number;
+  maxLevelsUp?: number;
+  stopMarkers?: string[];
+  skipDirs?: string[];
+  startDir?: string;
+}): string | null {
+  const visited = new Set<string>();
 
-  while (depth < maxDepth) {
-    const filePath = findFileInDirectory(
-      currentDir,
-      targetFilename.toLowerCase(),
-      skipDirs,
+  // check if we're already in what looks like a repo
+  const isLikelyRepo = stopMarkers.some((marker) =>
+    fs.existsSync(path.join(startDir, marker)),
+  );
+
+  // if we are not in what looks like a repo, limit the search more aggressively
+  if (!isLikelyRepo) {
+    maxDepth = 2;
+    maxLevelsUp = 2;
+  }
+
+  function crawlUp(currentDir: string, levelsUp: number): string | null {
+    if (levelsUp > maxLevelsUp) return null;
+
+    let targetPath = path.join(currentDir, fileName);
+    if (fs.existsSync(targetPath)) return targetPath;
+    targetPath = path.join(currentDir, fileName.toLowerCase());
+    if (fs.existsSync(targetPath)) return targetPath;
+
+    const hasMarker = stopMarkers.some((marker) =>
+      fs.existsSync(path.join(currentDir, marker)),
     );
-    if (filePath) return filePath;
 
-    // stop searching once we hit the repository root
-    const gitDir = path.join(currentDir, ".git");
-    if (fs.existsSync(gitDir) && fs.statSync(gitDir).isDirectory()) {
-      return null;
-    }
+    if (hasMarker && levelsUp > 0) return null;
 
-    // Move up one directory
     const parentDir = path.dirname(currentDir);
-    if (parentDir === currentDir) {
+    if (parentDir === currentDir) return null;
+
+    return crawlUp(parentDir, levelsUp + 1);
+  }
+
+  function crawlDown(dir: string, depth: number): string | null {
+    if (depth > maxDepth) return null;
+    if (visited.has(dir)) return null;
+    visited.add(dir);
+
+    try {
+      let targetPath = path.join(dir, fileName);
+      if (fs.existsSync(targetPath)) return targetPath;
+      targetPath = path.join(dir, fileName.toLowerCase());
+      if (fs.existsSync(targetPath)) return targetPath;
+
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        // skip hidden directories and node_modules
+        if (entry.name.startsWith(".") || skipDirs.includes(entry.name))
+          continue;
+
+        if (entry.isDirectory()) {
+          const fullPath = path.join(dir, entry.name);
+
+          const hasMarker = stopMarkers.some((marker) =>
+            fs.existsSync(path.join(fullPath, marker)),
+          );
+          if (hasMarker) continue;
+
+          const result = crawlDown(fullPath, depth + 1);
+          if (result) return result;
+        }
+      }
+    } catch (error) {
+      // honey badger don't care about errors
       return null;
     }
 
-    currentDir = parentDir;
-    depth++;
+    return null;
   }
 
-  return null;
-}
-
-export function findFileInDirectory(
-  dir: string,
-  targetFilename: string,
-  skipDirs: string[],
-): string | null {
-  const files = fs.readdirSync(dir);
-
-  for (const file of files) {
-    const absolutePath = path.join(dir, file);
-    try {
-      if (fs.statSync(absolutePath).isDirectory()) {
-        if (skipDirs.includes(file)) {
-          continue;
-        }
-        const result = findFileInDirectory(
-          absolutePath,
-          targetFilename,
-          skipDirs,
-        );
-        if (result) return result; // Found in a subdirectory
-      } else if (file.toLowerCase() === targetFilename) {
-        return absolutePath;
-      }
-    } catch (err) {}
-  }
+  const upResult = crawlUp(startDir, 0);
+  if (upResult) return upResult;
+  if (isLikelyRepo) return crawlDown(startDir, 0);
 
   return null;
 }
