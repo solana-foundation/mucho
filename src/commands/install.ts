@@ -1,4 +1,4 @@
-import { Argument, Command } from "@commander-js/extra-typings";
+import { Argument, Command, Option } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
 import { titleMessage, warnMessage } from "@/lib/logs";
 import { detectOperatingSystem } from "@/lib/shell";
@@ -41,6 +41,12 @@ export function installCommand() {
     new Command("install")
       .configureOutput(cliOutputConfig)
       .description("install Solana development tooling")
+      .addOption(
+        new Option(
+          "-b --base",
+          "Install base tools only (Anchor, Solana, and Rust)"
+        )
+      )
       .addArgument(
         new Argument("<tool>", "tool to install (default: all)")
           .choices(toolNames)
@@ -52,6 +58,7 @@ export function installCommand() {
           "desired tool version to install (default: stable)",
         ).argOptional(),
       )
+      
       // .addOption(
       //   new Option(
       //     "--dry-run",
@@ -86,7 +93,7 @@ export function installCommand() {
           )[0],
         });
 
-        if (!toolName || toolName == "rust") {
+        if (!toolName || toolName == "rust" || options.base) {
           await installRust({
             os,
             version,
@@ -119,7 +126,7 @@ export function installCommand() {
         // this requires cargo to already be installed, so we must do it after
         updatesAvailable.push(...(await getCargoUpdateOutput()));
 
-        if (!toolName || toolName == "solana") {
+        if (!toolName || toolName == "solana" || options.base) {
           const res = await installSolana({
             os,
             version,
@@ -138,7 +145,7 @@ export function installCommand() {
               : true,
           );
         }
-        if (!toolName || toolName == "avm") {
+        if (!toolName || toolName == "avm" || options.base) {
           // const version = "0.28.0"; //"latest"; // v0.29.0 has the "ahash yanked" issue
           await installAnchorVersionManager({
             os,
@@ -148,7 +155,7 @@ export function installCommand() {
             )[0],
           });
         }
-        if (!toolName || toolName == "anchor") {
+        if (!toolName || toolName == "anchor" || options.base) {
           await installAnchorUsingAvm({
             os,
             version,
@@ -184,7 +191,7 @@ export function installCommand() {
             )[0],
           });
         }
-        if (!toolName || toolName == "yarn") {
+        if (!toolName || toolName == "yarn" || options.base) {
           await installYarn({
             os,
             version,
