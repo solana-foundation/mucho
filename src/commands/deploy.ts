@@ -146,52 +146,26 @@ export function deployCommand() {
 
       // process the user's config file if they have one
       if (config?.programs) {
-        // make sure the user has the cluster program declared
-        if (!getSafeClusterMoniker(selectedCluster, config.programs)) {
-          warnMessage(
-            `Unable to locate '${selectedCluster}' programs in your Solana.toml`,
-          );
-
-          console.log("The following programs are declared:");
-          Object.keys(config.programs).forEach((cl) => {
-            console.log(` - ${cl}:`);
-            Object.keys(config.programs[cl]).forEach((name) => {
-              console.log(`    - ${name}`);
-            });
-          });
-
-          process.exit();
+        // Check if the program is declared in the toml for this cluster
+        if (config?.programs?.[selectedCluster]?.[options.programName]) {
+          programId = config.programs[selectedCluster][options.programName];
         }
+        // Note: We no longer exit if program is not in toml, just continue with auto-detection
+      }
 
-        if (
-          !config?.programs?.[selectedCluster] ||
-          !Object.hasOwn(config.programs[selectedCluster], options.programName)
-        ) {
-          warnMessage(
-            `Program '${options.programName}' not found in 'programs.${selectedCluster}'`,
-          );
-          process.exit();
-        }
-
-        programId = config.programs[selectedCluster][options.programName];
-      } else {
-        // if the user does not have a config file, we will try to auto detect the program id to use
-        // todo: this
-
-        if (programKeypair) {
-          programId = programKeypair.address;
-          warnMessage(`Auto detected default program keypair file:`);
-          console.log(` - keypair path: ${programIdPath}`);
-          console.log(` - program id: ${programId}`);
-        } else {
-          warnMessage(`Unable to locate any program id or program keypair.`);
-          process.exit();
-        }
+      // If we don't have a program ID from the toml (or no toml exists), try auto-detection
+      if (!programId && programKeypair) {
+        programId = programKeypair.address;
+        warnMessage(`Auto detected default program keypair file:`);
+        console.log(` - keypair path: ${programIdPath}`);
+        console.log(` - program id: ${programId}`);
       }
 
       if (!programId) {
         return warnMessage(
-          `Unable to locate program id for '${options.programName}'. Do you have it declared?`,
+          `Unable to locate program id for '${options.programName}'. Either:\n` +
+            `1. Declare it in Solana.toml under programs.${selectedCluster}\n` +
+            `2. Ensure ${programIdPath} exists`,
         );
       }
 
@@ -235,8 +209,19 @@ export function deployCommand() {
       }
 
       const authorityKeypair = await loadKeypairFromFile(
-        config.settings.keypair,
+        options.keypair ||
+          config?.settings?.keypair ||
+          "~/.config/solana/id.json",
       );
+
+      if (!authorityKeypair) {
+        return warnMessage(
+          `Unable to locate keypair file. Either:\n` +
+            `1. Specify with --keypair\n` +
+            `2. Declare it in Solana.toml settings.keypair\n` +
+            `3. Ensure ~/.config/solana/id.json exists`,
+        );
+      }
 
       /**
        * todo: assorted pre-deploy checks to add
