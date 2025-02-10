@@ -11,17 +11,36 @@ experience.
 > [open issues](https://github.com/solana-developers/mucho/issues) with any
 > feedback, feature requests, or issues you experience.
 
+## Installation
+
 **System Requirements:**
 
 - NodeJS (version >= 22)
 
-**Installation:**
+### Install with NodeJS already installed
+
+With NodeJS already installed on your system:
 
 ```shell
 npm install -gy mucho@latest
 ```
 
-**Usage:**
+Or to install mucho and all the core Solana development tooling at once:
+
+```shell
+npx mucho@latest install
+```
+
+### Install without NodeJS already installed
+
+The following command will install NodeJS, Node Version Manager
+([NVM](https://github.com/nvm-sh/nvm)), and `mucho` itself:
+
+```shell
+curl -sSfL https://raw.githubusercontent.com/solana-developers/mucho/master/install.sh | bash
+```
+
+## Usage
 
 ```shell
 mucho --help
