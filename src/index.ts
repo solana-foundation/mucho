@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
-import { assertRuntimeVersion } from "@/lib/node";
+import { assertRuntimeVersion, suppressRuntimeWarnings } from "@/lib/node";
+
+assertRuntimeVersion();
+suppressRuntimeWarnings();
+
 import { checkForSelfUpdate } from "@/lib/npm";
 import { errorOutro } from "@/lib/logs";
 import { cliProgramRoot } from "@/commands";
@@ -16,9 +20,6 @@ import { deployCommand } from "@/commands/deploy";
 import { tokenCommand } from "./commands/token";
 import { docsCommand } from "@/commands/docs";
 import { inspectCommand } from "@/commands/inspect";
-
-// ensure the user running the cli tool is on a supported javascript runtime version
-assertRuntimeVersion();
 
 async function main() {
   // create a global error boundary
