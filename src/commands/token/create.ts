@@ -3,6 +3,30 @@ import { cliOutputConfig, loadSolanaCliConfig } from "@/lib/cli";
 import { COMMON_OPTIONS } from "@/const/commands";
 import { errorOutro, titleMessage, warnMessage } from "@/lib/logs";
 import ora from "ora";
+
+import {
+  getAddressFromStringOrFilePath,
+  parseRpcUrlOrMoniker,
+} from "@/lib/solana";
+import {
+  getCreateMetadataAccountV3Instruction,
+  TOKEN_METADATA_PROGRAM_ADDRESS,
+} from "@/lib/codama/metadata/instructions/createMetadataAccountV3";
+import { wordWithPlurality } from "@/lib/utils";
+import { SolanaCluster } from "@/types/config";
+import {
+  createSolanaClient,
+  createTransaction,
+  getMinimumBalanceForRentExemption,
+  generateKeyPairSigner,
+  getProgramDerivedAddress,
+  getAddressEncoder,
+  isStringifiedNumber,
+  signTransactionMessageWithSigners,
+  getExplorerLink,
+  getPublicSolanaRpcUrl,
+} from "gill";
+import { getCreateAccountInstruction } from "gill/programs";
 import {
   findAssociatedTokenPda,
   getCreateAssociatedTokenIdempotentInstructionAsync,
@@ -10,34 +34,8 @@ import {
   getMintSize,
   getMintToInstruction,
   TOKEN_PROGRAM_ADDRESS,
-} from "@solana-program/token";
-import {
-  appendTransactionMessageInstructions,
-  createSolanaRpc,
-  createSolanaRpcSubscriptions,
-  createTransactionMessage,
-  generateKeyPairSigner,
-  pipe,
-  setTransactionMessageFeePayerSigner,
-  setTransactionMessageLifetimeUsingBlockhash,
-  getProgramDerivedAddress,
-  getAddressEncoder,
-  isStringifiedNumber,
-} from "@solana/web3.js";
-import {
-  getAddressFromStringOrFilePath,
-  loadKeypairFromFile,
-  parseRpcUrlOrMoniker,
-  signAndSendTransaction,
-} from "@/lib/solana";
-import { getCreateAccountInstruction } from "@solana-program/system";
-import {
-  getCreateMetadataAccountV3Instruction,
-  TOKEN_METADATA_PROGRAM_ADDRESS,
-} from "@/lib/codama/metadata/instructions/createMetadataAccountV3";
-import { getExplorerLink, getPublicSolanaRpcUrl } from "@/lib/web3";
-import { wordWithPlurality } from "@/lib/utils";
-import { SolanaCluster } from "@/types/config";
+} from "gill/programs/token";
+import { loadKeypairSignerFromFile } from "gill/node";
 
 export function createTokenCommand() {
   return new Command("create")
@@ -127,7 +125,7 @@ export function createTokenCommand() {
         );
       }
 
-      let cluster: SolanaCluster | string;
+      let cluster;
 
       try {
         options.url = options.url.startsWith("http")
@@ -138,7 +136,7 @@ export function createTokenCommand() {
 
         // convert monikers to public endpoints
         if (!options.url.startsWith("http")) {
-          options.url = getPublicSolanaRpcUrl(options.url);
+          options.url = getPublicSolanaRpcUrl(options.url as any);
         }
       } catch (err) {
         return errorOutro(
@@ -148,11 +146,11 @@ export function createTokenCommand() {
       }
 
       // payer will always be used to pay the fees
-      const payer = await loadKeypairFromFile(options.keypair);
+      const payer = await loadKeypairSignerFromFile(options.keypair);
 
       // mint authority is required to sign in order to mint the initial tokens
       const mintAuthority = options.mintAuthority
-        ? await loadKeypairFromFile(options.mintAuthority)
+        ? await loadKeypairSignerFromFile(options.mintAuthority)
         : payer;
 
       const freezeAuthority = await getAddressFromStringOrFilePath(
@@ -160,54 +158,50 @@ export function createTokenCommand() {
       );
 
       const mint = options.customMint
-        ? await loadKeypairFromFile(options.customMint)
+        ? await loadKeypairSignerFromFile(options.customMint)
         : await generateKeyPairSigner();
 
       console.log(); // line spacer after the common "ExperimentalWarning for Ed25519 Web Crypto API"
       const spinner = ora("Preparing to create token").start();
 
+      const { rpc, sendAndConfirmTransaction } = createSolanaClient({
+        urlOrMoniker: options.url,
+      });
+
       const websocketUrl = new URL(options.url);
       websocketUrl.protocol = "ws";
       cliConfig.websocket_url = websocketUrl.toString();
 
-      const rpc = createSolanaRpc(options.url);
-      const rpcSubscriptions = createSolanaRpcSubscriptions(
-        cliConfig.websocket_url,
-      );
-
       const space = BigInt(getMintSize());
-      const rent = await rpc.getMinimumBalanceForRentExemption(space).send();
-      const instructions = [
-        getCreateAccountInstruction({
-          payer,
-          newAccount: mint,
-          lamports: rent,
-          space,
-          programAddress: TOKEN_PROGRAM_ADDRESS,
-        }),
-        getInitializeMintInstruction({
-          mint: mint.address,
-          decimals: Number(options.decimals),
-          mintAuthority: mintAuthority.address,
-          freezeAuthority,
-        }),
-      ];
+      const rent = getMinimumBalanceForRentExemption(space);
 
       spinner.text = "Fetching the latest blockhash";
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      const createMintTransaction = pipe(
-        createTransactionMessage({ version: 0 }),
-        (tx) => setTransactionMessageFeePayerSigner(payer, tx),
-        (tx) =>
-          setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-        (tx) => appendTransactionMessageInstructions(instructions, tx),
-      );
+      const createMintTx = createTransaction({
+        version: "legacy",
+        feePayer: payer,
+        latestBlockhash,
+        instructions: [
+          getCreateAccountInstruction({
+            payer,
+            newAccount: mint,
+            lamports: rent,
+            space,
+            programAddress: TOKEN_PROGRAM_ADDRESS,
+          }),
+          getInitializeMintInstruction({
+            mint: mint.address,
+            decimals: Number(options.decimals),
+            mintAuthority: mintAuthority.address,
+            freezeAuthority,
+          }),
+        ],
+      });
 
       spinner.text = "Creating token mint: " + mint.address;
-      const createMintSignature = await signAndSendTransaction(
-        { rpc, rpcSubscriptions },
-        createMintTransaction,
+      let signature = await sendAndConfirmTransaction(
+        await signTransactionMessageWithSigners(createMintTx),
       );
 
       spinner.succeed("Token mint account created: " + mint.address);
@@ -216,7 +210,7 @@ export function createTokenCommand() {
         " ",
         getExplorerLink({
           cluster,
-          transaction: createMintSignature,
+          transaction: signature,
         }).toString(),
         "\n",
       );
@@ -233,37 +227,35 @@ export function createTokenCommand() {
         ],
       });
 
-      const metadataInstruction = getCreateMetadataAccountV3Instruction({
-        metadata: metadataPda,
-        mint: mint.address,
-        mintAuthority,
-        payer,
-        updateAuthority: mintAuthority,
-        data: {
-          name: options.name,
-          symbol: options.symbol,
-          uri: options.metadata,
-          sellerFeeBasisPoints: 0,
-          creators: null,
-          collection: null,
-          uses: null,
-        },
-        isMutable: true,
-        collectionDetails: null,
+      const createMetadataTx = createTransaction({
+        version: "legacy",
+        feePayer: payer,
+        latestBlockhash,
+        instructions: [
+          getCreateMetadataAccountV3Instruction({
+            metadata: metadataPda,
+            mint: mint.address,
+            mintAuthority,
+            payer,
+            updateAuthority: mintAuthority,
+            data: {
+              name: options.name,
+              symbol: options.symbol,
+              uri: options.metadata,
+              sellerFeeBasisPoints: 0,
+              creators: null,
+              collection: null,
+              uses: null,
+            },
+            isMutable: true,
+            collectionDetails: null,
+          }),
+        ],
       });
 
-      const createMetadataTransaction = pipe(
-        createTransactionMessage({ version: 0 }),
-        (tx) => setTransactionMessageFeePayerSigner(payer, tx),
-        (tx) =>
-          setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-        (tx) => appendTransactionMessageInstructions([metadataInstruction], tx),
-      );
-
       spinner.text = "Creating metadata account: " + metadataPda;
-      const createMetadataSignature = await signAndSendTransaction(
-        { rpc, rpcSubscriptions },
-        createMetadataTransaction,
+      signature = await sendAndConfirmTransaction(
+        await signTransactionMessageWithSigners(createMetadataTx),
       );
       spinner.succeed("Metadata account created: " + metadataPda);
 
@@ -271,7 +263,7 @@ export function createTokenCommand() {
         " ",
         getExplorerLink({
           cluster,
-          transaction: createMetadataSignature,
+          transaction: signature,
         }).toString(),
         "\n",
       );
@@ -304,27 +296,26 @@ export function createTokenCommand() {
         mint: mint.address,
       });
 
-      const createATA =
-        await getCreateAssociatedTokenIdempotentInstructionAsync({
-          mint: mint.address,
-          payer,
-          owner: payer.address,
-        });
-
-      const mintTo = getMintToInstruction({
-        mint: mint.address,
-        token: ata,
-        amount: BigInt(Number(options.amount) * 10 ** Number(options.decimals)),
-        mintAuthority,
+      const createTokensTx = createTransaction({
+        version: "legacy",
+        feePayer: payer,
+        latestBlockhash,
+        instructions: [
+          await getCreateAssociatedTokenIdempotentInstructionAsync({
+            mint: mint.address,
+            payer,
+            owner: payer.address,
+          }),
+          getMintToInstruction({
+            mint: mint.address,
+            token: ata,
+            amount: BigInt(
+              Number(options.amount) * 10 ** Number(options.decimals),
+            ),
+            mintAuthority,
+          }),
+        ],
       });
-
-      const createTokens = pipe(
-        createTransactionMessage({ version: 0 }),
-        (tx) => setTransactionMessageFeePayerSigner(payer, tx),
-        (tx) =>
-          setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-        (tx) => appendTransactionMessageInstructions([createATA, mintTo], tx),
-      );
 
       const tokenPlurality = wordWithPlurality(
         options.amount,
@@ -333,9 +324,8 @@ export function createTokenCommand() {
       );
 
       spinner.text = `Minting '${options.amount}' ${tokenPlurality} to: ${payer.address}`;
-      const createTokensSignature = await signAndSendTransaction(
-        { rpc, rpcSubscriptions },
-        createTokens,
+      signature = await sendAndConfirmTransaction(
+        await signTransactionMessageWithSigners(createTokensTx),
       );
       spinner.succeed(
         `Minted '${options.amount}' ${tokenPlurality} to: ${payer.address}`,
@@ -344,7 +334,7 @@ export function createTokenCommand() {
         " ",
         getExplorerLink({
           cluster,
-          transaction: createTokensSignature,
+          transaction: signature,
         }).toString(),
       );
     });
