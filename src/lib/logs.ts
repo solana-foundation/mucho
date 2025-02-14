@@ -89,7 +89,7 @@ export function errorMessage(err: any, title: string | null = null) {
   }
 
   if (title) {
-    console.log(picocolors.bgRed(title));
+    console.log(picocolors.bgRed(` ${title} `));
     console.log(message, "\n");
   } else console.log(picocolors.bgRed(` ${message} `), "\n");
 }

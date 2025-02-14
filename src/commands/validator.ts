@@ -22,6 +22,7 @@ import { promptToAutoClone } from "@/lib/prompts/clone";
 import { listLocalPrograms } from "@/lib/programs";
 import { cloneCommand } from "@/commands/clone";
 import { getAppInfo } from "@/lib/app-info";
+import { getExplorerLink } from "@/lib/web3";
 
 /**
  * Command: `validator`
@@ -181,15 +182,11 @@ export function validatorCommand() {
         );
       }
 
-      const explorerUrl = new URL(
-        "https://explorer.solana.com/?cluster=custom",
-      );
-      explorerUrl.searchParams.set("customUrl", "http://localhost:8899");
       console.log("\nSolana Explorer for your local test validator:");
       console.log(
         "(on Brave Browser, you may need to turn Shields down for the Explorer website)",
       );
-      console.log(explorerUrl.toString());
+      console.log(getExplorerLink({ cluster: "localnet" }).toString());
 
       shellExecInSession({
         command,
