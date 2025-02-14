@@ -38,7 +38,7 @@ export type SolanaUrlOrMoniker = SolanaCluster | ModifiedClusterUrl;
  *
  * Note: These RPC URLs are rate limited and not suitable for production applications.
  */
-export function getPublicSolanaRpcUrl(cluster: SolanaCluster): string {
+export function getPublicSolanaRpcUrl(cluster: SolanaCluster | string): string {
   switch (cluster) {
     case "devnet":
       return devnet("https://api.devnet.solana.com");
@@ -113,7 +113,7 @@ type ExplorerLinkBlock = {
 
 export type GetExplorerLinkArgs = {
   cluster?: SolanaUrlOrMoniker;
-} & (ExplorerLinkAccount | ExplorerLinkTransaction | ExplorerLinkBlock);
+} & (ExplorerLinkAccount | ExplorerLinkTransaction | ExplorerLinkBlock | {});
 
 /**
  * Craft a Solana Explorer link on any cluster
@@ -138,6 +138,10 @@ export function getExplorerLink(props: GetExplorerLinkArgs): URL {
       // localnet technically isn't a cluster, so requires special handling
       url.searchParams.set("cluster", "custom");
       url.searchParams.set("customUrl", "http://localhost:8899");
+    } else if (props.cluster.startsWith("http")) {
+      // localnet technically isn't a cluster, so requires special handling
+      url.searchParams.set("cluster", "custom");
+      url.searchParams.set("customUrl", props.cluster);
     } else {
       url.searchParams.set("cluster", props.cluster);
     }

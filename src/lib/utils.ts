@@ -386,3 +386,21 @@ export function numberStringToNumber(localeString: string): number {
     ),
   );
 }
+
+export function stringifiedNumber(input: string): number {
+  try {
+    return parseFloat(input);
+  } catch (err) {
+    throw new Error("Input value is not a number");
+  }
+}
+
+export function wordWithPlurality(
+  input: number | string,
+  singular: string,
+  plural: string,
+) {
+  if (typeof input == "string") input = stringifiedNumber(input);
+  if (input == 1) return singular;
+  else return plural;
+}

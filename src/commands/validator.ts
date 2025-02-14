@@ -14,7 +14,7 @@ import {
 } from "@/lib/utils";
 import { buildTestValidatorCommand } from "@/lib/shell/test-validator";
 import { COMMON_OPTIONS } from "@/const/commands";
-import { getExplorerUrl, loadKeypairFromFile } from "@/lib/solana";
+import { loadKeypairFromFile } from "@/lib/solana";
 import { DEFAULT_CACHE_DIR, DEFAULT_TEST_LEDGER_DIR } from "@/const/solana";
 import { deconflictAnchorTomlWithConfig, loadAnchorToml } from "@/lib/anchor";
 import { validateExpectedCloneCounts } from "@/lib/shell/clone";
@@ -22,6 +22,7 @@ import { promptToAutoClone } from "@/lib/prompts/clone";
 import { listLocalPrograms } from "@/lib/programs";
 import { cloneCommand } from "@/commands/clone";
 import { getAppInfo } from "@/lib/app-info";
+import { getExplorerLink } from "@/lib/web3";
 
 /**
  * Command: `validator`
@@ -185,7 +186,7 @@ export function validatorCommand() {
       console.log(
         "(on Brave Browser, you may need to turn Shields down for the Explorer website)",
       );
-      console.log(getExplorerUrl("http://localhost:8899").toString());
+      console.log(getExplorerLink({ cluster: "localnet" }).toString());
 
       shellExecInSession({
         command,
