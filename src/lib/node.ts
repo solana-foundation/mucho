@@ -46,3 +46,18 @@ export function assertRuntimeVersion() {
     }
   }
 }
+
+/**
+ * Suppress various messages that get logged by NodeJS and other runtimes
+ */
+export function suppressRuntimeWarnings() {
+  const FILTERED_WARNINGS = ["Ed25519", "Warning: WebSockets", "punycode"];
+
+  process.removeAllListeners("warning");
+  process.on("warning", (warning) => {
+    // Only log warnings that shouldn't be suppressed
+    if (!FILTERED_WARNINGS.some((filter) => warning.message.includes(filter))) {
+      console.warn(warning);
+    }
+  });
+}
