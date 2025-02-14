@@ -8,19 +8,13 @@ import {
   getAddressFromStringOrFilePath,
   parseRpcUrlOrMoniker,
 } from "@/lib/solana";
-import {
-  getCreateMetadataAccountV3Instruction,
-  TOKEN_METADATA_PROGRAM_ADDRESS,
-} from "@/lib/codama/metadata/instructions/createMetadataAccountV3";
+import { getCreateMetadataAccountV3Instruction } from "@/lib/codama/metadata/instructions/createMetadataAccountV3";
 import { wordWithPlurality } from "@/lib/utils";
-import { SolanaCluster } from "@/types/config";
 import {
   createSolanaClient,
   createTransaction,
   getMinimumBalanceForRentExemption,
   generateKeyPairSigner,
-  getProgramDerivedAddress,
-  getAddressEncoder,
   isStringifiedNumber,
   signTransactionMessageWithSigners,
   getExplorerLink,
@@ -36,6 +30,7 @@ import {
   TOKEN_PROGRAM_ADDRESS,
 } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
+import { getTokenMetadataAddress } from "@/lib/codama/metadata";
 
 export function createTokenCommand() {
   return new Command("create")
@@ -168,12 +163,7 @@ export function createTokenCommand() {
         urlOrMoniker: options.url,
       });
 
-      const websocketUrl = new URL(options.url);
-      websocketUrl.protocol = "ws";
-      cliConfig.websocket_url = websocketUrl.toString();
-
       const space = BigInt(getMintSize());
-      const rent = getMinimumBalanceForRentExemption(space);
 
       spinner.text = "Fetching the latest blockhash";
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
@@ -186,7 +176,7 @@ export function createTokenCommand() {
           getCreateAccountInstruction({
             payer,
             newAccount: mint,
-            lamports: rent,
+            lamports: getMinimumBalanceForRentExemption(space),
             space,
             programAddress: TOKEN_PROGRAM_ADDRESS,
           }),
@@ -217,15 +207,7 @@ export function createTokenCommand() {
 
       spinner.start("Preparing to create metadata account");
 
-      // Create metadata account
-      const [metadataPda] = await getProgramDerivedAddress({
-        programAddress: TOKEN_METADATA_PROGRAM_ADDRESS,
-        seeds: [
-          Buffer.from("metadata"),
-          getAddressEncoder().encode(TOKEN_METADATA_PROGRAM_ADDRESS),
-          getAddressEncoder().encode(mint.address),
-        ],
-      });
+      const metadataPda = await getTokenMetadataAddress(mint);
 
       const createMetadataTx = createTransaction({
         version: "legacy",
