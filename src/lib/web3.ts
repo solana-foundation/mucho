@@ -1,4 +1,4 @@
-import { SolanaCluster } from "@/types/config";
+import type { SolanaCluster } from "@/types/config";
 import {
   ComputeBudgetInstruction,
   identifyComputeBudgetInstruction,
@@ -7,147 +7,22 @@ import {
   parseSetComputeUnitLimitInstruction,
   parseSetComputeUnitPriceInstruction,
   parseSetLoadedAccountsDataSizeLimitInstruction,
-} from "@solana-program/compute-budget";
+  COMPUTE_BUDGET_PROGRAM_ADDRESS,
+} from "gill/programs";
 import {
   address,
-  Blockhash,
-  createSolanaRpc,
-  devnet,
-  DevnetUrl,
   getBase58Encoder,
-  GetTransactionApi,
-  mainnet,
-  MainnetUrl,
-  testnet,
-  TestnetUrl,
-  UnixTimestamp,
-} from "@solana/web3.js";
-
-type GenericUrl = string & {};
-
-export type ModifiedClusterUrl =
-  | DevnetUrl
-  | MainnetUrl
-  | TestnetUrl
-  | GenericUrl;
+  type GetTransactionApi,
+  type UnixTimestamp,
+  type ModifiedClusterUrl,
+} from "gill";
 
 export type SolanaUrlOrMoniker = SolanaCluster | ModifiedClusterUrl;
-
-/**
- * Get a public Solana RPC endpoint for a cluster based on its moniker
- *
- * Note: These RPC URLs are rate limited and not suitable for production applications.
- */
-export function getPublicSolanaRpcUrl(cluster: SolanaCluster | string): string {
-  switch (cluster) {
-    case "devnet":
-      return devnet("https://api.devnet.solana.com");
-    case "testnet":
-      return testnet("https://api.testnet.solana.com");
-    case "mainnet":
-    case "mainnet-beta":
-      return mainnet("https://api.mainnet-beta.solana.com");
-    case "localnet":
-    case "localhost":
-      return "http://127.0.0.1:8899";
-    default:
-      throw new Error("Invalid cluster moniker");
-  }
-}
-
-/**
- * Genesis hash for Solana networks
- */
-export const GENESIS_HASH = {
-  mainnet: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
-  devnet: "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
-  testnet: "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3zQawwpjk2NsNY",
-};
-
-/**
- * Determine the Solana moniker from its genesis hash (or an RPC connection to fetch the genesis hash)
- *
- * note: if the hash is NOT known, this will assume it is localnet and return as such
- */
-export async function getMonikerFromGenesisHash(
-  args: { hash: Blockhash } | { rpc: ReturnType<typeof createSolanaRpc> },
-): Promise<SolanaCluster> {
-  if ("rpc" in args) {
-    const hash = await args.rpc.getGenesisHash().send();
-    args = { hash };
-  }
-
-  if ("hash" in args) {
-    switch (args.hash) {
-      case GENESIS_HASH.mainnet:
-        return "mainnet-beta";
-      case GENESIS_HASH.devnet:
-        return "devnet";
-      case GENESIS_HASH.testnet:
-        return "testnet";
-      default: {
-        // todo: can we detect if localnet is running
-        return "localnet";
-      }
-    }
-  }
-
-  throw Error("Unable to process genesis hash or rpc connection");
-}
 
 export function lamportsToSol(lamports: bigint | number) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 9 }).format(
     Number(lamports) / 1_000_000_000,
   );
-}
-
-type ExplorerLinkAccount = {
-  address: string;
-};
-type ExplorerLinkTransaction = {
-  transaction: string;
-};
-type ExplorerLinkBlock = {
-  block: string;
-};
-
-export type GetExplorerLinkArgs = {
-  cluster?: SolanaUrlOrMoniker;
-} & (ExplorerLinkAccount | ExplorerLinkTransaction | ExplorerLinkBlock | {});
-
-/**
- * Craft a Solana Explorer link on any cluster
- */
-export function getExplorerLink(props: GetExplorerLinkArgs): URL {
-  let url: URL | null = null;
-
-  if (!props.cluster) props.cluster = "mainnet-beta";
-
-  if ("address" in props) {
-    url = new URL(`https://explorer.solana.com/address/${props.address}`);
-  } else if ("transaction" in props) {
-    url = new URL(`https://explorer.solana.com/tx/${props.transaction}`);
-  } else if ("block" in props) {
-    url = new URL(`https://explorer.solana.com/block/${props.block}`);
-  }
-
-  if (!url) throw new Error("Invalid Solana Explorer URL created");
-
-  if (props.cluster !== "mainnet-beta") {
-    if (props.cluster === "localnet") {
-      // localnet technically isn't a cluster, so requires special handling
-      url.searchParams.set("cluster", "custom");
-      url.searchParams.set("customUrl", "http://localhost:8899");
-    } else if (props.cluster.startsWith("http")) {
-      // localnet technically isn't a cluster, so requires special handling
-      url.searchParams.set("cluster", "custom");
-      url.searchParams.set("customUrl", props.cluster);
-    } else {
-      url.searchParams.set("cluster", props.cluster);
-    }
-  }
-
-  return url;
 }
 
 export function unixTimestampToDate(
@@ -160,9 +35,6 @@ export function unixTimestampToRelativeDate(
   time: UnixTimestamp | bigint | number,
 ) {}
 
-export const COMPUTE_BUDGET_PROGRAM_ID = address(
-  "ComputeBudget111111111111111111111111111111",
-);
 export const VOTE_PROGRAM_ID = address(
   "Vote111111111111111111111111111111111111111",
 );
@@ -195,7 +67,7 @@ export function getComputeBudgetDataFromTransaction(
   };
 
   const computeBudgetIndex = tx.transaction.message.accountKeys.findIndex(
-    (address) => address == COMPUTE_BUDGET_PROGRAM_ID,
+    (address) => address == COMPUTE_BUDGET_PROGRAM_ADDRESS,
   );
 
   tx.transaction.message.instructions
@@ -209,7 +81,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { microLamports },
           } = parseSetComputeUnitPriceInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.unitPrice = Number(microLamports);
           return;
@@ -219,7 +91,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { units },
           } = parseSetComputeUnitLimitInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.unitLimit = units;
           return;
@@ -229,7 +101,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { units },
           } = parseRequestUnitsInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.unitsRequested = units;
           return;
@@ -239,7 +111,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { accountDataSizeLimit },
           } = parseSetLoadedAccountsDataSizeLimitInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.accountDataSizeLimit = accountDataSizeLimit;
           return;
@@ -249,7 +121,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { bytes },
           } = parseRequestHeapFrameInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.heapFrameSize = bytes;
           return;

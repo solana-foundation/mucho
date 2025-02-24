@@ -14,7 +14,6 @@ import {
 } from "@/lib/utils";
 import { buildTestValidatorCommand } from "@/lib/shell/test-validator";
 import { COMMON_OPTIONS } from "@/const/commands";
-import { loadKeypairFromFile } from "@/lib/solana";
 import { DEFAULT_CACHE_DIR, DEFAULT_TEST_LEDGER_DIR } from "@/const/solana";
 import { deconflictAnchorTomlWithConfig, loadAnchorToml } from "@/lib/anchor";
 import { validateExpectedCloneCounts } from "@/lib/shell/clone";
@@ -22,7 +21,8 @@ import { promptToAutoClone } from "@/lib/prompts/clone";
 import { listLocalPrograms } from "@/lib/programs";
 import { cloneCommand } from "@/commands/clone";
 import { getAppInfo } from "@/lib/app-info";
-import { getExplorerLink } from "@/lib/web3";
+import { loadKeypairSignerFromFile } from "gill/node";
+import { getExplorerLink } from "gill";
 
 /**
  * Command: `validator`
@@ -94,7 +94,7 @@ export function validatorCommand() {
       if (config.settings.keypair) {
         if (doesFileExist(config.settings.keypair)) {
           authorityAddress = (
-            await loadKeypairFromFile(config.settings.keypair)
+            await loadKeypairSignerFromFile(config.settings.keypair)
           ).address;
         } else {
           warnMessage(
@@ -186,7 +186,7 @@ export function validatorCommand() {
       console.log(
         "(on Brave Browser, you may need to turn Shields down for the Explorer website)",
       );
-      console.log(getExplorerLink({ cluster: "localnet" }).toString());
+      console.log(getExplorerLink({ cluster: "localnet" }));
 
       shellExecInSession({
         command,

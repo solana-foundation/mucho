@@ -1,13 +1,19 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
 import picocolors from "picocolors";
-import { InspectorBaseArgs } from "@/types/inspect";
-import { Address, GetTransactionApi, Signature } from "@solana/web3.js";
+import type { InspectorBaseArgs } from "@/types/inspect";
+import {
+  type TransactionError,
+  type Address,
+  type GetTransactionApi,
+  type Signature,
+  getExplorerLink,
+} from "gill";
+
 import {
   unixTimestampToDate,
   lamportsToSol,
   getComputeBudgetDataFromTransaction,
-  getExplorerLink,
 } from "@/lib/web3";
 import { timeAgo } from "../utils";
 
@@ -24,10 +30,11 @@ export async function inspectSignature({
 }: InspectorBaseArgs & { signature: Signature }) {
   const spinner = ora("Fetching transaction").start();
   try {
+    if (cluster == "localhost") cluster = "localnet";
     const explorerUrl = getExplorerLink({
       cluster,
       transaction: signature,
-    }).toString();
+    });
 
     const tx = await rpc
       .getTransaction(signature, {
@@ -474,8 +481,6 @@ export function parseProgramLogs(
 
   return prettyLogs;
 }
-
-import { TransactionError } from "@solana/web3.js";
 
 const instructionErrorMessage: Map<string, string> = new Map([
   ["GenericError", "generic instruction error"],

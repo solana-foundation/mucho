@@ -1,13 +1,9 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
-import { InspectorBaseArgs } from "@/types/inspect";
-import { Address, GetBlockApi } from "@solana/web3.js";
-import {
-  COMPUTE_BUDGET_PROGRAM_ID,
-  getExplorerLink,
-  unixTimestampToDate,
-  VOTE_PROGRAM_ID,
-} from "@/lib/web3";
+import type { InspectorBaseArgs } from "@/types/inspect";
+import { getExplorerLink, type Address, type GetBlockApi } from "gill";
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from "gill/programs";
+import { unixTimestampToDate, VOTE_PROGRAM_ID } from "@/lib/web3";
 import { numberStringToNumber, timeAgo } from "@/lib/utils";
 
 export async function inspectBlock({
@@ -32,10 +28,11 @@ export async function inspectBlock({
       throw "Provided block number is not an actual number";
     }
 
+    if (cluster == "localhost") cluster = "localnet";
     const explorerUrl = getExplorerLink({
       cluster,
       block: blockNumber.toString(),
-    }).toString();
+    });
 
     const [block, leaders] = await Promise.all([
       await rpc
@@ -94,7 +91,7 @@ function buildBlockOverview({
   const nonVoteTxCount = block.transactions.length - voteTxs.length;
   const computeBudgetTxs = block.transactions.filter((tx) =>
     tx.transaction.message.accountKeys.find(
-      (account) => account == COMPUTE_BUDGET_PROGRAM_ID,
+      (account) => account == COMPUTE_BUDGET_PROGRAM_ADDRESS,
     ),
   );
 
