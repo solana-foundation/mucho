@@ -8,7 +8,6 @@ import {
 } from "@/lib/logs";
 import { COMMON_OPTIONS } from "@/const/commands";
 import { inspectAddress, inspectSignature } from "@/lib/inspect";
-import { getMonikerFromGenesisHash } from "@/lib/web3";
 import { inspectBlock } from "@/lib/inspect/block";
 import { numberStringToNumber } from "@/lib/utils";
 import { parseRpcUrlOrMoniker } from "@/lib/solana";
@@ -20,6 +19,7 @@ import {
   isSignature,
   isStringifiedNumber,
   signature,
+  getMonikerFromGenesisHash,
 } from "gill";
 
 const helpText: string[] = [
@@ -108,7 +108,11 @@ export function inspectCommand() {
       const rpc = createSolanaRpc(clusterUrl);
 
       try {
-        const selectedCluster = await getMonikerFromGenesisHash({ rpc });
+        let selectedCluster = getMonikerFromGenesisHash(
+          await rpc.getGenesisHash().send(),
+        );
+        // for unknown clusters, force to localnet since that is the most likely
+        if (selectedCluster == "unknown") selectedCluster = "localnet";
 
         if (isAddress(input)) {
           await inspectAddress({

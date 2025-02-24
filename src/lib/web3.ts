@@ -11,47 +11,13 @@ import {
 } from "gill/programs";
 import {
   address,
-  createSolanaRpc,
   getBase58Encoder,
-  type Blockhash,
   type GetTransactionApi,
   type UnixTimestamp,
   type ModifiedClusterUrl,
-  GENESIS_HASH,
 } from "gill";
 
 export type SolanaUrlOrMoniker = SolanaCluster | ModifiedClusterUrl;
-
-/**
- * Determine the Solana moniker from its genesis hash (or an RPC connection to fetch the genesis hash)
- *
- * note: if the hash is NOT known, this will assume it is localnet and return as such
- */
-export async function getMonikerFromGenesisHash(
-  args: { hash: Blockhash } | { rpc: ReturnType<typeof createSolanaRpc> },
-): Promise<SolanaCluster> {
-  if ("rpc" in args) {
-    const hash = await args.rpc.getGenesisHash().send();
-    args = { hash };
-  }
-
-  if ("hash" in args) {
-    switch (args.hash) {
-      case GENESIS_HASH.mainnet:
-        return "mainnet";
-      case GENESIS_HASH.devnet:
-        return "devnet";
-      case GENESIS_HASH.testnet:
-        return "testnet";
-      default: {
-        // todo: can we detect if localnet is running
-        return "localnet";
-      }
-    }
-  }
-
-  throw Error("Unable to process genesis hash or rpc connection");
-}
 
 export function lamportsToSol(lamports: bigint | number) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 9 }).format(
