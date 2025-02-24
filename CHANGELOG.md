@@ -1,5 +1,25 @@
 # mucho
 
+## 0.7.0
+
+### Minor Changes
+
+- [#36](https://github.com/solana-foundation/mucho/pull/36)
+  [`4190290`](https://github.com/solana-foundation/mucho/commit/419029093de4eb5c6a4378634a650fc4f2254a05)
+  Thanks [@jacobcreech](https://github.com/jacobcreech)! - added the
+  `token create` command
+
+### Patch Changes
+
+- [#56](https://github.com/solana-foundation/mucho/pull/56)
+  [`030df83`](https://github.com/solana-foundation/mucho/commit/030df83f7c077d6f972156c303e8308b17ae9b59)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - refactor to use gill
+
+- [#55](https://github.com/solana-foundation/mucho/pull/55)
+  [`d663434`](https://github.com/solana-foundation/mucho/commit/d663434e1444a83ac4647afe3988296360e19c01)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - suppress runtime
+  warning messages
+
 ## 0.6.0
 
 ### Minor Changes
