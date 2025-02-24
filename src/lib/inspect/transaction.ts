@@ -2,18 +2,18 @@ import ora from "ora";
 import CliTable3 from "cli-table3";
 import picocolors from "picocolors";
 import type { InspectorBaseArgs } from "@/types/inspect";
-import type {
-  TransactionError,
-  Address,
-  GetTransactionApi,
-  Signature,
+import {
+  type TransactionError,
+  type Address,
+  type GetTransactionApi,
+  type Signature,
+  getExplorerLink,
 } from "gill";
 
 import {
   unixTimestampToDate,
   lamportsToSol,
   getComputeBudgetDataFromTransaction,
-  getExplorerLink,
 } from "@/lib/web3";
 import { timeAgo } from "../utils";
 
@@ -30,10 +30,11 @@ export async function inspectSignature({
 }: InspectorBaseArgs & { signature: Signature }) {
   const spinner = ora("Fetching transaction").start();
   try {
+    if (cluster == "localhost") cluster = "localnet";
     const explorerUrl = getExplorerLink({
       cluster,
       transaction: signature,
-    }).toString();
+    });
 
     const tx = await rpc
       .getTransaction(signature, {

@@ -25,55 +25,6 @@ export function lamportsToSol(lamports: bigint | number) {
   );
 }
 
-type ExplorerLinkAccount = {
-  address: string;
-};
-type ExplorerLinkTransaction = {
-  transaction: string;
-};
-type ExplorerLinkBlock = {
-  block: string;
-};
-
-export type GetExplorerLinkArgs = {
-  cluster?: SolanaUrlOrMoniker;
-} & (ExplorerLinkAccount | ExplorerLinkTransaction | ExplorerLinkBlock | {});
-
-/**
- * Craft a Solana Explorer link on any cluster
- *
- * todo: (nick) remove this function in the next version of gill
- */
-export function getExplorerLink(props: GetExplorerLinkArgs = {}): string {
-  let url: URL | null = null;
-
-  // default to mainnet / mainnet-beta
-  if (!props.cluster || props.cluster == "mainnet")
-    props.cluster = "mainnet-beta";
-
-  url = new URL("https://explorer.solana.com");
-
-  if ("address" in props) {
-    url.pathname = `/address/${props.address}`;
-  } else if ("transaction" in props) {
-    url.pathname = `/tx/${props.transaction}`;
-  } else if ("block" in props) {
-    url.pathname = `/block/${props.block}`;
-  }
-
-  if (props.cluster !== "mainnet-beta") {
-    if (props.cluster === "localnet") {
-      // localnet technically isn't a cluster, so requires special handling
-      url.searchParams.set("cluster", "custom");
-      url.searchParams.set("customUrl", "http://localhost:8899");
-    } else {
-      url.searchParams.set("cluster", props.cluster);
-    }
-  }
-
-  return url.toString();
-}
-
 export function unixTimestampToDate(
   blockTime: UnixTimestamp | bigint | number,
 ) {

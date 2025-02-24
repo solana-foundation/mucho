@@ -189,7 +189,7 @@ export function createTokenCommand() {
         getExplorerLink({
           cluster,
           transaction: signature,
-        }).toString(),
+        }),
         "\n",
       );
 
@@ -243,7 +243,7 @@ export function createTokenCommand() {
         getExplorerLink({
           cluster,
           transaction: signature,
-        }).toString(),
+        }),
       );
     });
 }

@@ -1,13 +1,9 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
 import type { InspectorBaseArgs } from "@/types/inspect";
-import type { Address, GetBlockApi } from "gill";
+import { getExplorerLink, type Address, type GetBlockApi } from "gill";
 import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from "gill/programs";
-import {
-  getExplorerLink,
-  unixTimestampToDate,
-  VOTE_PROGRAM_ID,
-} from "@/lib/web3";
+import { unixTimestampToDate, VOTE_PROGRAM_ID } from "@/lib/web3";
 import { numberStringToNumber, timeAgo } from "@/lib/utils";
 
 export async function inspectBlock({
@@ -32,10 +28,11 @@ export async function inspectBlock({
       throw "Provided block number is not an actual number";
     }
 
+    if (cluster == "localhost") cluster = "localnet";
     const explorerUrl = getExplorerLink({
       cluster,
       block: blockNumber.toString(),
-    }).toString();
+    });
 
     const [block, leaders] = await Promise.all([
       await rpc

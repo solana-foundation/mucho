@@ -21,8 +21,8 @@ import { promptToAutoClone } from "@/lib/prompts/clone";
 import { listLocalPrograms } from "@/lib/programs";
 import { cloneCommand } from "@/commands/clone";
 import { getAppInfo } from "@/lib/app-info";
-import { getExplorerLink } from "@/lib/web3";
 import { loadKeypairSignerFromFile } from "gill/node";
+import { getExplorerLink } from "gill";
 
 /**
  * Command: `validator`
@@ -186,7 +186,7 @@ export function validatorCommand() {
       console.log(
         "(on Brave Browser, you may need to turn Shields down for the Explorer website)",
       );
-      console.log(getExplorerLink({ cluster: "localnet" }).toString());
+      console.log(getExplorerLink({ cluster: "localnet" }));
 
       shellExecInSession({
         command,
