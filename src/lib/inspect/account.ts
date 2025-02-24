@@ -1,12 +1,12 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
 import { InspectorBaseArgs } from "@/types/inspect";
-import {
+import type {
   AccountInfoBase,
   AccountInfoWithBase64EncodedData,
   Address,
   SolanaRpcResponse,
-} from "@solana/web3.js";
+} from "gill";
 import { getExplorerLink, lamportsToSol } from "@/lib/web3";
 
 type GetAccountInfoApiResponse<T> = (AccountInfoBase & T) | null;
