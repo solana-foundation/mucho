@@ -11,8 +11,6 @@ import {
 import { wordWithPlurality } from "@/lib/utils";
 import {
   createSolanaClient,
-  createTransaction,
-  getMinimumBalanceForRentExemption,
   generateKeyPairSigner,
   isStringifiedNumber,
   signTransactionMessageWithSigners,
@@ -20,16 +18,8 @@ import {
   getPublicSolanaRpcUrl,
 } from "gill";
 import {
-  getCreateAccountInstruction,
-  getCreateMetadataAccountV3Instruction,
-  getTokenMetadataAddress,
-} from "gill/programs";
-import {
-  findAssociatedTokenPda,
-  getCreateAssociatedTokenIdempotentInstructionAsync,
-  getInitializeMintInstruction,
-  getMintSize,
-  getMintToInstruction,
+  buildCreateTokenTransaction,
+  buildMintTokensTransaction,
   TOKEN_PROGRAM_ADDRESS,
 } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
@@ -165,30 +155,26 @@ export function createTokenCommand() {
         urlOrMoniker: options.url,
       });
 
-      const space = BigInt(getMintSize());
-
       spinner.text = "Fetching the latest blockhash";
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      const createMintTx = createTransaction({
-        version: "legacy",
+      spinner.text = "Preparing to create token mint";
+
+      const createMintTx = await buildCreateTokenTransaction({
         feePayer: payer,
         latestBlockhash,
-        instructions: [
-          getCreateAccountInstruction({
-            payer,
-            newAccount: mint,
-            lamports: getMinimumBalanceForRentExemption(space),
-            space,
-            programAddress: TOKEN_PROGRAM_ADDRESS,
-          }),
-          getInitializeMintInstruction({
-            mint: mint.address,
-            decimals: Number(options.decimals),
-            mintAuthority: mintAuthority.address,
-            freezeAuthority,
-          }),
-        ],
+        mint,
+        mintAuthority,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+        freezeAuthority,
+        updateAuthority: mintAuthority,
+        metadata: {
+          isMutable: true,
+          name: options.name,
+          symbol: options.symbol,
+          uri: options.metadata,
+        },
+        decimals: Number(options.decimals),
       });
 
       spinner.text = "Creating token mint: " + mint.address;
@@ -196,52 +182,7 @@ export function createTokenCommand() {
         await signTransactionMessageWithSigners(createMintTx),
       );
 
-      spinner.succeed("Token mint account created: " + mint.address);
-
-      console.log(
-        " ",
-        getExplorerLink({
-          cluster,
-          transaction: signature,
-        }).toString(),
-        "\n",
-      );
-
-      spinner.start("Preparing to create metadata account");
-
-      const metadataPda = await getTokenMetadataAddress(mint);
-
-      const createMetadataTx = createTransaction({
-        version: "legacy",
-        feePayer: payer,
-        latestBlockhash,
-        instructions: [
-          getCreateMetadataAccountV3Instruction({
-            metadata: metadataPda,
-            mint: mint.address,
-            mintAuthority,
-            payer,
-            updateAuthority: mintAuthority,
-            data: {
-              name: options.name,
-              symbol: options.symbol,
-              uri: options.metadata,
-              sellerFeeBasisPoints: 0,
-              creators: null,
-              collection: null,
-              uses: null,
-            },
-            isMutable: true,
-            collectionDetails: null,
-          }),
-        ],
-      });
-
-      spinner.text = "Creating metadata account: " + metadataPda;
-      signature = await sendAndConfirmTransaction(
-        await signTransactionMessageWithSigners(createMetadataTx),
-      );
-      spinner.succeed("Metadata account created: " + metadataPda);
+      spinner.succeed("Token mint created: " + mint.address);
 
       console.log(
         " ",
@@ -274,31 +215,14 @@ export function createTokenCommand() {
         `Preparing to mint '${options.amount}' tokens to: ${payer.address}`,
       );
 
-      const [ata] = await findAssociatedTokenPda({
-        owner: payer.address,
-        tokenProgram: TOKEN_PROGRAM_ADDRESS,
-        mint: mint.address,
-      });
-
-      const createTokensTx = createTransaction({
-        version: "legacy",
+      const createTokensTx = await buildMintTokensTransaction({
         feePayer: payer,
         latestBlockhash,
-        instructions: [
-          await getCreateAssociatedTokenIdempotentInstructionAsync({
-            mint: mint.address,
-            payer,
-            owner: payer.address,
-          }),
-          getMintToInstruction({
-            mint: mint.address,
-            token: ata,
-            amount: BigInt(
-              Number(options.amount) * 10 ** Number(options.decimals),
-            ),
-            mintAuthority,
-          }),
-        ],
+        mint,
+        mintAuthority,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+        amount: Number(options.amount) * 10 ** Number(options.decimals),
+        destination: payer.address,
       });
 
       const tokenPlurality = wordWithPlurality(
