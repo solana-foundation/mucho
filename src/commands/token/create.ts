@@ -8,7 +8,6 @@ import {
   getAddressFromStringOrFilePath,
   parseRpcUrlOrMoniker,
 } from "@/lib/solana";
-import { getCreateMetadataAccountV3Instruction } from "@/lib/codama/metadata/instructions/createMetadataAccountV3";
 import { wordWithPlurality } from "@/lib/utils";
 import {
   createSolanaClient,
@@ -20,7 +19,11 @@ import {
   getExplorerLink,
   getPublicSolanaRpcUrl,
 } from "gill";
-import { getCreateAccountInstruction } from "gill/programs";
+import {
+  getCreateAccountInstruction,
+  getCreateMetadataAccountV3Instruction,
+  getTokenMetadataAddress,
+} from "gill/programs";
 import {
   findAssociatedTokenPda,
   getCreateAssociatedTokenIdempotentInstructionAsync,
@@ -30,7 +33,6 @@ import {
   TOKEN_PROGRAM_ADDRESS,
 } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
-import { getTokenMetadataAddress } from "@/lib/codama/metadata";
 
 export function createTokenCommand() {
   return new Command("create")
