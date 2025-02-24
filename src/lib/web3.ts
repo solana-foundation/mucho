@@ -1,4 +1,4 @@
-import { SolanaCluster } from "@/types/config";
+import type { SolanaCluster } from "@/types/config";
 import {
   ComputeBudgetInstruction,
   identifyComputeBudgetInstruction,
@@ -7,27 +7,20 @@ import {
   parseSetComputeUnitLimitInstruction,
   parseSetComputeUnitPriceInstruction,
   parseSetLoadedAccountsDataSizeLimitInstruction,
+  COMPUTE_BUDGET_PROGRAM_ADDRESS,
 } from "gill/programs";
 import {
   address,
-  Blockhash,
   createSolanaRpc,
   getBase58Encoder,
-  GetTransactionApi,
-  UnixTimestamp,
-  ModifiedClusterUrl,
+  type Blockhash,
+  type GetTransactionApi,
+  type UnixTimestamp,
+  type ModifiedClusterUrl,
+  GENESIS_HASH,
 } from "gill";
 
 export type SolanaUrlOrMoniker = SolanaCluster | ModifiedClusterUrl;
-
-/**
- * Genesis hash for Solana networks
- */
-export const GENESIS_HASH = {
-  mainnet: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
-  devnet: "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
-  testnet: "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3zQawwpjk2NsNY",
-};
 
 /**
  * Determine the Solana moniker from its genesis hash (or an RPC connection to fetch the genesis hash)
@@ -125,9 +118,6 @@ export function unixTimestampToRelativeDate(
   time: UnixTimestamp | bigint | number,
 ) {}
 
-export const COMPUTE_BUDGET_PROGRAM_ID = address(
-  "ComputeBudget111111111111111111111111111111",
-);
 export const VOTE_PROGRAM_ID = address(
   "Vote111111111111111111111111111111111111111",
 );
@@ -160,7 +150,7 @@ export function getComputeBudgetDataFromTransaction(
   };
 
   const computeBudgetIndex = tx.transaction.message.accountKeys.findIndex(
-    (address) => address == COMPUTE_BUDGET_PROGRAM_ID,
+    (address) => address == COMPUTE_BUDGET_PROGRAM_ADDRESS,
   );
 
   tx.transaction.message.instructions
@@ -174,7 +164,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { microLamports },
           } = parseSetComputeUnitPriceInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.unitPrice = Number(microLamports);
           return;
@@ -184,7 +174,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { units },
           } = parseSetComputeUnitLimitInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.unitLimit = units;
           return;
@@ -194,7 +184,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { units },
           } = parseRequestUnitsInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.unitsRequested = units;
           return;
@@ -204,7 +194,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { accountDataSizeLimit },
           } = parseSetLoadedAccountsDataSizeLimitInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.accountDataSizeLimit = accountDataSizeLimit;
           return;
@@ -214,7 +204,7 @@ export function getComputeBudgetDataFromTransaction(
             data: { bytes },
           } = parseRequestHeapFrameInstruction({
             data,
-            programAddress: COMPUTE_BUDGET_PROGRAM_ID,
+            programAddress: COMPUTE_BUDGET_PROGRAM_ADDRESS,
           });
           budget.heapFrameSize = bytes;
           return;

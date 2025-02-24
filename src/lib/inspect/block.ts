@@ -1,9 +1,9 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
-import { InspectorBaseArgs } from "@/types/inspect";
-import { Address, GetBlockApi } from "@solana/web3.js";
+import type { InspectorBaseArgs } from "@/types/inspect";
+import type { Address, GetBlockApi } from "gill";
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from "gill/programs";
 import {
-  COMPUTE_BUDGET_PROGRAM_ID,
   getExplorerLink,
   unixTimestampToDate,
   VOTE_PROGRAM_ID,
@@ -94,7 +94,7 @@ function buildBlockOverview({
   const nonVoteTxCount = block.transactions.length - voteTxs.length;
   const computeBudgetTxs = block.transactions.filter((tx) =>
     tx.transaction.message.accountKeys.find(
-      (account) => account == COMPUTE_BUDGET_PROGRAM_ID,
+      (account) => account == COMPUTE_BUDGET_PROGRAM_ADDRESS,
     ),
   );
 

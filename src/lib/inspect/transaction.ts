@@ -1,8 +1,14 @@
 import ora from "ora";
 import CliTable3 from "cli-table3";
 import picocolors from "picocolors";
-import { InspectorBaseArgs } from "@/types/inspect";
-import { Address, GetTransactionApi, Signature } from "@solana/web3.js";
+import type { InspectorBaseArgs } from "@/types/inspect";
+import type {
+  TransactionError,
+  Address,
+  GetTransactionApi,
+  Signature,
+} from "gill";
+
 import {
   unixTimestampToDate,
   lamportsToSol,
@@ -474,8 +480,6 @@ export function parseProgramLogs(
 
   return prettyLogs;
 }
-
-import { TransactionError } from "@solana/web3.js";
 
 const instructionErrorMessage: Map<string, string> = new Map([
   ["GenericError", "generic instruction error"],
