@@ -50,8 +50,8 @@ export async function inspectSignature({
     }
 
     const allAccounts = tx.transaction.message.accountKeys
-      .concat(tx.meta.loadedAddresses.writable)
-      .concat(tx.meta.loadedAddresses.readonly);
+      .concat(tx.meta!.loadedAddresses.writable)
+      .concat(tx.meta!.loadedAddresses.readonly);
 
     const indexToProgramIds = new Map<number, Address>();
     tx.transaction.message.instructions.map((ix) =>
@@ -89,13 +89,15 @@ export async function inspectSignature({
 }
 
 function buildTransactionOverview({ tx }: BuildTableInput): CliTable3.Table {
+  if (!tx) throw new Error("A transaction is required");
+
   const table = new CliTable3({
     head: [
       "Transaction Overview",
-      !tx.meta.err ? picocolors.green("SUCCESS") : picocolors.red("FAILED"),
+      tx.meta?.err ? picocolors.green("SUCCESS") : picocolors.red("FAILED"),
     ],
     style: {
-      head: [!tx.meta.err ? "green" : "red"],
+      head: [tx.meta?.err ? "green" : "red"],
     },
   });
 
@@ -105,7 +107,7 @@ function buildTransactionOverview({ tx }: BuildTableInput): CliTable3.Table {
   //   console.log(tx.meta.err);
   // }
 
-  const blockTime = unixTimestampToDate(tx.blockTime);
+  const blockTime = unixTimestampToDate(tx.blockTime || 0);
   table.push([
     "Timestamp",
     blockTime.toLocaleDateString(undefined, {
@@ -119,7 +121,7 @@ function buildTransactionOverview({ tx }: BuildTableInput): CliTable3.Table {
   ]);
   table.push(["Version", tx.version]);
   table.push(["Slot", new Intl.NumberFormat().format(tx.slot)]);
-  table.push(["Fee (SOL)", "~" + lamportsToSol(tx.meta.fee)]);
+  table.push(["Fee (SOL)", "~" + lamportsToSol(tx.meta?.fee || 0)]);
 
   const budget = getComputeBudgetDataFromTransaction(tx);
   table.push([
@@ -155,14 +157,19 @@ function buildInstructionsTable({
   allAccounts,
   indexToProgramIds,
 }: BuildTableInput): CliTable3.Table {
-  const logs = parseProgramLogs(tx.meta.logMessages, tx.meta.err);
+  if (!tx) throw new Error("A transaction is required");
+
+  const logs = parseProgramLogs(
+    tx.meta?.logMessages || [],
+    tx.meta?.err || null,
+  );
 
   const failedIx = logs.findIndex((ix) => ix.failed);
 
   const table = new CliTable3({
     head: ["#", "Instruction & Logs"],
     style: {
-      head: [!tx.meta.err ? "green" : "red"],
+      head: [tx.meta?.err ? "green" : "red"],
     },
     wordWrap: true,
     colWidths: [3, 90],
@@ -213,10 +220,12 @@ function buildInstructionsTable({
 }
 
 function buildAccountsTable({ tx }: BuildTableInput): CliTable3.Table {
+  if (!tx) throw new Error("A transaction is required");
+
   const table = new CliTable3({
     head: ["#", "Address", "Details"],
     style: {
-      head: [!tx.meta.err ? "green" : "red"],
+      head: [tx.meta?.err ? "green" : "red"],
     },
   });
 
@@ -237,9 +246,9 @@ function buildAccountsTable({ tx }: BuildTableInput): CliTable3.Table {
   );
 
   function isInFailedIx(index: number) {
-    return tx.meta.err &&
-      tx.transaction.message.instructions[
-        tx.transaction.message.instructions.length - 1
+    return tx!.meta?.err &&
+      tx!.transaction.message.instructions[
+        tx!.transaction.message.instructions.length - 1
       ].accounts.includes(index)
       ? true
       : false;
@@ -288,7 +297,7 @@ function buildAccountsTable({ tx }: BuildTableInput): CliTable3.Table {
     counter++;
   });
 
-  tx.meta.loadedAddresses.writable.map((address, index) => {
+  tx.meta?.loadedAddresses.writable.map((address, index) => {
     table.push([
       counter,
       isInFailedIx(index) ? picocolors.red(address) : address,
@@ -296,7 +305,7 @@ function buildAccountsTable({ tx }: BuildTableInput): CliTable3.Table {
     ]);
     counter++;
   });
-  tx.meta.loadedAddresses.readonly.map((address, index) => {
+  tx.meta?.loadedAddresses.readonly.map((address, index) => {
     table.push([
       counter,
       isInFailedIx(index) ? picocolors.red(address) : address,
@@ -355,7 +364,7 @@ export function parseProgramLogs(
       // do nothing
     } else if (log.startsWith("Program log:")) {
       // Use passive tense
-      log = log.replace(/Program log: (.*)/g, (match, p1) => {
+      log = log.replace(/Program log: (.*)/g, (_match, p1) => {
         return `Program logged: "${p1}"`;
       });
 
@@ -433,7 +442,7 @@ export function parseProgramLogs(
         // Remove redundant program address from logs
         log = log.replace(
           /Program \w* consumed (\d*) (.*)/g,
-          (match, p1, p2) => {
+          (_match, p1, p2) => {
             // Only aggregate compute units consumed from top-level tx instructions
             // because they include inner ix compute units as well.
             if (depth === 1) {

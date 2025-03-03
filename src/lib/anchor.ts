@@ -189,7 +189,7 @@ export async function getAvailableAnchorVersions(): Promise<AnchorVersionData> {
   res.split("\n").map((line) => {
     line = line.trim().toLowerCase();
     if (!line) return;
-    const version = VERSION_REGEX.exec(line)[1];
+    const version = VERSION_REGEX.exec(line)?.[1];
     if (!version) return;
 
     if (line.includes("current")) data.current = version;

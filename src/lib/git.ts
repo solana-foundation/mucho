@@ -9,7 +9,7 @@ import { createFolders } from "./utils";
 export function cloneOrUpdateRepo(
   repoUrl: string,
   targetFolder: string,
-  branch: string = null,
+  branch: string | null = null,
 ): boolean {
   try {
     targetFolder = resolve(targetFolder);

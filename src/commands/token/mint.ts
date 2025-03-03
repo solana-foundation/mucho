@@ -14,6 +14,7 @@ import {
   getPublicSolanaRpcUrl,
   isNone,
   isSome,
+  SolanaClusterMoniker,
 } from "gill";
 import { buildMintTokensTransaction, fetchMint } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
@@ -82,9 +83,11 @@ export function mintTokenCommand() {
       let cluster;
 
       try {
-        options.url = options.url.startsWith("http")
+        options.url = options.url?.startsWith("http")
           ? new URL(options.url).toString()
-          : parseRpcUrlOrMoniker(options.url || cliConfig.json_rpc_url);
+          : parseRpcUrlOrMoniker(
+              options.url || cliConfig.json_rpc_url || "devnet",
+            );
 
         cluster = options.url;
 
@@ -172,7 +175,7 @@ export function mintTokenCommand() {
       console.log(
         " ",
         getExplorerLink({
-          cluster,
+          cluster: cluster as SolanaClusterMoniker,
           transaction: signature,
         }),
       );

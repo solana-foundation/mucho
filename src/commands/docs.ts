@@ -2,13 +2,14 @@ import { Argument, Command } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
 import shellExec from "shell-exec";
 import pc from "picocolors";
+import { errorMessage } from "@/lib/logs";
 
 type DocInfo = {
   url: string;
   desc: string;
 };
 
-const DOCS_INFO = {
+const DOCS_INFO: Record<string, DocInfo> = {
   // Core Development Tools
   mucho: {
     url: "https://github.com/solana-developers/mucho?tab=readme-ov-file#mucho",
@@ -82,7 +83,7 @@ const DOCS_INFO = {
     url: "https://yarnpkg.com/getting-started",
     desc: "Alternative Node.js package manager - dependency for Anchor",
   },
-} as const satisfies Record<string, DocInfo>;
+};
 
 const OPEN_COMMANDS = {
   win32: "start",
@@ -124,7 +125,11 @@ Examples:
   $ mucho docs         # open Mucho documentation
   $ mucho docs solana  # open Solana documentation`,
     )
-    .action(async (tool, options) => {
+    .action(async (tool) => {
+      if (tool in DOCS_INFO == false) {
+        return errorMessage("Invalid tool name: " + tool);
+      }
+
       console.log(pc.dim(`Opening: ${DOCS_INFO[tool].url}`));
 
       await shellExec(`${openCommand} ${DOCS_INFO[tool].url}`);

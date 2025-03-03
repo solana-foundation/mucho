@@ -111,7 +111,7 @@ export async function checkDebianDependenciesInstalled(): Promise<
 /**
  * Install the rust toolchain with Rustup
  */
-export async function installRust({ version }: InstallCommandPropsBase = {}) {
+export async function installRust({}: InstallCommandPropsBase = {}) {
   const spinner = ora("Installing the rust toolchain using rustup").start();
   try {
     // we ALWAYS check for and update the PATH in the bashrc file
@@ -250,7 +250,7 @@ export async function installSolana({
  * Install the anchor version manager (aka `avm`)
  */
 export async function installAnchorVersionManager({
-  version = "latest",
+  // version = "latest",
   updateAvailable,
 }: InstallCommandPropsBase = {}) {
   const spinner = ora("Installing avm (anchor version manager)").start();
@@ -432,7 +432,7 @@ export async function installYarn({}: InstallCommandPropsBase = {}) {
  * Install the trident fuzzer
  */
 export async function installTrident({
-  version = "latest",
+  // version = "latest",
   verifyParentCommand = true,
   updateAvailable,
 }: InstallCommandPropsBase = {}): Promise<boolean | string> {
@@ -496,7 +496,7 @@ export async function installTrident({
  * Install the Zest (from LimeChain) - code coverage tool
  */
 export async function installZest({
-  version = "latest",
+  // version = "latest",
   verifyParentCommand = true,
   updateAvailable,
 }: InstallCommandPropsBase = {}) {
@@ -588,7 +588,7 @@ export async function installZest({
  * Install the `cargo-update` tool to help detect installed crate versions
  */
 export async function installCargoUpdate({
-  version = "latest",
+  // version = "latest",
   verifyParentCommand = true,
 }: InstallCommandPropsBase = {}) {
   const spinner = ora("Installing cargo-update").start();
@@ -649,7 +649,7 @@ export async function installCargoUpdate({
  * Install the solana-verify tool
  */
 export async function installSolanaVerify({
-  version = "latest",
+  // version = "latest",
   verifyParentCommand = true,
   updateAvailable,
 }: InstallCommandPropsBase = {}) {
@@ -687,7 +687,7 @@ export async function installSolanaVerify({
 
     if (result && result.code != 0) {
       const error = result.stderr.trim().split("\n");
-      let parsed: string | null = null;
+      // let parsed: string | null = null;
 
       // // ensure the user has the minimum rustc version
       // if (

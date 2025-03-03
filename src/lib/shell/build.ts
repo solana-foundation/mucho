@@ -8,7 +8,7 @@ type BuildProgramCommandInput = {
 };
 
 export function buildProgramCommand({
-  verbose = false,
+  // verbose = false,
   manifestPath,
   workspace = false,
   toolsVersion,
@@ -46,7 +46,7 @@ type RunBuildCommandInput = {
 };
 
 export async function runBuildCommand({
-  programName,
+  // programName,
   command,
   args,
 }: RunBuildCommandInput): Promise<boolean> {
@@ -79,7 +79,7 @@ export async function runBuildCommand({
       }
     });
 
-    process.on("error", (error) => {
+    process.on("error", (_error) => {
       reject(false);
     });
   });

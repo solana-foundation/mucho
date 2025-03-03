@@ -1,4 +1,3 @@
-import { join } from "path";
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliOutputConfig } from "@/lib/cli";
 import { titleMessage, warningOutro, warnMessage } from "@/lib/logs";

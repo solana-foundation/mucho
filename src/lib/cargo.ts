@@ -14,8 +14,8 @@ const DEFAULT_CARGO_TOML_FILE = "Cargo.toml";
  */
 export function loadCargoToml(
   manifestPath: string = DEFAULT_CARGO_TOML_FILE,
-  settings: object = {},
-  isManifestRequired: boolean = false,
+  // settings: object = {},
+  // isManifestRequired: boolean = false,
 ): CargoTomlWithConfigPath | false {
   // allow the config path to be a directory, with a Solana.toml in it
   if (directoryExists(manifestPath)) {

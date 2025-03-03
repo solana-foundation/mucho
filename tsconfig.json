@@ -9,6 +9,8 @@
     "allowJs": true,
     "checkJs": true,
 
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,

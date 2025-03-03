@@ -429,7 +429,7 @@ export function validateExpectedCloneCounts(
   const autoCloned = new Map<string, SolanaTomlCloneConfig["cluster"]>();
 
   // count the number of deduplicated `owners` for all the cloned accounts
-  clonedAccounts.forEach((filename, key) => {
+  clonedAccounts.forEach((filename) => {
     autoCloned.set(
       loadJsonFile<JsonAccountStruct>(path.join(accountDir, filename)).account
         .owner,
