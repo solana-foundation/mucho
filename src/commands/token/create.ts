@@ -28,7 +28,6 @@ export function createTokenCommand() {
   return new Command("create")
     .configureOutput(cliOutputConfig)
     .description("create a new token")
-    .usage("[options] [-- <CREATE_TOKEN_ARGS>...]")
     .addOption(
       new Option(
         "-n --name <NAME>",
@@ -197,9 +196,19 @@ export function createTokenCommand() {
         warnMessage(
           "No amount provided, skipping minting tokens to your account",
         );
-        // warnMessage(
-        //   "Please provide an amount to mint tokens to your account with -a <AMOUNT>",
-        // );
+
+        const mintCommand = [
+          "mucho token mint",
+          `-u ${cluster}`,
+          `-m ${mint.address}`,
+          `-d <DESTINATION_ADDRESS>`,
+          `-a <AMOUNT>`,
+        ];
+
+        console.log(
+          "To mint new tokens to any destination wallet in the future, run the following command:",
+        );
+        console.log(mintCommand.join(" "));
         spinner.stop();
         return;
       }
@@ -215,7 +224,7 @@ export function createTokenCommand() {
         `Preparing to mint '${options.amount}' tokens to: ${payer.address}`,
       );
 
-      const createTokensTx = await buildMintTokensTransaction({
+      const mintTokensTx = await buildMintTokensTransaction({
         feePayer: payer,
         latestBlockhash,
         mint,
@@ -233,7 +242,7 @@ export function createTokenCommand() {
 
       spinner.text = `Minting '${options.amount}' ${tokenPlurality} to: ${payer.address}`;
       signature = await sendAndConfirmTransaction(
-        await signTransactionMessageWithSigners(createTokensTx),
+        await signTransactionMessageWithSigners(mintTokensTx),
       );
       spinner.succeed(
         `Minted '${options.amount}' ${tokenPlurality} to: ${payer.address}`,
