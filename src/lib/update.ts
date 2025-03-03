@@ -30,7 +30,7 @@ export async function getNpmPackageUpdates(
     updates.push({
       installed: current,
       needsUpdate: true,
-      latest: registry.latest,
+      latest: registry.latest || "",
       name: packageName,
     });
   }

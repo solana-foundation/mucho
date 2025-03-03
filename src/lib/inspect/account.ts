@@ -62,6 +62,8 @@ export async function inspectAddress({
 function buildAccountOverview({
   account: { value: account },
 }: BuildTableInput): CliTable3.Table {
+  if (!account) throw new Error("An account is required");
+
   const table = new CliTable3({
     head: ["Account Overview"],
     style: {

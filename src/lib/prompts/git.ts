@@ -43,7 +43,7 @@ export async function promptToInitGitRepo(
 
       return true;
     })
-    .catch((err) => {
+    .catch((_err) => {
       // do nothing on user cancel
       return false;
     });

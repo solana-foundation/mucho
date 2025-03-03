@@ -121,6 +121,8 @@ export function loadConfigToml(
  * setting the desired priority of values
  */
 export function deconflictSolanaTomlConfig(config: SolanaToml, args: any) {
+  if (!config.settings) config.settings = {};
+
   if (args?.url && args.url !== COMMON_OPTIONS.url.defaultValue) {
     config.settings.cluster = args.url;
   }

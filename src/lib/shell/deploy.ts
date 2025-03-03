@@ -19,9 +19,9 @@ type DeployProgramCommandInput = {
 export function buildDeployProgramCommand({
   programPath,
   programId,
-  verbose = false,
-  manifestPath,
-  workspace = false,
+  // verbose = false,
+  // manifestPath,
+  // workspace = false,
   url,
   keypair,
   upgradeAuthority,
@@ -83,7 +83,7 @@ export async function getDeployedProgramInfo(
   let { stderr, stdout } = await shellExec(command.join(" "));
 
   if (stderr) {
-    const error = stderr.trim().split("\n");
+    // const error = stderr.trim().split("\n");
     // let parsed: string | null = null;
 
     // console.log("error:");

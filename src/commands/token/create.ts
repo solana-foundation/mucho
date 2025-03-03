@@ -16,6 +16,7 @@ import {
   signTransactionMessageWithSigners,
   getExplorerLink,
   getPublicSolanaRpcUrl,
+  SolanaClusterMoniker,
 } from "gill";
 import {
   buildCreateTokenTransaction,
@@ -114,9 +115,11 @@ export function createTokenCommand() {
       let cluster;
 
       try {
-        options.url = options.url.startsWith("http")
+        options.url = options.url?.startsWith("http")
           ? new URL(options.url).toString()
-          : parseRpcUrlOrMoniker(options.url || cliConfig.json_rpc_url);
+          : parseRpcUrlOrMoniker(
+              options.url || cliConfig.json_rpc_url || "devnet",
+            );
 
         cluster = options.url;
 
@@ -186,7 +189,7 @@ export function createTokenCommand() {
       console.log(
         " ",
         getExplorerLink({
-          cluster,
+          cluster: cluster as SolanaClusterMoniker,
           transaction: signature,
         }),
         "\n",
@@ -250,7 +253,7 @@ export function createTokenCommand() {
       console.log(
         " ",
         getExplorerLink({
-          cluster,
+          cluster: cluster as SolanaClusterMoniker,
           transaction: signature,
         }),
       );

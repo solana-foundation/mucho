@@ -15,7 +15,7 @@ export function titleMessage(
 /**
  * Display a yellow warning message without exiting the cli
  */
-export function warnMessage(msg: string, highlight: boolean = false) {
+export function warnMessage(msg: string) {
   console.log(picocolors.yellow(msg));
 }
 

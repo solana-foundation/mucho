@@ -23,15 +23,15 @@ export function resolveTilde(filePath: string) {
 /**
  * Load a plaintext file from the local filesystem
  */
-export function loadPlaintextFile(filePath: string): string | null {
+export function loadPlaintextFile(filePath: string): string {
   try {
     const data = fs.readFileSync(resolveTilde(filePath), "utf-8");
     return data;
-  } catch (error) {
-    if (error.code === "ENOENT") {
+  } catch (err) {
+    if (err.code === "ENOENT") {
       throw new Error(`File not found: ${filePath}`);
     } else {
-      throw new Error(`Error reading file: ${error.message}`);
+      throw new Error(`Error reading file: ${err.message}`);
     }
   }
 }
@@ -39,40 +39,40 @@ export function loadPlaintextFile(filePath: string): string | null {
 /**
  *
  */
-export function loadJsonFile<T = object>(filePath: string): T | null {
+export function loadJsonFile<T = object>(filePath: string): T {
   try {
-    const parsedData: T = parseJson(loadPlaintextFile(filePath));
+    const parsedData = parseJson<T>(loadPlaintextFile(filePath));
+    if (!parsedData) throw new Error("Unable to parse JSON");
     return parsedData;
-  } catch (error) {
-    return null;
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new Error(`Error: The file at ${filePath} is not valid JSON.`);
+    }
+    throw err;
   }
 }
 
 /**
  *
  */
-export function loadYamlFile<T = object>(filePath: string): T | null {
+export function loadYamlFile<T = object>(filePath: string): T {
   try {
     const parsedData: T = yamlParse(loadPlaintextFile(filePath));
     return parsedData;
-  } catch (error) {
-    return null;
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      throw new Error(`Error: The file at ${filePath} is not valid YAML.`);
+    }
+    throw err;
   }
 }
 
 /**
  *
  */
-export function parseJson<T = object>(input: string): T | null {
-  try {
-    const parsedData: T = JSON.parse(input);
-    return parsedData;
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      console.error("Error parsing JSON:", error.message);
-    }
-    return null;
-  }
+export function parseJson<T = object>(input: string): T {
+  const parsedData: T = JSON.parse(input);
+  return parsedData;
 }
 
 /**
@@ -81,7 +81,7 @@ export function parseJson<T = object>(input: string): T | null {
 export function loadTomlFile<T>(
   filePath: string,
   injectConfigPath: boolean = true,
-): T | null {
+): T {
   try {
     const data = loadPlaintextFile(filePath);
     const parsedData = toml.parse(data);
@@ -91,7 +91,7 @@ export function loadTomlFile<T>(
     if (error instanceof SyntaxError) {
       console.error("Error parsing TOML:", error.message);
     }
-    return null;
+    throw error;
   }
 }
 

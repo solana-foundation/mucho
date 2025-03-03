@@ -31,10 +31,6 @@ export function unixTimestampToDate(
   return new Date(Number(blockTime) * 1000);
 }
 
-export function unixTimestampToRelativeDate(
-  time: UnixTimestamp | bigint | number,
-) {}
-
 export const VOTE_PROGRAM_ID = address(
   "Vote111111111111111111111111111111111111111",
 );
@@ -57,8 +53,9 @@ type ComputeBudgetData = {
 export function getComputeBudgetDataFromTransaction(
   tx: ReturnType<GetTransactionApi["getTransaction"]>,
 ): ComputeBudgetData {
+  if (!tx) throw new Error("A transaction is required");
   const budget: ComputeBudgetData = {
-    unitsConsumed: Number(tx.meta.computeUnitsConsumed),
+    unitsConsumed: Number(tx.meta?.computeUnitsConsumed),
     unitsRequested: null,
     unitLimit: null,
     unitPrice: null,

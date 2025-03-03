@@ -70,6 +70,8 @@ function buildBlockOverview({
   block: ReturnType<GetBlockApi["getBlock"]>;
   leader: Address;
 }): CliTable3.Table {
+  if (!block) throw new Error("A block is required");
+
   const table = new CliTable3({
     head: ["Block Overview"],
     style: {
