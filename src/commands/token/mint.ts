@@ -26,6 +26,20 @@ export function mintTokenCommand() {
     .description(
       "mint new tokens from an existing token's mint (raising the supply)",
     )
+    .addHelpText(
+      "after",
+      `Examples:
+  $ npx mucho token mint --url devnet \\
+      --mint <MINT_ADDRESS> \\
+      --destination <DESTINATION_WALLET_ADDRESS> \\
+      --amount 100
+
+  $ npx mucho token mint --url devnet \\
+      --mint <MINT_ADDRESS> \\
+      --destination <DESTINATION_WALLET_ADDRESS> \\
+      --mint-authority /path/to/mint-authority.json \\
+      --amount 100`,
+    )
     .addOption(new Option("-a --amount <AMOUNT>", `amount of tokens to create`))
     .addOption(
       new Option(
@@ -152,7 +166,7 @@ export function mintTokenCommand() {
       spinner.text = "Fetching the latest blockhash";
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      spinner.text = `Preparing to mint '${options.amount}' ${tokenPlurality} to: ${destination}`;
+      spinner.text = `Preparing to mint '${options.amount}' ${tokenPlurality} to ${destination}`;
 
       const mintTokensTx = await buildMintTokensTransaction({
         feePayer: payer,
@@ -165,12 +179,12 @@ export function mintTokenCommand() {
         destination: destination,
       });
 
-      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to: ${destination}`;
+      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to ${destination}`;
       let signature = await sendAndConfirmTransaction(
         await signTransactionMessageWithSigners(mintTokensTx),
       );
       spinner.succeed(
-        `Minted '${options.amount}' ${tokenPlurality} to: ${destination}`,
+        `Minted '${options.amount}' ${tokenPlurality} to ${destination}`,
       );
       console.log(
         " ",

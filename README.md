@@ -62,6 +62,15 @@ mucho --help
 - [`inspect`](#inspect) - Inspect transactions, accounts, and block in the cli
   (like a block explorer)
 
+### Token commands
+
+- [`token`](#token) - Create, mint, and transfer tokens.
+- [`token create`](#token-create) - Create a new token (with metadata).
+- [`token mint`](#token-mint) - Mint new tokens from an existing token (raising
+  the supply).
+- [`token transfer`](#token-transfer) - Transfer tokens from one wallet to
+  another.
+
 ### install
 
 Install the Solana Toolkit local development tooling on your system.
@@ -281,6 +290,89 @@ Examples:
 ```shell
 mucho docs         # open Mucho documentation
 mucho docs solana  # open Solana documentation
+```
+
+### token
+
+Create, mint, and transfer tokens.
+
+**Usage:**
+
+```shell
+npx mucho token --help
+```
+
+**Considerations:**
+
+- All `mucho token` commands will use the `--keypair` wallet as the transaction
+  fee payer. Defaults to the Solana CLI wallet (`~/.config/solana/id.json`).
+
+### token create
+
+Create a new token on the Solana blockchain, including adding metadata to the
+token for viewing on explorers and in wallets.
+
+```shell
+npx mucho token create --url devnet \
+  --name NAME \
+  --symbol SYMBOL \
+  --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
+```
+
+### token mint
+
+Mint new tokens from an existing token (raising the supply), issuing them to a
+destination wallet.
+
+> Note: If the `destination` wallet does not have an Associated Token Account
+> (ata), one will be automatically created.
+
+Authorizing new tokens to be minted requires the transaction to be signed by the
+token's "mint authority". By default, the `mucho token mint` command will
+attempt to use your CLI wallet (`--keypair`) as the mint authority.
+
+```shell
+npx mucho token mint --url devnet \
+  --mint <MINT_ADDRESS> \
+  --destination <DESTINATION_WALLET_ADDRESS> \
+  --amount 100
+```
+
+To use a mint authority that is different from the default CLI keypair
+(`--keypair`), explicitly set the mint authority by providing the authority's
+keypair file via the `--mint-authority` flag:
+
+```shell
+npx mucho token mint --url devnet \
+  --mint <MINT_ADDRESS> \
+  --destination <DESTINATION_WALLET_ADDRESS> \
+  --amount 100
+  --mint-authority /path/to/mint-authority.json
+```
+
+### token transfer
+
+Transfer tokens from a source wallet to another destination wallet.
+
+> Note: If the `destination` wallet does not have an Associated Token Account
+> (ata), one will be automatically created.
+
+```shell
+npx mucho token transfer --url devnet \
+  --mint <MINT_ADDRESS> \
+  --destination <DESTINATION_WALLET_ADDRESS> \
+  --amount 100
+```
+
+If the `source` wallet is different than the default CLI wallet (`--keypair`),
+you can explicitly set the source wallet via the `--source` flag:
+
+```shell
+npx mucho token transfer --url devnet \
+  --mint <MINT_ADDRESS> \
+  --destination <DESTINATION_WALLET_ADDRESS> \
+  --source <SOURCE_KEYPAIR_FILEPATH> \
+  --amount 100
 ```
 
 ## Solana.toml

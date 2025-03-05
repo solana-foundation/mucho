@@ -29,6 +29,20 @@ export function transferTokenCommand() {
   return new Command("transfer")
     .configureOutput(cliOutputConfig)
     .description("transfer tokens from one wallet to another")
+    .addHelpText(
+      "after",
+      `Examples:
+  $ npx mucho token transfer --url devnet \\
+      --mint <MINT_ADDRESS> \\
+      --destination <DESTINATION_WALLET_ADDRESS> \\
+      --amount 100
+
+  $ npx mucho token transfer --url devnet \\
+      --mint <MINT_ADDRESS> \\
+      --destination <DESTINATION_WALLET_ADDRESS> \\
+      --source /path/to/source-wallet.json \\
+      --amount 100`,
+    )
     .addOption(
       new Option("-a --amount <AMOUNT>", `amount of tokens to transfer`),
     )
@@ -181,7 +195,7 @@ export function transferTokenCommand() {
       spinner.text = "Fetching the latest blockhash";
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      spinner.text = `Preparing to transfer '${options.amount}' ${tokenPlurality} to: ${destination}`;
+      spinner.text = `Preparing to transfer '${options.amount}' ${tokenPlurality} to ${destination}`;
 
       const mintTokensTx = await buildTransferTokensTransaction({
         feePayer: payer,
@@ -195,12 +209,12 @@ export function transferTokenCommand() {
         sourceAta,
       });
 
-      spinner.text = `Transferring '${options.amount}' ${tokenPlurality} to: ${destination}`;
+      spinner.text = `Transferring '${options.amount}' ${tokenPlurality} to ${destination}`;
       let signature = await sendAndConfirmTransaction(
         await signTransactionMessageWithSigners(mintTokensTx),
       );
       spinner.succeed(
-        `Transferred '${options.amount}' ${tokenPlurality} to: ${destination}`,
+        `Transferred '${options.amount}' ${tokenPlurality} to ${destination}`,
       );
       console.log(
         " ",
