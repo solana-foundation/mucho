@@ -62,6 +62,13 @@ mucho --help
 - [`inspect`](#inspect) - Inspect transactions, accounts, and block in the cli
   (like a block explorer)
 
+### Token commands
+
+- [`token`](#token) - Create, mint, and transfer tokens.
+- [`token create`](#token-create) - Create a new token (with metadata).
+- [`token mint`](#token-mint) - Mint new tokens from an existing token (raising
+  the supply).
+
 ### install
 
 Install the Solana Toolkit local development tooling on your system.
@@ -281,6 +288,56 @@ Examples:
 ```shell
 mucho docs         # open Mucho documentation
 mucho docs solana  # open Solana documentation
+```
+
+### token
+
+Create, mint, and transfer tokens.
+
+**Usage:**
+
+```shell
+npx mucho token --help
+```
+
+### token create
+
+Create a new token on the Solana blockchain, including adding metadata to the
+token for viewing in explorer's and wallets.
+
+```shell
+npx mucho token create --url devnet \
+  --name NAME \
+  --symbol SYMBOL \
+  --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
+```
+
+### token mint
+
+Mint new tokens from an existing token (raising the supply), issuing them to a
+destination wallet.
+
+Authorizing new tokens to be minted requires the transaction to be signed by the
+token's "mint authority". By default, the `mucho token mint` command will
+attempt to use your CLI wallet (`--keypair`) as the mint authority.
+
+```shell
+npx mucho token mint --url devnet \
+  --mint <MINT_ADDRESS> \
+  --destination <DESTINATION_WALLET_ADDRESS> \
+  --amount 100
+```
+
+To use a mint authority that is different from the default CLI keypair
+(`--keypair`), explicitly set the mint authority by providing the authority's
+keypair file via the `--mint-authority` flag:
+
+```shell
+npx mucho token mint --url devnet \
+  --mint <MINT_ADDRESS> \
+  --destination <DESTINATION_WALLET_ADDRESS> \
+  --amount 100
+  --mint-authority /path/to/mint-authority.json
 ```
 
 ## Solana.toml
