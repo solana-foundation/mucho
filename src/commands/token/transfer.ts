@@ -12,21 +12,26 @@ import {
   signTransactionMessageWithSigners,
   getExplorerLink,
   getPublicSolanaRpcUrl,
-  isNone,
-  isSome,
   SolanaClusterMoniker,
+  isSolanaError,
+  SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND,
 } from "gill";
-import { buildMintTokensTransaction, fetchMint } from "gill/programs/token";
+import {
+  buildTransferTokensTransaction,
+  fetchMint,
+  fetchToken,
+  getAssociatedTokenAccountAddress,
+} from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
 import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
 
-export function mintTokenCommand() {
-  return new Command("mint")
+export function transferTokenCommand() {
+  return new Command("transfer")
     .configureOutput(cliOutputConfig)
-    .description(
-      "mint new tokens from an existing token's mint (raising the supply)",
+    .description("transfer tokens from one wallet to another")
+    .addOption(
+      new Option("-a --amount <AMOUNT>", `amount of tokens to transfer`),
     )
-    .addOption(new Option("-a --amount <AMOUNT>", `amount of tokens to create`))
     .addOption(
       new Option(
         "-m --mint <ADDRESS_OR_KEYPAIR_FILEPATH>",
@@ -41,14 +46,14 @@ export function mintTokenCommand() {
     )
     .addOption(
       new Option(
-        "--mint-authority <MINT_AUTHORITY_FILEPATH>",
-        `keypair file for the mint authority (default: same as --keypair)`,
+        "--source <SOURCE_KEYPAIR_FILEPATH>",
+        `keypair file for the source wallet (default: same as --keypair)`,
       ),
     )
     .addOption(COMMON_OPTIONS.keypair)
     .addOption(COMMON_OPTIONS.url)
     .action(async (options) => {
-      titleMessage("Mint new tokens");
+      titleMessage("Transfer tokens");
 
       let cliConfig = loadSolanaCliConfig();
 
@@ -108,13 +113,13 @@ export function mintTokenCommand() {
       const mint = await parseOrLoadSignerAddress(options.mint);
       const destination = await parseOrLoadSignerAddress(options.destination);
 
-      // mint authority is required to sign in order to mint the initial tokens
-      const mintAuthority = options.mintAuthority
-        ? await loadKeypairSignerFromFile(options.mintAuthority)
+      // source wallet is required to sign in order to authorize the transfer
+      const source = options.source
+        ? await loadKeypairSignerFromFile(options.source)
         : payer;
 
       console.log(); // line spacer after the common "ExperimentalWarning for Ed25519 Web Crypto API"
-      const spinner = ora("Preparing to mint tokens").start();
+      const spinner = ora("Preparing to transfer tokens").start();
 
       const { rpc, sendAndConfirmTransaction } = createSolanaClient({
         urlOrMoniker: options.url,
@@ -127,50 +132,75 @@ export function mintTokenCommand() {
       );
 
       // fetch the current mint from the chain to validate it
-      const mintAccount = await fetchMint(rpc, mint);
+      const mintAccount = await fetchMint(rpc, mint).catch((err) => {
+        if (isSolanaError(err, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND)) {
+          spinner.fail();
+          throw errorOutro(`Mint account not found: ${mint}`, "Mint Not Found");
+        }
+        throw err;
+      });
 
-      // supply is capped when the mint authority is removed
-      if (isNone(mintAccount.data.mintAuthority)) {
-        return errorOutro(
-          "This token's can no longer mint new tokens to holders",
-          "Frozen Mint",
-        );
-      }
+      // fetch the source ata from the chain to validate it
+      const [sourceAta, destinationAta] = await Promise.all([
+        getAssociatedTokenAccountAddress(
+          mint,
+          source.address,
+          mintAccount.programAddress,
+        ),
+        getAssociatedTokenAccountAddress(
+          mint,
+          destination,
+          mintAccount.programAddress,
+        ),
+      ]);
 
-      // only the current mint authority can authorize issuing new supply
-      if (
-        isSome(mintAccount.data.mintAuthority) &&
-        mintAccount.data.mintAuthority.value !== mintAuthority.address
-      ) {
+      const tokenAccount = await fetchToken(rpc, sourceAta).catch((err) => {
+        if (isSolanaError(err, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND)) {
+          spinner.fail();
+          throw errorOutro(
+            `Source token account not found:\n` +
+              `- mint: ${mint}\n` +
+              `- source owner: ${source.address}\n` +
+              `- source ata: ${sourceAta}`,
+            "Token Account Not Found",
+          );
+        }
+        throw err;
+      });
+
+      if (tokenAccount.data.amount < BigInt(options.amount)) {
+        spinner.fail();
         return errorOutro(
-          `The provided mint authority cannot mint new tokens: ${mintAuthority.address}\n` +
-            `Only ${mintAccount.data.mintAuthority.value} can authorize minting new tokens`,
-          "Incorrect Mint Authority",
+          `The provided source wallet does not have enough tokens to transfer:\n` +
+            `- current balance: ${tokenAccount.data.amount}\n` +
+            `- transfer amount: ${options.amount}`,
+          "Insufficient Balance",
         );
       }
 
       spinner.text = "Fetching the latest blockhash";
       const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-      spinner.text = `Preparing to mint '${options.amount}' ${tokenPlurality} to: ${destination}`;
+      spinner.text = `Preparing to transfer '${options.amount}' ${tokenPlurality} to: ${destination}`;
 
-      const mintTokensTx = await buildMintTokensTransaction({
+      const mintTokensTx = await buildTransferTokensTransaction({
         feePayer: payer,
         latestBlockhash,
         mint,
-        mintAuthority,
+        authority: source,
         tokenProgram: mintAccount.programAddress,
-        amount: Number(options.amount),
-        // amount: Number(options.amount) * 10 ** Number(options.decimals),
-        destination: destination,
+        amount: BigInt(options.amount),
+        destination,
+        destinationAta,
+        sourceAta,
       });
 
-      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to: ${destination}`;
+      spinner.text = `Transferring '${options.amount}' ${tokenPlurality} to: ${destination}`;
       let signature = await sendAndConfirmTransaction(
         await signTransactionMessageWithSigners(mintTokensTx),
       );
       spinner.succeed(
-        `Minted '${options.amount}' ${tokenPlurality} to: ${destination}`,
+        `Transferred '${options.amount}' ${tokenPlurality} to: ${destination}`,
       );
       console.log(
         " ",
@@ -178,6 +208,21 @@ export function mintTokenCommand() {
           cluster: cluster as SolanaClusterMoniker,
           transaction: signature,
         }),
+      );
+
+      const [updatedSourceTokenAccount, updatedDestinationTokenAccount] =
+        await Promise.all([
+          fetchToken(rpc, sourceAta),
+          fetchToken(rpc, destinationAta),
+        ]);
+
+      console.log();
+      titleMessage("Updated token balances");
+
+      console.log(
+        // `Updated token balances:\n` +
+        `- ${source.address} - source wallet: ${updatedSourceTokenAccount.data.amount}\n` +
+          `- ${destination} - destination wallet: ${updatedDestinationTokenAccount.data.amount}`,
       );
     });
 }
