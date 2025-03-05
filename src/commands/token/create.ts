@@ -24,11 +24,29 @@ import {
   TOKEN_PROGRAM_ADDRESS,
 } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
+import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
 
 export function createTokenCommand() {
   return new Command("create")
     .configureOutput(cliOutputConfig)
-    .description("create a new token")
+    .description("create a new token with metadata")
+    .addHelpText(
+      "after",
+      `Examples:
+  $ npx mucho token create --url devnet \\
+      --name NAME \\
+      --symbol SYMBOL \\
+      --decimals 9 \\
+      --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
+
+  $ npx mucho token create --url devnet \\
+      --name NAME \\
+      --symbol SYMBOL \\
+      --decimals 9 \\
+      --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json \\
+      --amount 100 \\
+      --destination <DESTINATION_WALLET_ADDRESS>`,
+    )
     .addOption(
       new Option(
         "-n --name <NAME>",
@@ -47,11 +65,22 @@ export function createTokenCommand() {
         `decimals of the token you want to create`,
       ),
     )
-    .addOption(new Option("-a --amount <AMOUNT>", `amount of tokens to create`))
     .addOption(
       new Option(
         "-m --metadata <METADATA_URI>",
         `URI for additional metadata info for your token`,
+      ),
+    )
+    .addOption(
+      new Option(
+        "-a --amount <AMOUNT>",
+        `amount of tokens to issue to the mint authority upon creation`,
+      ),
+    )
+    .addOption(
+      new Option(
+        "--destination <ADDRESS>",
+        `destination address to mint tokens to upon creation (default: same as --keypair)`,
       ),
     )
     .addOption(
@@ -201,11 +230,11 @@ export function createTokenCommand() {
         );
 
         const mintCommand = [
-          "mucho token mint",
-          `-u ${cluster}`,
-          `-m ${mint.address}`,
-          `-d <DESTINATION_ADDRESS>`,
-          `-a <AMOUNT>`,
+          "npx mucho token mint",
+          `--url ${cluster}`,
+          `--mint ${mint.address}`,
+          `--destination <DESTINATION_ADDRESS>`,
+          `--amount <AMOUNT>`,
         ];
 
         console.log(
@@ -223,8 +252,12 @@ export function createTokenCommand() {
         );
       }
 
+      const destination = options.destination
+        ? await parseOrLoadSignerAddress(options.destination)
+        : payer.address;
+
       spinner.start(
-        `Preparing to mint '${options.amount}' tokens to: ${payer.address}`,
+        `Preparing to mint '${options.amount}' tokens to ${destination}`,
       );
 
       const mintTokensTx = await buildMintTokensTransaction({
@@ -234,7 +267,7 @@ export function createTokenCommand() {
         mintAuthority,
         tokenProgram: TOKEN_PROGRAM_ADDRESS,
         amount: Number(options.amount) * 10 ** Number(options.decimals),
-        destination: payer.address,
+        destination,
       });
 
       const tokenPlurality = wordWithPlurality(
@@ -243,12 +276,12 @@ export function createTokenCommand() {
         "tokens",
       );
 
-      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to: ${payer.address}`;
+      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to ${destination}`;
       signature = await sendAndConfirmTransaction(
         await signTransactionMessageWithSigners(mintTokensTx),
       );
       spinner.succeed(
-        `Minted '${options.amount}' ${tokenPlurality} to: ${payer.address}`,
+        `Minted '${options.amount}' ${tokenPlurality} to ${destination}`,
       );
       console.log(
         " ",
