@@ -312,8 +312,25 @@ npx mucho token --help
 Create a new token on the Solana blockchain, including adding metadata to the
 token for viewing on explorers and in wallets.
 
+By default, the legacy token program
+(`TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`) will be used to create the
+token's mint.
+
 ```shell
 npx mucho token create --url devnet \
+  --name NAME \
+  --symbol SYMBOL \
+  --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
+```
+
+To create a token using the Token Extensions (Token22) program
+(`TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb`), you can explicitly set the
+token program to be used with the `--token-program` flag (with a value of
+`token22` or `tokenExtensions` or the program ID):
+
+```shell
+npx mucho token create --url devnet \
+  --token-program token22 \
   --name NAME \
   --symbol SYMBOL \
   --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
