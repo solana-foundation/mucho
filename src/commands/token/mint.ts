@@ -165,12 +165,12 @@ export function mintTokenCommand() {
         destination: destination,
       });
 
-      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to: ${payer.address}`;
+      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to: ${destination}`;
       let signature = await sendAndConfirmTransaction(
         await signTransactionMessageWithSigners(mintTokensTx),
       );
       spinner.succeed(
-        `Minted '${options.amount}' ${tokenPlurality} to: ${payer.address}`,
+        `Minted '${options.amount}' ${tokenPlurality} to: ${destination}`,
       );
       console.log(
         " ",
