@@ -68,6 +68,8 @@ mucho --help
 - [`token create`](#token-create) - Create a new token (with metadata).
 - [`token mint`](#token-mint) - Mint new tokens from an existing token (raising
   the supply).
+- [`token transfer`](#token-transfer) - Transfer tokens from one wallet to
+  another.
 
 ### install
 
@@ -300,10 +302,15 @@ Create, mint, and transfer tokens.
 npx mucho token --help
 ```
 
+**Considerations:**
+
+- All `mucho token` commands will use the `--keypair` wallet as the transaction
+  fee payer. Defaults to the Solana CLI wallet (`~/.config/solana/id.json`).
+
 ### token create
 
 Create a new token on the Solana blockchain, including adding metadata to the
-token for viewing in explorer's and wallets.
+token for viewing on explorers and in wallets.
 
 ```shell
 npx mucho token create --url devnet \
@@ -316,6 +323,9 @@ npx mucho token create --url devnet \
 
 Mint new tokens from an existing token (raising the supply), issuing them to a
 destination wallet.
+
+> Note: If the `destination` wallet does not have an Associated Token Account
+> (ata), one will be automatically created.
 
 Authorizing new tokens to be minted requires the transaction to be signed by the
 token's "mint authority". By default, the `mucho token mint` command will
@@ -338,6 +348,31 @@ npx mucho token mint --url devnet \
   --destination <DESTINATION_WALLET_ADDRESS> \
   --amount 100
   --mint-authority /path/to/mint-authority.json
+```
+
+### token transfer
+
+Transfer tokens from a source wallet to another destination wallet.
+
+> Note: If the `destination` wallet does not have an Associated Token Account
+> (ata), one will be automatically created.
+
+```shell
+npx mucho token transfer --url devnet \
+  --mint <MINT_ADDRESS> \
+  --destination <DESTINATION_WALLET_ADDRESS> \
+  --amount 100
+```
+
+If the `source` wallet is different than the default CLI wallet (`--keypair`),
+you can explicitly set the source wallet via the `--source` flag:
+
+```shell
+npx mucho token transfer --url devnet \
+  --mint <MINT_ADDRESS> \
+  --destination <DESTINATION_WALLET_ADDRESS> \
+  --source <SOURCE_KEYPAIR_FILEPATH> \
+  --amount 100
 ```
 
 ## Solana.toml
