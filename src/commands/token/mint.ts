@@ -54,7 +54,7 @@ export function mintTokenCommand() {
 
       if (!options.mint) {
         return errorOutro(
-          "Please provide a mint address -m <ADDRESS_OR_KEYPAIR_FILEPATH>",
+          "Please provide a mint address or keypair -m <ADDRESS_OR_KEYPAIR_FILEPATH>",
           "No mint address provided",
         );
       }
