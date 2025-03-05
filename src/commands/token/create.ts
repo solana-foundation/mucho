@@ -17,10 +17,14 @@ import {
   getExplorerLink,
   getPublicSolanaRpcUrl,
   SolanaClusterMoniker,
+  isAddress,
+  address,
 } from "gill";
 import {
   buildCreateTokenTransaction,
   buildMintTokensTransaction,
+  checkedTokenProgramAddress,
+  TOKEN_2022_PROGRAM_ADDRESS,
   TOKEN_PROGRAM_ADDRESS,
 } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
@@ -40,12 +44,11 @@ export function createTokenCommand() {
       --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
 
   $ npx mucho token create --url devnet \\
+      --token-program token22 \\
       --name NAME \\
       --symbol SYMBOL \\
       --decimals 9 \\
-      --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json \\
-      --amount 100 \\
-      --destination <DESTINATION_WALLET_ADDRESS>`,
+      --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json`,
     )
     .addOption(
       new Option(
@@ -101,6 +104,12 @@ export function createTokenCommand() {
         `keypair file for the mint authority (default: same as --keypair)`,
       ),
     )
+    .addOption(
+      new Option(
+        "--token-program <TOKEN_PROGRAM_ADDRESS>",
+        "SPL token program to for this token (default: legacy)",
+      ).choices(["legacy", "token22", "tokenExtensions", "<PROGRAM_ID>"]),
+    )
     .addOption(COMMON_OPTIONS.keypair)
     .addOption(COMMON_OPTIONS.url)
     .action(async (options) => {
@@ -134,6 +143,36 @@ export function createTokenCommand() {
         options.decimals = "9";
       }
 
+      if (options.tokenProgram) {
+        if (!isAddress(options.tokenProgram)) {
+          options.tokenProgram = options.tokenProgram.toLowerCase();
+        }
+
+        switch (options.tokenProgram) {
+          case "token":
+          case "default":
+          case "legacy":
+          case TOKEN_PROGRAM_ADDRESS: {
+            options.tokenProgram = TOKEN_PROGRAM_ADDRESS;
+            break;
+          }
+          case "token22":
+          case "token2022":
+          case "tokenExtension".toLowerCase(): // toLowerCase() to satisfy the spell checker
+          case "tokenExtensions".toLowerCase(): // toLowerCase() to satisfy the spell checker
+          case TOKEN_2022_PROGRAM_ADDRESS: {
+            options.tokenProgram = TOKEN_2022_PROGRAM_ADDRESS;
+            break;
+          }
+          default: {
+            return errorOutro(
+              "Please provide a valid token program using --token-program <TOKEN_PROGRAM_ADDRESS>",
+              "Invalid Token Program",
+            );
+          }
+        }
+      } else options.tokenProgram = TOKEN_PROGRAM_ADDRESS;
+
       if (!isStringifiedNumber(options.decimals)) {
         return errorOutro(
           "Please provide valid decimals with -d <DECIMALS>",
@@ -162,6 +201,10 @@ export function createTokenCommand() {
           "Invalid value",
         );
       }
+
+      const tokenProgram = checkedTokenProgramAddress(
+        address(options.tokenProgram),
+      );
 
       // payer will always be used to pay the fees
       const payer = await loadKeypairSignerFromFile(options.keypair);
@@ -196,7 +239,7 @@ export function createTokenCommand() {
         latestBlockhash,
         mint,
         mintAuthority,
-        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+        tokenProgram,
         freezeAuthority,
         updateAuthority: mintAuthority,
         metadata: {
@@ -265,7 +308,7 @@ export function createTokenCommand() {
         latestBlockhash,
         mint,
         mintAuthority,
-        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+        tokenProgram,
         amount: Number(options.amount) * 10 ** Number(options.decimals),
         destination,
       });
