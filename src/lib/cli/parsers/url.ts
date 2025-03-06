@@ -9,7 +9,7 @@ type ParsedUrlAndCluster = { cluster: SolanaCliClusterMonikers; url: URL };
  */
 export function parseOptionsFlagForRpcUrl(
   input: URL | string | undefined,
-  fallbackUrlOrMoniker: ParsedUrlAndCluster["url"] | string,
+  fallbackUrlOrMoniker?: ParsedUrlAndCluster["url"] | string,
 ): ParsedUrlAndCluster {
   try {
     if (!input && fallbackUrlOrMoniker) {
