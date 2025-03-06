@@ -28,7 +28,6 @@ export async function inspectBlock({
       throw "Provided block number is not an actual number";
     }
 
-    if (cluster == "localhost") cluster = "localnet";
     const explorerUrl = getExplorerLink({
       cluster,
       block: blockNumber.toString(),

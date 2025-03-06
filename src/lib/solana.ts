@@ -1,5 +1,8 @@
-import { ProgramsByClusterLabels, SolanaCluster } from "@/types/config";
-import { warnMessage } from "@/lib/logs";
+import {
+  AllSolanaClusters,
+  ProgramsByClusterLabels,
+  SolanaCliClusterMonikers,
+} from "@/types/config";
 import { getCommandOutputSync, VERSION_REGEX } from "@/lib/shell";
 import { PlatformToolsVersions } from "@/types";
 import { address, isAddress } from "gill";
@@ -13,43 +16,111 @@ export async function getAddressFromStringOrFilePath(input: string) {
 }
 
 /**
+ * Given a RPC url string, attempt to determine the cluster moniker
+ */
+export function getClusterMonikerFromUrl(
+  punitiveUrl: string | URL,
+): SolanaCliClusterMonikers {
+  try {
+    punitiveUrl = new URL(punitiveUrl);
+  } catch (err) {
+    throw new Error("Unable to parse RPC url");
+  }
+
+  switch (punitiveUrl.hostname) {
+    case "api.devnet.solana.com": {
+      return "devnet";
+    }
+    case "api.testnet.solana.com": {
+      return "testnet";
+    }
+    case "api.mainnet-beta.solana.com": {
+      return "mainnet-beta";
+    }
+    case "0.0.0.0":
+    case "127.0.0.1":
+    case "localhost": {
+      return "localhost";
+    }
+  }
+
+  // todo(nick): add support for common rpc provider urls
+
+  throw new Error("Unable to determine moniker from RPC url");
+}
+
+/**
  * Parse the provided url to correct it into a valid moniker or rpc url
  */
 export function parseRpcUrlOrMoniker(
   input: string,
-  includeBetaLabel: boolean = true,
+): SolanaCliClusterMonikers | string;
+export function parseRpcUrlOrMoniker(
+  input: string,
+  allowUrl: true,
+): SolanaCliClusterMonikers | string;
+export function parseRpcUrlOrMoniker(
+  input: string,
+  allowUrl: false,
+): SolanaCliClusterMonikers;
+export function parseRpcUrlOrMoniker(
+  input: string,
   allowUrl: boolean = true,
-): SolanaCluster | string {
-  if (allowUrl && input.match(/^http?s/i)) {
+): SolanaCliClusterMonikers | string {
+  if (input.match(/^https?/i)) {
+    if (!allowUrl) {
+      throw new Error(`RPC url not allowed. Please provide a moniker.`);
+    }
+
     try {
       return new URL(input).toString();
     } catch (err) {
-      console.error("Unable to parse 'url':", input);
-      process.exit(1);
+      throw new Error(`Invalid RPC url provided: ${input}`);
     }
-    return input;
-  } else if (input.startsWith("local") || input.startsWith("l")) {
-    return "localhost";
-  } else if (input.startsWith("t")) {
-    return "testnet";
-  } else if (input.startsWith("d")) {
-    return "devnet";
-  } else if (input.startsWith("m")) {
-    return includeBetaLabel ? "mainnet-beta" : "mainnet";
-  } else {
-    warnMessage("Unable to parse url or moniker. Falling back to mainnet");
-    return includeBetaLabel ? "mainnet-beta" : "mainnet";
   }
+
+  input = input.toLowerCase(); // case insensitive for monikers
+  switch (input) {
+    case "l":
+    case "local":
+    case "localnet":
+    case "localhost": {
+      return "localhost";
+    }
+    case "m":
+    case "mainnet":
+    case "mainnet-beta": {
+      return "mainnet-beta";
+    }
+    case "l":
+    case "localnet":
+    case "localhost": {
+      return "localhost";
+    }
+    case "t":
+    case "testnet": {
+      return "testnet";
+    }
+    case "d":
+    case "devnet": {
+      return "devnet";
+    }
+  }
+
+  throw new Error(`Invalid RPC url provided: ${input}`);
 }
 
 /**
  * Validate and sanitize the provided cluster moniker
  */
 export function getSafeClusterMoniker(
-  cluster: SolanaCluster | string,
+  cluster: AllSolanaClusters | string,
   labels?: ProgramsByClusterLabels,
 ): false | keyof ProgramsByClusterLabels {
-  cluster = parseRpcUrlOrMoniker(cluster, true, false);
+  cluster = parseRpcUrlOrMoniker(
+    cluster,
+    false /* do not allow parsing urls, only monikers */,
+  );
 
   if (!labels) {
     labels = {

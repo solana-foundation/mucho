@@ -10,9 +10,7 @@ import { COMMON_OPTIONS } from "@/const/commands";
 import { inspectAddress, inspectSignature } from "@/lib/inspect";
 import { inspectBlock } from "@/lib/inspect/block";
 import { numberStringToNumber } from "@/lib/utils";
-import { parseRpcUrlOrMoniker } from "@/lib/solana";
 import {
-  getPublicSolanaRpcUrl,
   address,
   createSolanaRpc,
   isAddress,
@@ -21,6 +19,7 @@ import {
   signature,
   getMonikerFromGenesisHash,
 } from "gill";
+import { parseOptionsFlagForRpcUrl } from "@/lib/cli/parsers";
 
 const helpText: string[] = [
   "Examples:",
@@ -59,8 +58,10 @@ export function inspectCommand() {
 
       // construct the rpc url endpoint to use based on the provided url option or the solana cli config.yml file
       const cliConfig = loadSolanaCliConfig();
-      let clusterUrl = parseRpcUrlOrMoniker(
-        options.url || cliConfig.json_rpc_url,
+
+      let parsedRpcUrl = parseOptionsFlagForRpcUrl(
+        options.url,
+        cliConfig.json_rpc_url /* use the Solana cli config's rpc url as the fallback */,
       );
 
       // when an explorer url is provided, attempt to parse this and strip away the noise
@@ -86,7 +87,10 @@ export function inspectCommand() {
           }
 
           // auto detect the cluster selected via the url
-          clusterUrl = parseRpcUrlOrMoniker(clusterFromUrl);
+          parsedRpcUrl = parseOptionsFlagForRpcUrl(
+            clusterFromUrl,
+            parsedRpcUrl.url,
+          );
 
           if (url.pathname.match(/^\/address\//gi)) {
             input = url.pathname.match(/^\/address\/(.*)\/?/i)[1];
@@ -102,10 +106,7 @@ export function inspectCommand() {
         }
       }
 
-      clusterUrl = clusterUrl.startsWith("http")
-        ? clusterUrl
-        : getPublicSolanaRpcUrl(clusterUrl as any);
-      const rpc = createSolanaRpc(clusterUrl);
+      const rpc = createSolanaRpc(parsedRpcUrl.url.toString());
 
       try {
         let selectedCluster = getMonikerFromGenesisHash(
@@ -145,7 +146,7 @@ export function inspectCommand() {
           warnMessage(
             "A network error occurred while connecting to your configured RPC endpoint." +
               "\nIs your RPC connection available at: " +
-              clusterUrl,
+              parsedRpcUrl.cluster,
           );
         } else {
           warnMessage(err);

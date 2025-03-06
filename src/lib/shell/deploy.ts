@@ -1,4 +1,4 @@
-import { SolanaCluster } from "@/types/config";
+import { SolanaCliClusterMonikers } from "@/types/config";
 import { parseRpcUrlOrMoniker } from "@/lib/solana";
 import shellExec from "shell-exec";
 import { parseJson } from "@/lib/utils";
@@ -12,7 +12,7 @@ type DeployProgramCommandInput = {
   manifestPath?: string;
   upgradeAuthority?: string;
   keypair?: string;
-  url?: SolanaCluster | string;
+  url?: SolanaCliClusterMonikers | string;
   priorityFee?: string;
 };
 
@@ -33,9 +33,7 @@ export function buildDeployProgramCommand({
 
   // note: when no url/cluster is specified, the user's `solana config` url will be used
   if (url) {
-    command.push(
-      `--url ${parseRpcUrlOrMoniker(url, true /* enforce the "beta" label */)}`,
-    );
+    command.push(`--url ${parseRpcUrlOrMoniker(url)}`);
   }
 
   if (keypair) {
@@ -73,10 +71,7 @@ export async function getDeployedProgramInfo(
   const command: string[] = [
     "solana program show",
     "--output json",
-    `--url ${parseRpcUrlOrMoniker(
-      cluster,
-      true /* enforce the "beta" label */,
-    )}`,
+    `--url ${parseRpcUrlOrMoniker(cluster)}`,
     programId,
   ];
 

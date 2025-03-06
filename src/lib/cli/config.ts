@@ -22,6 +22,7 @@ import { COMMON_OPTIONS } from "@/const/commands";
 import { warningOutro, warnMessage } from "@/lib/logs";
 import { SolanaCliYaml } from "@/types/solana";
 import { DEFAULT_CLI_KEYPAIR_PATH } from "gill/node";
+import { getClusterMonikerFromUrl } from "../solana";
 
 /**
  * Load the Solana CLI's config file
@@ -34,24 +35,7 @@ export function loadSolanaCliConfig(
 
     // auto convert the rpc url to the cluster moniker
     if (cliConfig?.json_rpc_url) {
-      switch (cliConfig.json_rpc_url) {
-        case "https://api.devnet.solana.com": {
-          cliConfig.json_rpc_url = "devnet";
-          break;
-        }
-        case "https://api.testnet.solana.com": {
-          cliConfig.json_rpc_url = "testnet";
-          break;
-        }
-        case "https://api.mainnet-beta.solana.com": {
-          cliConfig.json_rpc_url = "mainnet";
-          break;
-        }
-        case "http://localhost:8899": {
-          cliConfig.json_rpc_url = "localhost";
-          break;
-        }
-      }
+      cliConfig.json_rpc_url = getClusterMonikerFromUrl(cliConfig.json_rpc_url);
     }
 
     return cliConfig;

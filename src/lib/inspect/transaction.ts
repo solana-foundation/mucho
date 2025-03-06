@@ -8,11 +8,11 @@ import {
   type GetTransactionApi,
   type Signature,
   getExplorerLink,
+  lamportsToSol,
 } from "gill";
 
 import {
   unixTimestampToDate,
-  lamportsToSol,
   getComputeBudgetDataFromTransaction,
 } from "@/lib/web3";
 import { timeAgo } from "../utils";
@@ -30,7 +30,6 @@ export async function inspectSignature({
 }: InspectorBaseArgs & { signature: Signature }) {
   const spinner = ora("Fetching transaction").start();
   try {
-    if (cluster == "localhost") cluster = "localnet";
     const explorerUrl = getExplorerLink({
       cluster,
       transaction: signature,

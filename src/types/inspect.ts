@@ -1,8 +1,8 @@
-import { SolanaCluster } from "@/types/config";
+import { AllSolanaClusters } from "@/types/config";
 import type { Commitment, createSolanaRpc } from "gill";
 
 export type InspectorBaseArgs = {
-  cluster: SolanaCluster;
+  cluster: AllSolanaClusters;
   rpc: ReturnType<typeof createSolanaRpc>;
   commitment?: Commitment;
 };

@@ -1,12 +1,12 @@
 import { select } from "@inquirer/prompts";
-import { type SolanaCluster } from "@/types/config";
+import { SolanaClusterMoniker } from "gill";
 
 export async function promptToSelectCluster(
   message: string = "Select a cluster?",
-  defaultValue: SolanaCluster = "mainnet",
-): Promise<SolanaCluster> {
+  defaultValue: SolanaClusterMoniker = "mainnet",
+): Promise<SolanaClusterMoniker> {
   console.log(); // print a line separator
-  return select<SolanaCluster>({
+  return select<SolanaClusterMoniker>({
     message,
     theme: {
       // style: {
