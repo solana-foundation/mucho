@@ -26,7 +26,6 @@ export async function inspectAddress({
 }: InspectorBaseArgs & { address: Address }) {
   const spinner = ora("Fetching account").start();
   try {
-    if (cluster == "localhost") cluster = "localnet";
     const explorerUrl = getExplorerLink({
       cluster,
       address,

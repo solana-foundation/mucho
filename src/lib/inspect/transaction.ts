@@ -30,7 +30,6 @@ export async function inspectSignature({
 }: InspectorBaseArgs & { signature: Signature }) {
   const spinner = ora("Fetching transaction").start();
   try {
-    if (cluster == "localhost") cluster = "localnet";
     const explorerUrl = getExplorerLink({
       cluster,
       transaction: signature,
