@@ -20,6 +20,17 @@ export async function getAddressFromStringOrFilePath(input: string) {
  */
 export function parseRpcUrlOrMoniker(
   input: string,
+): SolanaCliClusterMonikers | string;
+export function parseRpcUrlOrMoniker(
+  input: string,
+  allowUrl: true,
+): SolanaCliClusterMonikers | string;
+export function parseRpcUrlOrMoniker(
+  input: string,
+  allowUrl: false,
+): SolanaCliClusterMonikers;
+export function parseRpcUrlOrMoniker(
+  input: string,
   allowUrl: boolean = true,
 ): SolanaCliClusterMonikers | string {
   if (input.match(/^https?/i)) {
