@@ -15,12 +15,6 @@ import {
   type UnixTimestamp,
 } from "gill";
 
-export function lamportsToSol(lamports: bigint | number) {
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 9 }).format(
-    Number(lamports) / 1_000_000_000,
-  );
-}
-
 export function unixTimestampToDate(
   blockTime: UnixTimestamp | bigint | number,
 ) {

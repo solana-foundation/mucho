@@ -3,12 +3,12 @@ import CliTable3 from "cli-table3";
 import { InspectorBaseArgs } from "@/types/inspect";
 import {
   getExplorerLink,
+  lamportsToSol,
   type AccountInfoBase,
   type AccountInfoWithBase64EncodedData,
   type Address,
   type SolanaRpcResponse,
 } from "gill";
-import { lamportsToSol } from "@/lib/web3";
 
 type GetAccountInfoApiResponse<T> = (AccountInfoBase & T) | null;
 

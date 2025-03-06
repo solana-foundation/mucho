@@ -8,11 +8,11 @@ import {
   type GetTransactionApi,
   type Signature,
   getExplorerLink,
+  lamportsToSol,
 } from "gill";
 
 import {
   unixTimestampToDate,
-  lamportsToSol,
   getComputeBudgetDataFromTransaction,
 } from "@/lib/web3";
 import { timeAgo } from "../utils";
