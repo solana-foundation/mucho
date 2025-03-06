@@ -80,8 +80,6 @@ function buildAccountOverview({
   table.push(["Balance (sol)", lamportsToSol(account.lamports)]);
   table.push([
     "Space",
-    // @ts-expect-error - known bug: `space` is missing from the type
-    // see: https://github.com/anza-xyz/solana-web3.js/issues/12
     new Intl.NumberFormat().format(account.space) + " bytes",
   ]);
 
