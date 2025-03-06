@@ -16,6 +16,40 @@ export async function getAddressFromStringOrFilePath(input: string) {
 }
 
 /**
+ * Given a RPC url string, attempt to determine the cluster moniker
+ */
+export function getClusterMonikerFromUrl(
+  punitiveUrl: string | URL,
+): SolanaCliClusterMonikers {
+  try {
+    punitiveUrl = new URL(punitiveUrl);
+  } catch (err) {
+    throw new Error("Unable to parse RPC url");
+  }
+
+  switch (punitiveUrl.hostname) {
+    case "api.devnet.solana.com": {
+      return "devnet";
+    }
+    case "api.testnet.solana.com": {
+      return "testnet";
+    }
+    case "api.mainnet-beta.solana.com": {
+      return "mainnet-beta";
+    }
+    case "0.0.0.0":
+    case "127.0.0.1":
+    case "localhost": {
+      return "localhost";
+    }
+  }
+
+  // todo(nick): add support for common rpc provider urls
+
+  throw new Error("Unable to determine moniker from RPC url");
+}
+
+/**
  * Parse the provided url to correct it into a valid moniker or rpc url
  */
 export function parseRpcUrlOrMoniker(
