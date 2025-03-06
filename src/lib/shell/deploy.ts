@@ -1,4 +1,4 @@
-import { SolanaCluster } from "@/types/config";
+import { SolanaCliClusterMonikers } from "@/types/config";
 import { parseRpcUrlOrMoniker } from "@/lib/solana";
 import shellExec from "shell-exec";
 import { parseJson } from "@/lib/utils";
@@ -12,7 +12,7 @@ type DeployProgramCommandInput = {
   manifestPath?: string;
   upgradeAuthority?: string;
   keypair?: string;
-  url?: SolanaCluster | string;
+  url?: SolanaCliClusterMonikers | string;
   priorityFee?: string;
 };
 

@@ -1,4 +1,8 @@
-import { ProgramsByClusterLabels, SolanaCluster } from "@/types/config";
+import {
+  AllSolanaClusters,
+  ProgramsByClusterLabels,
+  SolanaCliClusterMonikers,
+} from "@/types/config";
 import { getCommandOutputSync, VERSION_REGEX } from "@/lib/shell";
 import { PlatformToolsVersions } from "@/types";
 import { address, isAddress } from "gill";
@@ -17,7 +21,7 @@ export async function getAddressFromStringOrFilePath(input: string) {
 export function parseRpcUrlOrMoniker(
   input: string,
   allowUrl: boolean = true,
-): SolanaCluster | string {
+): SolanaCliClusterMonikers | string {
   if (input.match(/^https?/i)) {
     if (!allowUrl) {
       throw new Error(`RPC url not allowed. Please provide a moniker.`);
@@ -65,7 +69,7 @@ export function parseRpcUrlOrMoniker(
  * Validate and sanitize the provided cluster moniker
  */
 export function getSafeClusterMoniker(
-  cluster: SolanaCluster | string,
+  cluster: AllSolanaClusters | string,
   labels?: ProgramsByClusterLabels,
 ): false | keyof ProgramsByClusterLabels {
   cluster = parseRpcUrlOrMoniker(

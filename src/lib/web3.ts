@@ -1,4 +1,3 @@
-import type { SolanaCluster } from "@/types/config";
 import {
   ComputeBudgetInstruction,
   identifyComputeBudgetInstruction,
@@ -14,10 +13,7 @@ import {
   getBase58Encoder,
   type GetTransactionApi,
   type UnixTimestamp,
-  type ModifiedClusterUrl,
 } from "gill";
-
-export type SolanaUrlOrMoniker = SolanaCluster | ModifiedClusterUrl;
 
 export function lamportsToSol(lamports: bigint | number) {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 9 }).format(

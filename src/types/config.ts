@@ -4,7 +4,16 @@ import { SolanaClusterMoniker } from "gill";
 export type SolanaTomlWithConfigPath = Omit<SolanaToml, "configPath"> &
   NonNullable<{ configPath: SolanaToml["configPath"] }>;
 
-export type SolanaCluster = SolanaClusterMoniker | "mainnet-beta" | "localhost";
+/**
+ * The Solana CLI does not support: `mainnet` or `localnet`
+ */
+export type SolanaCliClusterMonikers =
+  | "mainnet-beta"
+  | "devnet"
+  | "testnet"
+  | "localhost";
+
+export type AllSolanaClusters = SolanaClusterMoniker | SolanaCliClusterMonikers;
 
 export type SolanaToml = {
   configPath?: string;
@@ -13,7 +22,7 @@ export type SolanaToml = {
      * default cluster to use for all operations.
      * when not set, fallback to the Solana CLI cluster
      */
-    cluster: SolanaCluster;
+    cluster: AllSolanaClusters;
     /** local directory for the ledger */
     ledgerDir?: string;
     /** local directory path to store any cloned accounts */
@@ -38,7 +47,7 @@ export type SolanaTomlCloneConfig = {
   address: string;
   filePath?: string;
   name?: string;
-  cluster?: SolanaCluster | string;
+  cluster?: AllSolanaClusters | string;
   // default - `cached`
   frequency?: "cached" | "always";
 };

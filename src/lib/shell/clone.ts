@@ -9,7 +9,7 @@ import {
 import {
   CloneAccountsFromConfigResult,
   CloneSettings,
-  SolanaCluster,
+  SolanaCliClusterMonikers,
   SolanaToml,
   SolanaTomlCloneConfig,
 } from "@/types/config";
@@ -39,13 +39,13 @@ type JsonAccountInfo = {
 type CloneAccountInput = {
   saveDir: string;
   address: string;
-  url?: SolanaCluster | string;
+  url?: SolanaCliClusterMonikers | string;
 };
 
 type CloneProgramInput = {
   saveDir: string;
   address: string;
-  url?: SolanaCluster | string;
+  url?: SolanaCliClusterMonikers | string;
 };
 
 export async function cloneAccount({
