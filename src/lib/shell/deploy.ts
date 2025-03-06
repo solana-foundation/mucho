@@ -33,9 +33,7 @@ export function buildDeployProgramCommand({
 
   // note: when no url/cluster is specified, the user's `solana config` url will be used
   if (url) {
-    command.push(
-      `--url ${parseRpcUrlOrMoniker(url, true /* enforce the "beta" label */)}`,
-    );
+    command.push(`--url ${parseRpcUrlOrMoniker(url)}`);
   }
 
   if (keypair) {
@@ -73,10 +71,7 @@ export async function getDeployedProgramInfo(
   const command: string[] = [
     "solana program show",
     "--output json",
-    `--url ${parseRpcUrlOrMoniker(
-      cluster,
-      true /* enforce the "beta" label */,
-    )}`,
+    `--url ${parseRpcUrlOrMoniker(cluster)}`,
     programId,
   ];
 

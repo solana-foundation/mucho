@@ -1,5 +1,4 @@
 import { ProgramsByClusterLabels, SolanaCluster } from "@/types/config";
-import { warnMessage } from "@/lib/logs";
 import { getCommandOutputSync, VERSION_REGEX } from "@/lib/shell";
 import { PlatformToolsVersions } from "@/types";
 import { address, isAddress } from "gill";
@@ -17,29 +16,49 @@ export async function getAddressFromStringOrFilePath(input: string) {
  */
 export function parseRpcUrlOrMoniker(
   input: string,
-  includeBetaLabel: boolean = true,
   allowUrl: boolean = true,
 ): SolanaCluster | string {
-  if (allowUrl && input.match(/^http?s/i)) {
+  if (input.match(/^https?/i)) {
+    if (!allowUrl) {
+      throw new Error(`RPC url not allowed. Please provide a moniker.`);
+    }
+
     try {
       return new URL(input).toString();
     } catch (err) {
-      console.error("Unable to parse 'url':", input);
-      process.exit(1);
+      throw new Error(`Invalid RPC url provided: ${input}`);
     }
-    return input;
-  } else if (input.startsWith("local") || input.startsWith("l")) {
-    return "localhost";
-  } else if (input.startsWith("t")) {
-    return "testnet";
-  } else if (input.startsWith("d")) {
-    return "devnet";
-  } else if (input.startsWith("m")) {
-    return includeBetaLabel ? "mainnet-beta" : "mainnet";
-  } else {
-    warnMessage("Unable to parse url or moniker. Falling back to mainnet");
-    return includeBetaLabel ? "mainnet-beta" : "mainnet";
   }
+
+  input = input.toLowerCase(); // case insensitive for monikers
+  switch (input) {
+    case "l":
+    case "local":
+    case "localnet":
+    case "localhost": {
+      return "localhost";
+    }
+    case "m":
+    case "mainnet":
+    case "mainnet-beta": {
+      return "mainnet-beta";
+    }
+    case "l":
+    case "localnet":
+    case "localhost": {
+      return "localhost";
+    }
+    case "t":
+    case "testnet": {
+      return "testnet";
+    }
+    case "d":
+    case "devnet": {
+      return "devnet";
+    }
+  }
+
+  throw new Error(`Invalid RPC url provided: ${input}`);
 }
 
 /**
@@ -49,7 +68,10 @@ export function getSafeClusterMoniker(
   cluster: SolanaCluster | string,
   labels?: ProgramsByClusterLabels,
 ): false | keyof ProgramsByClusterLabels {
-  cluster = parseRpcUrlOrMoniker(cluster, true, false);
+  cluster = parseRpcUrlOrMoniker(
+    cluster,
+    false /* do not allow parsing urls, only monikers */,
+  );
 
   if (!labels) {
     labels = {
