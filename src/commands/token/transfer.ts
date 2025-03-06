@@ -4,15 +4,12 @@ import { COMMON_OPTIONS } from "@/const/commands";
 import { errorOutro, titleMessage } from "@/lib/logs";
 import ora from "ora";
 
-import { parseRpcUrlOrMoniker } from "@/lib/solana";
 import { wordWithPlurality } from "@/lib/utils";
 import {
   createSolanaClient,
   isStringifiedNumber,
   signTransactionMessageWithSigners,
   getExplorerLink,
-  getPublicSolanaRpcUrl,
-  SolanaClusterMoniker,
   isSolanaError,
   SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND,
 } from "gill";
@@ -24,6 +21,7 @@ import {
 } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
 import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
+import { parseOptionsFlagForRpcUrl } from "@/lib/cli/parsers";
 
 export function transferTokenCommand() {
   return new Command("transfer")
@@ -69,7 +67,11 @@ export function transferTokenCommand() {
     .action(async (options) => {
       titleMessage("Transfer tokens");
 
-      let cliConfig = loadSolanaCliConfig();
+      const parsedRpcUrl = parseOptionsFlagForRpcUrl(
+        options.url,
+        /* use the Solana cli config's rpc url as the fallback */
+        loadSolanaCliConfig().json_rpc_url,
+      );
 
       if (!options.mint) {
         return errorOutro(
@@ -99,28 +101,6 @@ export function transferTokenCommand() {
         );
       }
 
-      let cluster;
-
-      try {
-        options.url = options.url?.startsWith("http")
-          ? new URL(options.url).toString()
-          : parseRpcUrlOrMoniker(
-              options.url || cliConfig.json_rpc_url || "devnet",
-            );
-
-        cluster = options.url;
-
-        // convert monikers to public endpoints
-        if (!options.url.startsWith("http")) {
-          options.url = getPublicSolanaRpcUrl(options.url as any);
-        }
-      } catch (err) {
-        return errorOutro(
-          "Please provide a valid url with -u <URL_OR_MONIKER>",
-          "Invalid value",
-        );
-      }
-
       // payer will always be used to pay the fees
       const payer = await loadKeypairSignerFromFile(options.keypair);
 
@@ -136,7 +116,7 @@ export function transferTokenCommand() {
       const spinner = ora("Preparing to transfer tokens").start();
 
       const { rpc, sendAndConfirmTransaction } = createSolanaClient({
-        urlOrMoniker: options.url,
+        urlOrMoniker: parsedRpcUrl.url,
       });
 
       const tokenPlurality = wordWithPlurality(
@@ -219,7 +199,7 @@ export function transferTokenCommand() {
       console.log(
         " ",
         getExplorerLink({
-          cluster: cluster as SolanaClusterMoniker,
+          cluster: parsedRpcUrl.cluster,
           transaction: signature,
         }),
       );

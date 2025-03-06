@@ -4,10 +4,7 @@ import { COMMON_OPTIONS } from "@/const/commands";
 import { errorOutro, titleMessage, warnMessage } from "@/lib/logs";
 import ora from "ora";
 
-import {
-  getAddressFromStringOrFilePath,
-  parseRpcUrlOrMoniker,
-} from "@/lib/solana";
+import { getAddressFromStringOrFilePath } from "@/lib/solana";
 import { wordWithPlurality } from "@/lib/utils";
 import {
   createSolanaClient,
@@ -15,8 +12,6 @@ import {
   isStringifiedNumber,
   signTransactionMessageWithSigners,
   getExplorerLink,
-  getPublicSolanaRpcUrl,
-  SolanaClusterMoniker,
   isAddress,
   address,
 } from "gill";
@@ -29,6 +24,7 @@ import {
 } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
 import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
+import { parseOptionsFlagForRpcUrl } from "@/lib/cli/parsers";
 
 export function createTokenCommand() {
   return new Command("create")
@@ -115,8 +111,6 @@ export function createTokenCommand() {
     .action(async (options) => {
       titleMessage("Create a new token");
 
-      let cliConfig = loadSolanaCliConfig();
-
       if (!options.name) {
         return errorOutro(
           "Please provide a name with -n <NAME>",
@@ -180,27 +174,11 @@ export function createTokenCommand() {
         );
       }
 
-      let cluster;
-
-      try {
-        options.url = options.url?.startsWith("http")
-          ? new URL(options.url).toString()
-          : parseRpcUrlOrMoniker(
-              options.url || cliConfig.json_rpc_url || "devnet",
-            );
-
-        cluster = options.url;
-
-        // convert monikers to public endpoints
-        if (!options.url.startsWith("http")) {
-          options.url = getPublicSolanaRpcUrl(options.url as any);
-        }
-      } catch (err) {
-        return errorOutro(
-          "Please provide a valid url with -u <URL_OR_MONIKER>",
-          "Invalid value",
-        );
-      }
+      const parsedRpcUrl = parseOptionsFlagForRpcUrl(
+        options.url,
+        /* use the Solana cli config's rpc url as the fallback */
+        loadSolanaCliConfig().json_rpc_url,
+      );
 
       const tokenProgram = checkedTokenProgramAddress(
         address(options.tokenProgram),
@@ -226,7 +204,7 @@ export function createTokenCommand() {
       const spinner = ora("Preparing to create token").start();
 
       const { rpc, sendAndConfirmTransaction } = createSolanaClient({
-        urlOrMoniker: options.url,
+        urlOrMoniker: parsedRpcUrl.url,
       });
 
       spinner.text = "Fetching the latest blockhash";
@@ -261,7 +239,7 @@ export function createTokenCommand() {
       console.log(
         " ",
         getExplorerLink({
-          cluster: cluster as SolanaClusterMoniker,
+          cluster: parsedRpcUrl.cluster,
           transaction: signature,
         }),
         "\n",
@@ -274,7 +252,7 @@ export function createTokenCommand() {
 
         const mintCommand = [
           "npx mucho token mint",
-          `--url ${cluster}`,
+          `--url ${parsedRpcUrl.cluster}`,
           `--mint ${mint.address}`,
           `--destination <DESTINATION_ADDRESS>`,
           `--amount <AMOUNT>`,
@@ -329,7 +307,7 @@ export function createTokenCommand() {
       console.log(
         " ",
         getExplorerLink({
-          cluster: cluster as SolanaClusterMoniker,
+          cluster: parsedRpcUrl.cluster,
           transaction: signature,
         }),
       );
