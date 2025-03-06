@@ -1,6 +1,6 @@
 import { getPublicSolanaRpcUrl } from "gill";
 import { SolanaCliClusterMonikers } from "@/types/config";
-import { parseRpcUrlOrMoniker } from "@/lib/solana";
+import { getClusterMonikerFromUrl, parseRpcUrlOrMoniker } from "@/lib/solana";
 
 type ParsedUrlAndCluster = { cluster: SolanaCliClusterMonikers; url: URL };
 
@@ -25,17 +25,25 @@ export function parseOptionsFlagForRpcUrl(
     );
   }
 
+  if (!input) {
+    throw new Error("Invalid input provided for parsing the RPC url");
+  }
+
   input = input.toString();
 
   let cluster: ParsedUrlAndCluster["cluster"];
 
   if (input.startsWith("http")) {
-    /**
-     * fallback to devnet for the cluster when unable to determine
-     * todo: we need to figure out a better way to handle this
-     * todo: without adjusting this, mucho does not really support custom rpc urls
-     */
-    cluster = "devnet";
+    try {
+      cluster = getClusterMonikerFromUrl(input);
+    } catch (err) {
+      /**
+       * fallback to devnet for the cluster when unable to determine
+       * todo: we need to figure out a better way to handle this
+       * todo: without adjusting this, mucho does not really support custom rpc urls
+       */
+      cluster = "devnet";
+    }
   } else {
     cluster = parseRpcUrlOrMoniker(
       input,
