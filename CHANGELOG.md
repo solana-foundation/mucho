@@ -1,5 +1,14 @@
 # mucho
 
+## 0.7.1
+
+### Patch Changes
+
+- [#64](https://github.com/solana-foundation/mucho/pull/64)
+  [`c654ea0`](https://github.com/solana-foundation/mucho/commit/c654ea052a050ae4745cba3e7e04f253eecd4f29)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - fix help flag being
+  added to all commands
+
 ## 0.7.0
 
 ### Minor Changes
