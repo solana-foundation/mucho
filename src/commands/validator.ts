@@ -59,26 +59,25 @@ export function validatorCommand() {
       ),
     )
     .addOption(
+      new Option("--clone", "re-clone all fixtures on validator reset"),
+    )
+    .addOption(COMMON_OPTIONS.outputOnly)
+    .addOption(
       new Option(
         "-l, --ledger <LEDGER_DIR>",
         "location for the local ledger",
       ).default(DEFAULT_TEST_LEDGER_DIR),
     )
-    .addOption(
-      new Option(
-        "--output",
-        "output the generated test validator command while executing it",
-      ),
-    )
-    .addOption(COMMON_OPTIONS.outputOnly)
     .addOption(COMMON_OPTIONS.accountDir)
-    .addOption(COMMON_OPTIONS.config)
     .addOption(COMMON_OPTIONS.keypair)
+    .addOption(COMMON_OPTIONS.config)
     .addOption(COMMON_OPTIONS.url)
+    .addOption(COMMON_OPTIONS.verbose)
     .action(async (options, { args: passThroughArgs }) => {
       if (!options.outputOnly) {
         titleMessage("solana-test-validator");
-      } else options.output = options.outputOnly;
+      }
+      // else options.output = options.outputOnly;
 
       await checkCommand("solana-test-validator --version", {
         exit: true,
@@ -134,7 +133,7 @@ export function validatorCommand() {
       // }
 
       // auto run the clone on reset
-      if (options.reset) {
+      if (options.clone && options.reset) {
         // run the clone command with default options
         // todo: could we pass options in here if we want?
         await cloneCommand().parseAsync([]);
@@ -156,7 +155,7 @@ export function validatorCommand() {
       }
 
       const command = buildTestValidatorCommand({
-        verbose: !options.output,
+        verbose: options.verbose,
         reset: options.reset || false,
         accountDir: config.settings.accountDir,
         ledgerDir: config.settings.ledgerDir,
@@ -165,11 +164,11 @@ export function validatorCommand() {
         localPrograms: locatedPrograms,
       });
 
-      if (options.output) console.log(`\n${command}\n`);
+      if (options.verbose) console.log(`\n${command}\n`);
       // only log the "run validator" command, do not execute it
       if (options.outputOnly) process.exit();
 
-      if (options.reset) {
+      if (options.reset && options.verbose) {
         console.log(
           "Loaded",
           loadFileNamesToMap(config.settings.accountDir, ".json").size,

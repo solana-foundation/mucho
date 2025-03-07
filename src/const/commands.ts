@@ -30,9 +30,9 @@ export const COMMON_OPTIONS = {
    */
   url: new Option(
     "-u --url <URL_OR_MONIKER>",
-    "URL for Solana's JSON RPC or moniker",
+    "URL for Solana's JSON RPC or moniker (or their first letter)",
   ),
-  //.default(cliConfig.json_rpc_url || "mainnet"),
+  verbose: new Option("--verbose", "enable verbose output mode"),
   outputOnly: new Option(
     "--output-only",
     "only output the generated command, do not execute it",
