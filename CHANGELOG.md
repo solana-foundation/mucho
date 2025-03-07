@@ -1,5 +1,54 @@
 # mucho
 
+## 0.7.0
+
+### Minor Changes
+
+- [#60](https://github.com/solana-foundation/mucho/pull/60)
+  [`d31a5c5`](https://github.com/solana-foundation/mucho/commit/d31a5c5cba552a2a7c00f1fedae4fb432fa0a3bf)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - document the `token`
+  commands
+
+- [`0089e2a`](https://github.com/solana-foundation/mucho/commit/0089e2ab9fac541dfe5967cea2cd951760050508)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - add the `token mint`
+  command to issue new supply
+
+- [#36](https://github.com/solana-foundation/mucho/pull/36)
+  [`4190290`](https://github.com/solana-foundation/mucho/commit/419029093de4eb5c6a4378634a650fc4f2254a05)
+  Thanks [@jacobcreech](https://github.com/jacobcreech)! - added the
+  `token create` command
+
+- [#61](https://github.com/solana-foundation/mucho/pull/61)
+  [`0657d12`](https://github.com/solana-foundation/mucho/commit/0657d125359d333c1fefeda52e579f75caa5e52d)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - accept token program
+  for creating tokens
+
+- [#59](https://github.com/solana-foundation/mucho/pull/59)
+  [`9fce264`](https://github.com/solana-foundation/mucho/commit/9fce264a66cf0c2eca0cb4015d35c25c761270a4)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - add the
+  `token transfer` command
+
+### Patch Changes
+
+- [#62](https://github.com/solana-foundation/mucho/pull/62)
+  [`df52093`](https://github.com/solana-foundation/mucho/commit/df52093d35dd8a244e9728b9eeb03277fb020fdc)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - added rpc url input
+  parser
+
+- [#63](https://github.com/solana-foundation/mucho/pull/63)
+  [`16f7426`](https://github.com/solana-foundation/mucho/commit/16f74261b784c4f7f0156a178332620e70932624)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - refactor commands to
+  use the new rpc url parser
+
+- [#56](https://github.com/solana-foundation/mucho/pull/56)
+  [`030df83`](https://github.com/solana-foundation/mucho/commit/030df83f7c077d6f972156c303e8308b17ae9b59)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - refactor to use gill
+
+- [#55](https://github.com/solana-foundation/mucho/pull/55)
+  [`d663434`](https://github.com/solana-foundation/mucho/commit/d663434e1444a83ac4647afe3988296360e19c01)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - suppress runtime
+  warning messages
+
 ## 0.6.0
 
 ### Minor Changes
