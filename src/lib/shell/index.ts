@@ -163,8 +163,6 @@ export function shellExecInSession({
   args = undefined,
   outputOnly,
 }: ShellExecInSessionArgs): ChildProcess | void {
-  console.log(""); // spacer in the terminal
-
   if (outputOnly) {
     args = args || [];
     args.unshift(command);
