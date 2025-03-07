@@ -91,7 +91,7 @@ export function buildCommand() {
         console.log(
           `Building program '${
             cargoToml.lib.name || cargoToml.package.name || "[unknown]"
-          }' only`,
+          }':`,
         );
 
         buildCommand = buildProgramCommand({
