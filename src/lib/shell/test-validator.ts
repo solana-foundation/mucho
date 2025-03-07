@@ -13,6 +13,7 @@ import {
 } from "@/const/solana";
 import { warnMessage } from "@/lib/logs";
 import { SolanaTomlClone } from "@/types/config";
+import { getCommandOutputSync } from ".";
 
 type BuildTestValidatorCommandInput = {
   verbose?: boolean;
@@ -110,4 +111,11 @@ export function buildTestValidatorCommand({
   // todo: support cloning programs via `--clone-upgradeable-program`?
 
   return command.join(" ");
+}
+
+export function getRunningTestValidatorCommand() {
+  return getCommandOutputSync(
+    // lsof limits the program name character length
+    `ps aux | awk '/solana-test-validator/ && !/grep/ {$1=$2=$3=$4=$5=$6=$7=$8=$9=$10=""; print substr($0,11)}'`,
+  );
 }

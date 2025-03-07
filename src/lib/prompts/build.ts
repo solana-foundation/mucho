@@ -5,7 +5,6 @@ export async function promptToSelectCluster(
   message: string = "Select a cluster?",
   defaultValue: SolanaClusterMoniker = "mainnet",
 ): Promise<SolanaClusterMoniker> {
-  console.log(); // print a line separator
   return select<SolanaClusterMoniker>({
     message,
     theme: {
