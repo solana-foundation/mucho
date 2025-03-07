@@ -10,6 +10,7 @@ import { getPlatformToolsVersions } from "@/lib/solana";
 import { DEFAULT_CLI_YAML_PATH } from "@/const/solana";
 import { doesFileExist } from "@/lib/utils";
 import { DEFAULT_CLI_KEYPAIR_PATH } from "gill/node";
+import { getRunningTestValidatorCommand } from "@/lib/shell/test-validator";
 
 /**
  * Command: `info`
@@ -71,10 +72,7 @@ export function infoCommand() {
         )}`,
       );
 
-      const testValidatorChecker = await getCommandOutput(
-        // lsof limits the program name character length
-        `ps aux | awk '/solana-test-validator/ && !/grep/ {$1=$2=$3=$4=$5=$6=$7=$8=$9=$10=""; print substr($0,11)}'`,
-      );
+      const testValidatorChecker = getRunningTestValidatorCommand();
 
       // build the test validator port, with support for an manually defined one
       let localnetClusterUrl = "http://127.0.0.1:8899";

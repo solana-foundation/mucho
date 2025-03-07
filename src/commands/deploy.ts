@@ -13,6 +13,7 @@ import { directoryExists, doesFileExist } from "@/lib/utils";
 import { getSafeClusterMoniker, parseRpcUrlOrMoniker } from "@/lib/solana";
 import { promptToSelectCluster } from "@/lib/prompts/build";
 import { loadKeypairSignerFromFile } from "gill/node";
+import { getRunningTestValidatorCommand } from "@/lib/shell/test-validator";
 
 /**
  * Command: `deploy`
@@ -88,6 +89,7 @@ export function deployCommand() {
           "Select the cluster to deploy your program on?",
           getSafeClusterMoniker(cliConfig?.json_rpc_url) || undefined,
         );
+        console.log(); // print a line separator
         options.url = parseRpcUrlOrMoniker(cluster);
       }
 
@@ -107,6 +109,12 @@ export function deployCommand() {
             `Unable to detect cluster to deploy to. Operation canceled.`,
           );
         }
+      }
+
+      if (!getRunningTestValidatorCommand()) {
+        return warnMessage(
+          `Attempted to deploy to localnet with no local validator running. Operation canceled.`,
+        );
       }
 
       let config = loadConfigToml(
