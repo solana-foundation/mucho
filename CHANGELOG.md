@@ -1,5 +1,21 @@
 # mucho
 
+## 0.8.0
+
+### Minor Changes
+
+- [#69](https://github.com/solana-foundation/mucho/pull/69)
+  [`e4b6d03`](https://github.com/solana-foundation/mucho/commit/e4b6d03ae4eadd2b461e19c137eadfea36a20b37)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - get account balances
+  for various clusters
+
+### Patch Changes
+
+- [#66](https://github.com/solana-foundation/mucho/pull/66)
+  [`81495a4`](https://github.com/solana-foundation/mucho/commit/81495a4883f89edf6a8d1a1fd23d3b023d176950)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - fix assorted minor bugs
+  for program development
+
 ## 0.7.1
 
 ### Patch Changes
