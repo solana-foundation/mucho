@@ -2,4 +2,4 @@
 "mucho": minor
 ---
 
-get account balances for accounts
+get account balances for various clusters
