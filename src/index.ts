@@ -20,6 +20,7 @@ import { deployCommand } from "@/commands/deploy";
 import { tokenCommand } from "./commands/token";
 import { docsCommand } from "@/commands/docs";
 import { inspectCommand } from "@/commands/inspect";
+import { balanceCommand } from "@/commands/balance";
 
 async function main() {
   // create a global error boundary
@@ -39,6 +40,7 @@ async function main() {
         .addCommand(buildCommand())
         .addCommand(deployCommand())
         .addCommand(tokenCommand())
+        .addCommand(balanceCommand())
         .addCommand(coverageCommand())
         .addCommand(infoCommand())
         .addCommand(docsCommand());
