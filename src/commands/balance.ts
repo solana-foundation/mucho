@@ -30,9 +30,6 @@ export function balanceCommand() {
     )
     .description("get the balances for an account")
     .action(async (addressOrKeypairPath) => {
-      // titleMessage("Gather troubleshooting info");
-      // console.log();
-
       if (!addressOrKeypairPath)
         addressOrKeypairPath = DEFAULT_CLI_KEYPAIR_PATH;
 

@@ -59,7 +59,7 @@ mucho --help
 - [`coverage`](#coverage) - Run code coverage tests on a Solana program.
 - [`info`](#info) - Gather helpful troubleshooting info about your setup.
 - [`docs`](#docs) - Show the documentation for the Solana development tools.
-- [`balance`](#balance) - Get an account's balances on all clusters.
+- [`balance`](#balance) - Get an account's balances for all clusters.
 - [`inspect`](#inspect) - Inspect transactions, accounts, and block in the cli
   (like a block explorer)
 
@@ -295,7 +295,7 @@ mucho docs solana  # open Solana documentation
 
 ### balance
 
-Get an account's balances on all clusters
+Get an account's balances for all clusters.
 
 **Usage:**
 
