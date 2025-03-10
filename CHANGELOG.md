@@ -1,5 +1,14 @@
 # mucho
 
+## 0.9.0
+
+### Minor Changes
+
+- [#70](https://github.com/solana-foundation/mucho/pull/70)
+  [`8d9c520`](https://github.com/solana-foundation/mucho/commit/8d9c5209ab5a4928e89b02f9ea49f1be760a4fc5)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - add the `self-update`
+  command
+
 ## 0.8.0
 
 ### Minor Changes
