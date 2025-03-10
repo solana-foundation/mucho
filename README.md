@@ -31,6 +31,21 @@ Or to install mucho and all the core Solana development tooling at once:
 npx mucho@latest install
 ```
 
+## Updating mucho
+
+To update mucho to the latest version, use the `self-update` command to perform
+any required update migrations:
+
+```shell
+npx mucho@latest self-update
+```
+
+To update mucho to a specific version:
+
+```shell
+npx mucho@latest self-update <version>
+```
+
 ### Install without NodeJS already installed
 
 The following command will install NodeJS, Node Version Manager
@@ -60,7 +75,7 @@ mucho --help
 - [`info`](#info) - Gather helpful troubleshooting info about your setup.
 - [`docs`](#docs) - Show the documentation for the Solana development tools.
 - [`balance`](#balance) - Get an account's balances for all clusters.
-- [`inspect`](#inspect) - Inspect transactions, accounts, and block in the cli
+- [`inspect`](#inspect) - Inspect transactions, accounts, and block in the CLI
   (like a block explorer)
 
 ### Token commands
@@ -106,7 +121,7 @@ The Solana Toolkit includes the following tools:
 
 ### inspect
 
-Inspect transactions, accounts, and block in the cli (like a block explorer)
+Inspect transactions, accounts, and block in the CLI (like a block explorer)
 
 ```shell
 mucho inspect <INPUT>
