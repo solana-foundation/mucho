@@ -31,6 +31,15 @@ Or to install mucho and all the core Solana development tooling at once:
 npx mucho@latest install
 ```
 
+### Install without NodeJS already installed
+
+The following command will install NodeJS, Node Version Manager
+([NVM](https://github.com/nvm-sh/nvm)), and `mucho` itself:
+
+```shell
+curl -sSfL https://raw.githubusercontent.com/solana-developers/mucho/master/install.sh | bash
+```
+
 ## Updating mucho
 
 To update mucho to the latest version, use the `self-update` command to perform
@@ -44,15 +53,6 @@ To update mucho to a specific version:
 
 ```shell
 npx mucho@latest self-update <version>
-```
-
-### Install without NodeJS already installed
-
-The following command will install NodeJS, Node Version Manager
-([NVM](https://github.com/nvm-sh/nvm)), and `mucho` itself:
-
-```shell
-curl -sSfL https://raw.githubusercontent.com/solana-developers/mucho/master/install.sh | bash
 ```
 
 ## Usage
