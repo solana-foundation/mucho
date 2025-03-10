@@ -12,7 +12,7 @@ type DocInfo = {
 const DOCS_INFO: Record<string, DocInfo> = {
   // Core Development Tools
   mucho: {
-    url: "https://github.com/solana-developers/mucho?tab=readme-ov-file#mucho",
+    url: "https://github.com/solana-foundation/mucho?tab=readme-ov-file#mucho",
     desc: "A superset of popular Solana developer tools to simplify Solana program development and testing",
   },
   solana: {

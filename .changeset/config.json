@@ -5,7 +5,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "solana-developers/mucho"
+      "repo": "solana-foundation/mucho"
     }
   ],
   "commit": false,
