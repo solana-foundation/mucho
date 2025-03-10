@@ -133,10 +133,7 @@ export async function checkForSelfUpdate() {
       "  ",
       `To install the latest version, run the following command:`,
     );
-    console.log(
-      "  ",
-      picocolors.green(`npx ${getAppInfo().name}@latest install`),
-    );
+    console.log("  ", picocolors.green(`npx mucho@latest self-update`));
 
     console.log(); // print a spacer
   }

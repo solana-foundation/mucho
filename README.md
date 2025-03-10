@@ -8,7 +8,7 @@ local test validator with all the required state for a consistent development
 experience.
 
 > `mucho` is in beta and subject to change. Please feel free to
-> [open issues](https://github.com/solana-developers/mucho/issues) with any
+> [open issues](https://github.com/solana-foundation/mucho/issues) with any
 > feedback, feature requests, or issues you experience.
 
 ## Installation
@@ -37,7 +37,22 @@ The following command will install NodeJS, Node Version Manager
 ([NVM](https://github.com/nvm-sh/nvm)), and `mucho` itself:
 
 ```shell
-curl -sSfL https://raw.githubusercontent.com/solana-developers/mucho/master/install.sh | bash
+curl -sSfL https://raw.githubusercontent.com/solana-foundation/mucho/master/install.sh | bash
+```
+
+## Updating mucho
+
+To update mucho to the latest version, use the `self-update` command to perform
+any required update migrations:
+
+```shell
+npx mucho@latest self-update
+```
+
+To update mucho to a specific version:
+
+```shell
+npx mucho@latest self-update <version>
 ```
 
 ## Usage
@@ -60,7 +75,7 @@ mucho --help
 - [`info`](#info) - Gather helpful troubleshooting info about your setup.
 - [`docs`](#docs) - Show the documentation for the Solana development tools.
 - [`balance`](#balance) - Get an account's balances for all clusters.
-- [`inspect`](#inspect) - Inspect transactions, accounts, and block in the cli
+- [`inspect`](#inspect) - Inspect transactions, accounts, and block in the CLI
   (like a block explorer)
 
 ### Token commands
@@ -90,7 +105,7 @@ The Solana Toolkit includes the following tools:
 - [Agave CLI tool suite](https://solana.com/docs/intro/installation#install-the-solana-cli) -
   the standard tool suite required to build and deploy Solana programs (formerly
   known as the "Solana CLI tool suite").
-- [Mucho CLI](https://github.com/solana-developers/mucho) - a superset of
+- [Mucho CLI](https://github.com/solana-foundation/mucho) - a superset of
   popular developer tools within the Solana ecosystem used to simplify the
   development and testing of Solana blockchain programs.
 - [solana-verify](https://github.com/Ellipsis-Labs/solana-verifiable-build) - A
@@ -106,7 +121,7 @@ The Solana Toolkit includes the following tools:
 
 ### inspect
 
-Inspect transactions, accounts, and block in the cli (like a block explorer)
+Inspect transactions, accounts, and block in the CLI (like a block explorer)
 
 ```shell
 mucho inspect <INPUT>
@@ -341,7 +356,7 @@ token's mint.
 npx mucho token create --url devnet \
   --name NAME \
   --symbol SYMBOL \
-  --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
+  --metadata https://raw.githubusercontent.com/solana-foundation/opos-asset/main/assets/Climate/metadata.json
 ```
 
 To create a token using the Token Extensions (Token22) program
@@ -354,7 +369,7 @@ npx mucho token create --url devnet \
   --token-program token22 \
   --name NAME \
   --symbol SYMBOL \
-  --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
+  --metadata https://raw.githubusercontent.com/solana-foundation/opos-asset/main/assets/Climate/metadata.json
 ```
 
 ### token mint

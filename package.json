@@ -66,14 +66,14 @@
   },
   "packageManager": "pnpm@9.1.0",
   "keywords": [],
-  "homepage": "https://github.com/solana-developers/mucho#readme",
+  "homepage": "https://github.com/solana-foundation/mucho#readme",
   "bugs": {
-    "url": "https://github.com/solana-developers/mucho/issues"
+    "url": "https://github.com/solana-foundation/mucho/issues"
   },
   "repository": {
-    "name": "solana-developers/mucho",
+    "name": "solana-foundation/mucho",
     "type": "git",
-    "url": "git+https://github.com/solana-developers/mucho.git"
+    "url": "git+https://github.com/solana-foundation/mucho.git"
   },
   "author": "nickfrosty",
   "contributors": [

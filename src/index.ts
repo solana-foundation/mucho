@@ -21,12 +21,18 @@ import { tokenCommand } from "./commands/token";
 import { docsCommand } from "@/commands/docs";
 import { inspectCommand } from "@/commands/inspect";
 import { balanceCommand } from "@/commands/balance";
+import { selfUpdateCommand } from "./commands/self-update";
 
 async function main() {
   // create a global error boundary
   try {
-    // auto check for new version of the cli
-    await checkForSelfUpdate();
+    // auto check for new version of the cli when not attempting the self-update
+    if (
+      process.argv?.[2]?.toLowerCase() !== "self-update" ||
+      process.argv?.[3]?.toLowerCase() === "--help"
+    ) {
+      await checkForSelfUpdate();
+    }
 
     try {
       const program = cliProgramRoot();
@@ -43,7 +49,8 @@ async function main() {
         .addCommand(balanceCommand())
         .addCommand(coverageCommand())
         .addCommand(infoCommand())
-        .addCommand(docsCommand());
+        .addCommand(docsCommand())
+        .addCommand(selfUpdateCommand());
 
       // set the default action to `help` without an error
       if (process.argv.length === 2) {

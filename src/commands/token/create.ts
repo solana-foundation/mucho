@@ -37,14 +37,14 @@ export function createTokenCommand() {
       --name NAME \\
       --symbol SYMBOL \\
       --decimals 9 \\
-      --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json
+      --metadata https://raw.githubusercontent.com/solana-foundation/opos-asset/main/assets/Climate/metadata.json
 
   $ npx mucho token create --url devnet \\
       --token-program token22 \\
       --name NAME \\
       --symbol SYMBOL \\
       --decimals 9 \\
-      --metadata https://raw.githubusercontent.com/solana-developers/opos-asset/main/assets/Climate/metadata.json`,
+      --metadata https://raw.githubusercontent.com/solana-foundation/opos-asset/main/assets/Climate/metadata.json`,
     )
     .addOption(
       new Option(
