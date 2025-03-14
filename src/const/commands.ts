@@ -3,6 +3,7 @@ import { DEFAULT_ACCOUNTS_DIR, DEFAULT_CONFIG_FILE } from "./solana";
 import { loadSolanaCliConfig } from "@/lib/cli";
 import { join } from "path";
 import { DEFAULT_CLI_KEYPAIR_PATH } from "gill/node";
+import { Commitment } from "gill";
 
 export const cliConfig = loadSolanaCliConfig();
 
@@ -25,6 +26,17 @@ export const COMMON_OPTIONS = {
   keypair: new Option("--keypair <PATH>", "path to a keypair file").default(
     cliConfig?.keypair_path || DEFAULT_CLI_KEYPAIR_PATH,
   ),
+  /** skip preflight checks for transactions */
+  skipPreflight: new Option(
+    "--skip-preflight",
+    "whether or not to skip preflight checks",
+  ),
+  commitment: new Option(
+    "--commitment <COMMITMENT>",
+    "desired commitment level for transactions",
+  )
+    .choices(["confirmed", "finalized", "processed"] as Commitment[])
+    .default("confirmed" as Commitment),
   /**
    * rpc url or moniker to use
    */

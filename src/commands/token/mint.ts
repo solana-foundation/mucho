@@ -58,6 +58,8 @@ export function mintTokenCommand() {
         `keypair file for the mint authority (default: same as --keypair)`,
       ),
     )
+    .addOption(COMMON_OPTIONS.skipPreflight)
+    .addOption(COMMON_OPTIONS.commitment)
     .addOption(COMMON_OPTIONS.keypair)
     .addOption(COMMON_OPTIONS.url)
     .action(async (options) => {
@@ -166,8 +168,8 @@ export function mintTokenCommand() {
 
         spinner.text = `Minting '${options.amount}' ${tokenPlurality} to ${destination}`;
         let signature = await sendAndConfirmTransaction(mintTokensTx, {
-          commitment: "confirmed",
-          // skipPreflight: true,
+          commitment: options.commitment || "confirmed",
+          skipPreflight: options.skipPreflight,
         }).catch(async (err) => {
           await simulateTransactionOnThrow(
             simulateTransaction,
