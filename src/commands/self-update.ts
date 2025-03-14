@@ -57,8 +57,6 @@ export function selfUpdateCommand() {
         spinner.text = `Validating installation`;
         const newCurrent = await getCurrentNpmPackageVersion(appName, true);
 
-        console.log("newCurrent:", newCurrent);
-
         if (newCurrent != version) {
           throw new Error(`Failed to update ${appName} to '${version}'`);
         }
