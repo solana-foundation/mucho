@@ -1,5 +1,29 @@
 # mucho
 
+## 0.9.0
+
+### Minor Changes
+
+- [#72](https://github.com/solana-foundation/mucho/pull/72)
+  [`c42cf8d`](https://github.com/solana-foundation/mucho/commit/c42cf8d1c9364a20a2bf1af4abdfca7e4d78a8fd)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - improved error handling
+  for gill transactions
+
+- [#73](https://github.com/solana-foundation/mucho/pull/73)
+  [`46a9674`](https://github.com/solana-foundation/mucho/commit/46a967408c37b0db8fc619eebff3f084b90e26fe)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - added the
+  `--commitment` and `--skip-preflight` flags for the token commands
+
+- [#74](https://github.com/solana-foundation/mucho/pull/74)
+  [`ce5b616`](https://github.com/solana-foundation/mucho/commit/ce5b6164acddfa981e0733c67cb8a3b5ee32ae50)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - added localnet
+  validator checks on token commands
+
+- [#70](https://github.com/solana-foundation/mucho/pull/70)
+  [`8d9c520`](https://github.com/solana-foundation/mucho/commit/8d9c5209ab5a4928e89b02f9ea49f1be760a4fc5)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - add the `self-update`
+  command
+
 ## 0.8.0
 
 ### Minor Changes
