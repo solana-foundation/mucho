@@ -70,8 +70,12 @@ export function successOutro(msg: string = "Operation successful") {
  * Print a red error message using `picocolors`
  * (including a process exit code)
  */
-export function errorOutro(msg: string, title: string = "An error occurred") {
-  errorMessage(msg, title);
+export function errorOutro(
+  msg: string,
+  title: string = "An error occurred",
+  extraLog?: any,
+) {
+  errorMessage(msg, title, extraLog);
   process.exit(1);
 }
 
@@ -79,7 +83,11 @@ export function errorOutro(msg: string, title: string = "An error occurred") {
  * Display a error message with using `picocolors`
  * (including a process exit code)
  */
-export function errorMessage(err: any, title: string | null = null) {
+export function errorMessage(
+  err: any,
+  title: string | null = null,
+  extraLog?: any,
+) {
   let message = "Unknown error";
 
   if (typeof err == "string") {
@@ -90,6 +98,7 @@ export function errorMessage(err: any, title: string | null = null) {
 
   if (title) {
     console.log(picocolors.bgRed(` ${title} `));
-    console.log(message, "\n");
-  } else console.log(picocolors.bgRed(` ${message} `), "\n");
+    console.log(message);
+  } else console.log(picocolors.bgRed(` ${message} `));
+  if (extraLog) console.log(extraLog);
 }
