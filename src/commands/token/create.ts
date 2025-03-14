@@ -10,10 +10,10 @@ import {
   createSolanaClient,
   generateKeyPairSigner,
   isStringifiedNumber,
-  signTransactionMessageWithSigners,
   getExplorerLink,
   isAddress,
   address,
+  isSolanaError,
 } from "gill";
 import {
   buildCreateTokenTransaction,
@@ -25,6 +25,7 @@ import {
 import { loadKeypairSignerFromFile } from "gill/node";
 import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
 import { parseOptionsFlagForRpcUrl } from "@/lib/cli/parsers";
+import { simulateTransactionOnThrow } from "@/lib/gill/errors";
 
 export function createTokenCommand() {
   return new Command("create")
@@ -110,6 +111,7 @@ export function createTokenCommand() {
     .addOption(COMMON_OPTIONS.url)
     .action(async (options) => {
       titleMessage("Create a new token");
+      const spinner = ora();
 
       if (!options.name) {
         return errorOutro(
@@ -174,142 +176,176 @@ export function createTokenCommand() {
         );
       }
 
-      const parsedRpcUrl = parseOptionsFlagForRpcUrl(
-        options.url,
-        /* use the Solana cli config's rpc url as the fallback */
-        loadSolanaCliConfig().json_rpc_url,
-      );
+      spinner.start("Preparing to create token");
 
-      const tokenProgram = checkedTokenProgramAddress(
-        address(options.tokenProgram),
-      );
-
-      // payer will always be used to pay the fees
-      const payer = await loadKeypairSignerFromFile(options.keypair);
-
-      // mint authority is required to sign in order to mint the initial tokens
-      const mintAuthority = options.mintAuthority
-        ? await loadKeypairSignerFromFile(options.mintAuthority)
-        : payer;
-
-      const freezeAuthority = await getAddressFromStringOrFilePath(
-        options.freezeAuthority || payer.address,
-      );
-
-      const mint = options.customMint
-        ? await loadKeypairSignerFromFile(options.customMint)
-        : await generateKeyPairSigner();
-
-      console.log(); // line spacer after the common "ExperimentalWarning for Ed25519 Web Crypto API"
-      const spinner = ora("Preparing to create token").start();
-
-      const { rpc, sendAndConfirmTransaction } = createSolanaClient({
-        urlOrMoniker: parsedRpcUrl.url,
-      });
-
-      spinner.text = "Fetching the latest blockhash";
-      const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
-
-      spinner.text = "Preparing to create token mint";
-
-      const createMintTx = await buildCreateTokenTransaction({
-        feePayer: payer,
-        latestBlockhash,
-        mint,
-        mintAuthority,
-        tokenProgram,
-        freezeAuthority,
-        updateAuthority: mintAuthority,
-        metadata: {
-          isMutable: true,
-          name: options.name,
-          symbol: options.symbol,
-          uri: options.metadata,
-        },
-        decimals: Number(options.decimals),
-      });
-
-      spinner.text = "Creating token mint: " + mint.address;
-      let signature = await sendAndConfirmTransaction(
-        await signTransactionMessageWithSigners(createMintTx),
-      );
-
-      spinner.succeed("Token mint created: " + mint.address);
-
-      console.log(
-        " ",
-        getExplorerLink({
-          cluster: parsedRpcUrl.cluster,
-          transaction: signature,
-        }),
-        "\n",
-      );
-
-      if (!options.amount) {
-        warnMessage(
-          "No amount provided, skipping minting tokens to your account",
+      try {
+        const parsedRpcUrl = parseOptionsFlagForRpcUrl(
+          options.url,
+          /* use the Solana cli config's rpc url as the fallback */
+          loadSolanaCliConfig().json_rpc_url,
         );
 
-        const mintCommand = [
-          "npx mucho token mint",
-          `--url ${parsedRpcUrl.cluster}`,
-          `--mint ${mint.address}`,
-          `--destination <DESTINATION_ADDRESS>`,
-          `--amount <AMOUNT>`,
-        ];
+        const tokenProgram = checkedTokenProgramAddress(
+          address(options.tokenProgram),
+        );
+
+        // payer will always be used to pay the fees
+        const payer = await loadKeypairSignerFromFile(options.keypair);
+
+        // mint authority is required to sign in order to mint the initial tokens
+        const mintAuthority = options.mintAuthority
+          ? await loadKeypairSignerFromFile(options.mintAuthority)
+          : payer;
+
+        const freezeAuthority = await getAddressFromStringOrFilePath(
+          options.freezeAuthority || payer.address,
+        );
+
+        const mint = options.customMint
+          ? await loadKeypairSignerFromFile(options.customMint)
+          : await generateKeyPairSigner();
+
+        const { rpc, sendAndConfirmTransaction, simulateTransaction } =
+          createSolanaClient({
+            urlOrMoniker: parsedRpcUrl.url,
+          });
+
+        spinner.text = "Fetching the latest blockhash";
+        const { value: latestBlockhash } = await rpc
+          .getLatestBlockhash()
+          .send();
+
+        spinner.text = "Preparing to create token mint";
+
+        const createMintTx = await buildCreateTokenTransaction({
+          feePayer: payer,
+          latestBlockhash,
+          mint,
+          mintAuthority,
+          tokenProgram,
+          freezeAuthority,
+          updateAuthority: mintAuthority,
+          metadata: {
+            isMutable: true,
+            name: options.name,
+            symbol: options.symbol,
+            uri: options.metadata,
+          },
+          decimals: Number(options.decimals),
+        });
+
+        spinner.text = "Creating token mint: " + mint.address;
+        let signature = await sendAndConfirmTransaction(createMintTx, {
+          commitment: "confirmed",
+          // skipPreflight: true,
+        }).catch(async (err) => {
+          await simulateTransactionOnThrow(
+            simulateTransaction,
+            err,
+            createMintTx,
+          );
+          throw err;
+        });
+
+        spinner.succeed("Token mint created: " + mint.address);
 
         console.log(
-          "To mint new tokens to any destination wallet in the future, run the following command:",
+          " ",
+          getExplorerLink({
+            cluster: parsedRpcUrl.cluster,
+            transaction: signature,
+          }),
+          "\n",
         );
-        console.log(mintCommand.join(" "));
+
+        if (!options.amount) {
+          warnMessage(
+            "No amount provided, skipping minting tokens to your account",
+          );
+
+          const mintCommand = [
+            "npx mucho token mint",
+            `--url ${parsedRpcUrl.cluster}`,
+            `--mint ${mint.address}`,
+            `--destination <DESTINATION_ADDRESS>`,
+            `--amount <AMOUNT>`,
+          ];
+
+          console.log(
+            "To mint new tokens to any destination wallet in the future, run the following command:",
+          );
+          console.log(mintCommand.join(" "));
+          spinner.stop();
+          return;
+        }
+
+        if (!isStringifiedNumber(options.amount)) {
+          return errorOutro(
+            "Please provide a valid amount with -a <AMOUNT>",
+            "Invalid value",
+          );
+        }
+
+        const destination = options.destination
+          ? await parseOrLoadSignerAddress(options.destination)
+          : payer.address;
+
+        spinner.start(
+          `Preparing to mint '${options.amount}' tokens to ${destination}`,
+        );
+
+        const mintTokensTx = await buildMintTokensTransaction({
+          feePayer: payer,
+          latestBlockhash,
+          mint,
+          mintAuthority,
+          tokenProgram,
+          amount: Number(options.amount) * 10 ** Number(options.decimals),
+          destination,
+        });
+
+        const tokenPlurality = wordWithPlurality(
+          options.amount,
+          "token",
+          "tokens",
+        );
+
+        spinner.text = `Minting '${options.amount}' ${tokenPlurality} to ${destination}`;
+        signature = await sendAndConfirmTransaction(mintTokensTx, {
+          commitment: "confirmed",
+          skipPreflight: true,
+        }).catch(async (err) => {
+          await simulateTransactionOnThrow(
+            simulateTransaction,
+            err,
+            createMintTx,
+          );
+          throw err;
+        });
+
+        spinner.succeed(
+          `Minted '${options.amount}' ${tokenPlurality} to ${destination}`,
+        );
+        console.log(
+          " ",
+          getExplorerLink({
+            cluster: parsedRpcUrl.cluster,
+            transaction: signature,
+          }),
+        );
+      } catch (err) {
         spinner.stop();
-        return;
+        let title = "Failed to complete operation";
+        let message = err;
+        let extraLog = null;
+
+        if (isSolanaError(err)) {
+          title = "SolanaError";
+          message = err.message;
+          extraLog = err.context;
+        }
+
+        errorOutro(message, title, extraLog);
       }
-
-      if (!isStringifiedNumber(options.amount)) {
-        return errorOutro(
-          "Please provide a valid amount with -a <AMOUNT>",
-          "Invalid value",
-        );
-      }
-
-      const destination = options.destination
-        ? await parseOrLoadSignerAddress(options.destination)
-        : payer.address;
-
-      spinner.start(
-        `Preparing to mint '${options.amount}' tokens to ${destination}`,
-      );
-
-      const mintTokensTx = await buildMintTokensTransaction({
-        feePayer: payer,
-        latestBlockhash,
-        mint,
-        mintAuthority,
-        tokenProgram,
-        amount: Number(options.amount) * 10 ** Number(options.decimals),
-        destination,
-      });
-
-      const tokenPlurality = wordWithPlurality(
-        options.amount,
-        "token",
-        "tokens",
-      );
-
-      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to ${destination}`;
-      signature = await sendAndConfirmTransaction(
-        await signTransactionMessageWithSigners(mintTokensTx),
-      );
-      spinner.succeed(
-        `Minted '${options.amount}' ${tokenPlurality} to ${destination}`,
-      );
-      console.log(
-        " ",
-        getExplorerLink({
-          cluster: parsedRpcUrl.cluster,
-          transaction: signature,
-        }),
-      );
     });
 }

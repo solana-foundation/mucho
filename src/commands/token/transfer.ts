@@ -8,7 +8,6 @@ import { wordWithPlurality } from "@/lib/utils";
 import {
   createSolanaClient,
   isStringifiedNumber,
-  signTransactionMessageWithSigners,
   getExplorerLink,
   isSolanaError,
   SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND,
@@ -22,6 +21,7 @@ import {
 import { loadKeypairSignerFromFile } from "gill/node";
 import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
 import { parseOptionsFlagForRpcUrl } from "@/lib/cli/parsers";
+import { simulateTransactionOnThrow } from "@/lib/gill/errors";
 
 export function transferTokenCommand() {
   return new Command("transfer")
@@ -66,6 +66,7 @@ export function transferTokenCommand() {
     .addOption(COMMON_OPTIONS.url)
     .action(async (options) => {
       titleMessage("Transfer tokens");
+      const spinner = ora();
 
       const parsedRpcUrl = parseOptionsFlagForRpcUrl(
         options.url,
@@ -101,122 +102,154 @@ export function transferTokenCommand() {
         );
       }
 
-      // payer will always be used to pay the fees
-      const payer = await loadKeypairSignerFromFile(options.keypair);
+      spinner.start("Preparing to mint tokens");
 
-      const mint = await parseOrLoadSignerAddress(options.mint);
-      const destination = await parseOrLoadSignerAddress(options.destination);
+      try {
+        // payer will always be used to pay the fees
+        const payer = await loadKeypairSignerFromFile(options.keypair);
 
-      // source wallet is required to sign in order to authorize the transfer
-      const source = options.source
-        ? await loadKeypairSignerFromFile(options.source)
-        : payer;
+        const mint = await parseOrLoadSignerAddress(options.mint);
+        const destination = await parseOrLoadSignerAddress(options.destination);
 
-      console.log(); // line spacer after the common "ExperimentalWarning for Ed25519 Web Crypto API"
-      const spinner = ora("Preparing to transfer tokens").start();
+        // source wallet is required to sign in order to authorize the transfer
+        const source = options.source
+          ? await loadKeypairSignerFromFile(options.source)
+          : payer;
 
-      const { rpc, sendAndConfirmTransaction } = createSolanaClient({
-        urlOrMoniker: parsedRpcUrl.url,
-      });
+        console.log(); // line spacer after the common "ExperimentalWarning for Ed25519 Web Crypto API"
+        const spinner = ora("Preparing to transfer tokens").start();
 
-      const tokenPlurality = wordWithPlurality(
-        options.amount,
-        "token",
-        "tokens",
-      );
+        const { rpc, sendAndConfirmTransaction, simulateTransaction } =
+          createSolanaClient({
+            urlOrMoniker: parsedRpcUrl.url,
+          });
 
-      // fetch the current mint from the chain to validate it
-      const mintAccount = await fetchMint(rpc, mint).catch((err) => {
-        if (isSolanaError(err, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND)) {
-          spinner.fail();
-          throw errorOutro(`Mint account not found: ${mint}`, "Mint Not Found");
-        }
-        throw err;
-      });
-
-      // fetch the source ata from the chain to validate it
-      const [sourceAta, destinationAta] = await Promise.all([
-        getAssociatedTokenAccountAddress(
-          mint,
-          source.address,
-          mintAccount.programAddress,
-        ),
-        getAssociatedTokenAccountAddress(
-          mint,
-          destination,
-          mintAccount.programAddress,
-        ),
-      ]);
-
-      const tokenAccount = await fetchToken(rpc, sourceAta).catch((err) => {
-        if (isSolanaError(err, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND)) {
-          spinner.fail();
-          throw errorOutro(
-            `Source token account not found:\n` +
-              `- mint: ${mint}\n` +
-              `- source owner: ${source.address}\n` +
-              `- source ata: ${sourceAta}`,
-            "Token Account Not Found",
-          );
-        }
-        throw err;
-      });
-
-      if (tokenAccount.data.amount < BigInt(options.amount)) {
-        spinner.fail();
-        return errorOutro(
-          `The provided source wallet does not have enough tokens to transfer:\n` +
-            `- current balance: ${tokenAccount.data.amount}\n` +
-            `- transfer amount: ${options.amount}`,
-          "Insufficient Balance",
+        const tokenPlurality = wordWithPlurality(
+          options.amount,
+          "token",
+          "tokens",
         );
-      }
 
-      spinner.text = "Fetching the latest blockhash";
-      const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+        // fetch the current mint from the chain to validate it
+        const mintAccount = await fetchMint(rpc, mint).catch((err) => {
+          if (isSolanaError(err, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND)) {
+            spinner.fail();
+            throw errorOutro(
+              `Mint account not found: ${mint}`,
+              "Mint Not Found",
+            );
+          }
+          throw err;
+        });
 
-      spinner.text = `Preparing to transfer '${options.amount}' ${tokenPlurality} to ${destination}`;
-
-      const mintTokensTx = await buildTransferTokensTransaction({
-        feePayer: payer,
-        latestBlockhash,
-        mint,
-        authority: source,
-        tokenProgram: mintAccount.programAddress,
-        amount: BigInt(options.amount),
-        destination,
-        destinationAta,
-        sourceAta,
-      });
-
-      spinner.text = `Transferring '${options.amount}' ${tokenPlurality} to ${destination}`;
-      let signature = await sendAndConfirmTransaction(
-        await signTransactionMessageWithSigners(mintTokensTx),
-      );
-      spinner.succeed(
-        `Transferred '${options.amount}' ${tokenPlurality} to ${destination}`,
-      );
-      console.log(
-        " ",
-        getExplorerLink({
-          cluster: parsedRpcUrl.cluster,
-          transaction: signature,
-        }),
-      );
-
-      const [updatedSourceTokenAccount, updatedDestinationTokenAccount] =
-        await Promise.all([
-          fetchToken(rpc, sourceAta),
-          fetchToken(rpc, destinationAta),
+        // fetch the source ata from the chain to validate it
+        const [sourceAta, destinationAta] = await Promise.all([
+          getAssociatedTokenAccountAddress(
+            mint,
+            source.address,
+            mintAccount.programAddress,
+          ),
+          getAssociatedTokenAccountAddress(
+            mint,
+            destination,
+            mintAccount.programAddress,
+          ),
         ]);
 
-      console.log();
-      titleMessage("Updated token balances");
+        const tokenAccount = await fetchToken(rpc, sourceAta).catch((err) => {
+          if (isSolanaError(err, SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND)) {
+            spinner.fail();
+            throw errorOutro(
+              `Source token account not found:\n` +
+                `- mint: ${mint}\n` +
+                `- source owner: ${source.address}\n` +
+                `- source ata: ${sourceAta}`,
+              "Token Account Not Found",
+            );
+          }
+          throw err;
+        });
 
-      console.log(
-        // `Updated token balances:\n` +
-        `- ${source.address} - source wallet: ${updatedSourceTokenAccount.data.amount}\n` +
-          `- ${destination} - destination wallet: ${updatedDestinationTokenAccount.data.amount}`,
-      );
+        if (tokenAccount.data.amount < BigInt(options.amount)) {
+          spinner.fail();
+          return errorOutro(
+            `The provided source wallet does not have enough tokens to transfer:\n` +
+              `- current balance: ${tokenAccount.data.amount}\n` +
+              `- transfer amount: ${options.amount}`,
+            "Insufficient Balance",
+          );
+        }
+
+        spinner.text = "Fetching the latest blockhash";
+        const { value: latestBlockhash } = await rpc
+          .getLatestBlockhash()
+          .send();
+
+        spinner.text = `Preparing to transfer '${options.amount}' ${tokenPlurality} to ${destination}`;
+
+        const transferTokensTx = await buildTransferTokensTransaction({
+          feePayer: payer,
+          latestBlockhash,
+          mint,
+          authority: source,
+          tokenProgram: mintAccount.programAddress,
+          amount: BigInt(options.amount),
+          destination,
+          destinationAta,
+          sourceAta,
+        });
+
+        spinner.text = `Transferring '${options.amount}' ${tokenPlurality} to ${destination}`;
+        let signature = await sendAndConfirmTransaction(transferTokensTx, {
+          commitment: "confirmed",
+          // skipPreflight: true,
+        }).catch(async (err) => {
+          await simulateTransactionOnThrow(
+            simulateTransaction,
+            err,
+            transferTokensTx,
+          );
+          throw err;
+        });
+
+        spinner.succeed(
+          `Transferred '${options.amount}' ${tokenPlurality} to ${destination}`,
+        );
+        console.log(
+          " ",
+          getExplorerLink({
+            cluster: parsedRpcUrl.cluster,
+            transaction: signature,
+          }),
+        );
+
+        const [updatedSourceTokenAccount, updatedDestinationTokenAccount] =
+          await Promise.all([
+            fetchToken(rpc, sourceAta),
+            fetchToken(rpc, destinationAta),
+          ]);
+
+        console.log();
+        titleMessage("Updated token balances");
+
+        console.log(
+          // `Updated token balances:\n` +
+          `- ${source.address} - source wallet: ${updatedSourceTokenAccount.data.amount}\n` +
+            `- ${destination} - destination wallet: ${updatedDestinationTokenAccount.data.amount}`,
+        );
+      } catch (err) {
+        spinner.stop();
+        let title = "Failed to complete operation";
+        let message = err;
+        let extraLog = null;
+
+        if (isSolanaError(err)) {
+          title = "SolanaError";
+          message = err.message;
+          extraLog = err.context;
+        }
+
+        errorOutro(message, title, extraLog);
+      }
     });
 }
