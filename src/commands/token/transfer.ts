@@ -62,6 +62,8 @@ export function transferTokenCommand() {
         `keypair file for the source wallet (default: same as --keypair)`,
       ),
     )
+    .addOption(COMMON_OPTIONS.skipPreflight)
+    .addOption(COMMON_OPTIONS.commitment)
     .addOption(COMMON_OPTIONS.keypair)
     .addOption(COMMON_OPTIONS.url)
     .action(async (options) => {
@@ -201,8 +203,8 @@ export function transferTokenCommand() {
 
         spinner.text = `Transferring '${options.amount}' ${tokenPlurality} to ${destination}`;
         let signature = await sendAndConfirmTransaction(transferTokensTx, {
-          commitment: "confirmed",
-          // skipPreflight: true,
+          commitment: options.commitment || "confirmed",
+          skipPreflight: options.skipPreflight,
         }).catch(async (err) => {
           await simulateTransactionOnThrow(
             simulateTransaction,

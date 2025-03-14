@@ -107,6 +107,8 @@ export function createTokenCommand() {
         "SPL token program to for this token (default: legacy)",
       ).choices(["legacy", "token22", "tokenExtensions", "<PROGRAM_ID>"]),
     )
+    .addOption(COMMON_OPTIONS.skipPreflight)
+    .addOption(COMMON_OPTIONS.commitment)
     .addOption(COMMON_OPTIONS.keypair)
     .addOption(COMMON_OPTIONS.url)
     .action(async (options) => {
@@ -236,8 +238,8 @@ export function createTokenCommand() {
 
         spinner.text = "Creating token mint: " + mint.address;
         let signature = await sendAndConfirmTransaction(createMintTx, {
-          commitment: "confirmed",
-          // skipPreflight: true,
+          commitment: options.commitment || "confirmed",
+          skipPreflight: options.skipPreflight,
         }).catch(async (err) => {
           await simulateTransactionOnThrow(
             simulateTransaction,
@@ -312,8 +314,8 @@ export function createTokenCommand() {
 
         spinner.text = `Minting '${options.amount}' ${tokenPlurality} to ${destination}`;
         signature = await sendAndConfirmTransaction(mintTokensTx, {
-          commitment: "confirmed",
-          skipPreflight: true,
+          commitment: options.commitment || "confirmed",
+          skipPreflight: options.skipPreflight,
         }).catch(async (err) => {
           await simulateTransactionOnThrow(
             simulateTransaction,
