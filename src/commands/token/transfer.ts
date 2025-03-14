@@ -1,7 +1,7 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliOutputConfig, loadSolanaCliConfig } from "@/lib/cli";
 import { COMMON_OPTIONS } from "@/const/commands";
-import { errorOutro, titleMessage } from "@/lib/logs";
+import { errorOutro, titleMessage, warningOutro } from "@/lib/logs";
 import ora from "ora";
 
 import { wordWithPlurality } from "@/lib/utils";
@@ -22,6 +22,7 @@ import { loadKeypairSignerFromFile } from "gill/node";
 import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
 import { parseOptionsFlagForRpcUrl } from "@/lib/cli/parsers";
 import { simulateTransactionOnThrow } from "@/lib/gill/errors";
+import { getRunningTestValidatorCommand } from "@/lib/shell/test-validator";
 
 export function transferTokenCommand() {
   return new Command("transfer")
@@ -75,6 +76,16 @@ export function transferTokenCommand() {
         /* use the Solana cli config's rpc url as the fallback */
         loadSolanaCliConfig().json_rpc_url,
       );
+
+      if (
+        parsedRpcUrl.cluster == "localhost" &&
+        !getRunningTestValidatorCommand()
+      ) {
+        spinner.stop();
+        return warningOutro(
+          `Attempted to use localnet with no local validator running. Operation canceled.`,
+        );
+      }
 
       if (!options.mint) {
         return errorOutro(

@@ -1,7 +1,12 @@
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliOutputConfig, loadSolanaCliConfig } from "@/lib/cli";
 import { COMMON_OPTIONS } from "@/const/commands";
-import { errorOutro, titleMessage, warnMessage } from "@/lib/logs";
+import {
+  errorOutro,
+  titleMessage,
+  warningOutro,
+  warnMessage,
+} from "@/lib/logs";
 import ora from "ora";
 
 import { getAddressFromStringOrFilePath } from "@/lib/solana";
@@ -26,6 +31,7 @@ import { loadKeypairSignerFromFile } from "gill/node";
 import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
 import { parseOptionsFlagForRpcUrl } from "@/lib/cli/parsers";
 import { simulateTransactionOnThrow } from "@/lib/gill/errors";
+import { getRunningTestValidatorCommand } from "@/lib/shell/test-validator";
 
 export function createTokenCommand() {
   return new Command("create")
@@ -115,6 +121,22 @@ export function createTokenCommand() {
       titleMessage("Create a new token");
       const spinner = ora();
 
+      const parsedRpcUrl = parseOptionsFlagForRpcUrl(
+        options.url,
+        /* use the Solana cli config's rpc url as the fallback */
+        loadSolanaCliConfig().json_rpc_url,
+      );
+
+      if (
+        parsedRpcUrl.cluster == "localhost" &&
+        !getRunningTestValidatorCommand()
+      ) {
+        spinner.stop();
+        return warningOutro(
+          `Attempted to use localnet with no local validator running. Operation canceled.`,
+        );
+      }
+
       if (!options.name) {
         return errorOutro(
           "Please provide a name with -n <NAME>",
@@ -181,12 +203,6 @@ export function createTokenCommand() {
       spinner.start("Preparing to create token");
 
       try {
-        const parsedRpcUrl = parseOptionsFlagForRpcUrl(
-          options.url,
-          /* use the Solana cli config's rpc url as the fallback */
-          loadSolanaCliConfig().json_rpc_url,
-        );
-
         const tokenProgram = checkedTokenProgramAddress(
           address(options.tokenProgram),
         );

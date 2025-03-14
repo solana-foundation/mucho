@@ -2,7 +2,12 @@ import path from "path";
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliConfig, COMMON_OPTIONS } from "@/const/commands";
 import { cliOutputConfig, loadConfigToml } from "@/lib/cli";
-import { cancelMessage, titleMessage, warnMessage } from "@/lib/logs";
+import {
+  cancelMessage,
+  titleMessage,
+  warningOutro,
+  warnMessage,
+} from "@/lib/logs";
 import { checkCommand, shellExecInSession } from "@/lib/shell";
 import {
   buildDeployProgramCommand,
@@ -111,8 +116,8 @@ export function deployCommand() {
         }
       }
 
-      if (!getRunningTestValidatorCommand()) {
-        return warnMessage(
+      if (selectedCluster == "localnet" && !getRunningTestValidatorCommand()) {
+        return warningOutro(
           `Attempted to deploy to localnet with no local validator running. Operation canceled.`,
         );
       }
