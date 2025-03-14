@@ -8,15 +8,16 @@ import { wordWithPlurality } from "@/lib/utils";
 import {
   createSolanaClient,
   isStringifiedNumber,
-  signTransactionMessageWithSigners,
   getExplorerLink,
   isNone,
   isSome,
+  isSolanaError,
 } from "gill";
 import { buildMintTokensTransaction, fetchMint } from "gill/programs/token";
 import { loadKeypairSignerFromFile } from "gill/node";
 import { parseOrLoadSignerAddress } from "@/lib/gill/keys";
 import { parseOptionsFlagForRpcUrl } from "@/lib/cli/parsers";
+import { simulateTransactionOnThrow } from "@/lib/gill/errors";
 
 export function mintTokenCommand() {
   return new Command("mint")
@@ -61,6 +62,7 @@ export function mintTokenCommand() {
     .addOption(COMMON_OPTIONS.url)
     .action(async (options) => {
       titleMessage("Mint new tokens");
+      const spinner = ora();
 
       const parsedRpcUrl = parseOptionsFlagForRpcUrl(
         options.url,
@@ -96,82 +98,108 @@ export function mintTokenCommand() {
         );
       }
 
-      // payer will always be used to pay the fees
-      const payer = await loadKeypairSignerFromFile(options.keypair);
+      spinner.start("Preparing to mint tokens");
 
-      const mint = await parseOrLoadSignerAddress(options.mint);
-      const destination = await parseOrLoadSignerAddress(options.destination);
+      try {
+        // payer will always be used to pay the fees
+        const payer = await loadKeypairSignerFromFile(options.keypair);
 
-      // mint authority is required to sign in order to mint the initial tokens
-      const mintAuthority = options.mintAuthority
-        ? await loadKeypairSignerFromFile(options.mintAuthority)
-        : payer;
+        const mint = await parseOrLoadSignerAddress(options.mint);
+        const destination = await parseOrLoadSignerAddress(options.destination);
 
-      console.log(); // line spacer after the common "ExperimentalWarning for Ed25519 Web Crypto API"
-      const spinner = ora("Preparing to mint tokens").start();
+        // mint authority is required to sign in order to mint the initial tokens
+        const mintAuthority = options.mintAuthority
+          ? await loadKeypairSignerFromFile(options.mintAuthority)
+          : payer;
 
-      const { rpc, sendAndConfirmTransaction } = createSolanaClient({
-        urlOrMoniker: parsedRpcUrl.url,
-      });
+        const { rpc, sendAndConfirmTransaction, simulateTransaction } =
+          createSolanaClient({
+            urlOrMoniker: parsedRpcUrl.url,
+          });
 
-      const tokenPlurality = wordWithPlurality(
-        options.amount,
-        "token",
-        "tokens",
-      );
-
-      // fetch the current mint from the chain to validate it
-      const mintAccount = await fetchMint(rpc, mint);
-
-      // supply is capped when the mint authority is removed
-      if (isNone(mintAccount.data.mintAuthority)) {
-        return errorOutro(
-          "This token's can no longer mint new tokens to holders",
-          "Frozen Mint",
+        const tokenPlurality = wordWithPlurality(
+          options.amount,
+          "token",
+          "tokens",
         );
-      }
 
-      // only the current mint authority can authorize issuing new supply
-      if (
-        isSome(mintAccount.data.mintAuthority) &&
-        mintAccount.data.mintAuthority.value !== mintAuthority.address
-      ) {
-        return errorOutro(
-          `The provided mint authority cannot mint new tokens: ${mintAuthority.address}\n` +
-            `Only ${mintAccount.data.mintAuthority.value} can authorize minting new tokens`,
-          "Incorrect Mint Authority",
+        // fetch the current mint from the chain to validate it
+        const mintAccount = await fetchMint(rpc, mint);
+
+        // supply is capped when the mint authority is removed
+        if (isNone(mintAccount.data.mintAuthority)) {
+          return errorOutro(
+            "This token's can no longer mint new tokens to holders",
+            "Frozen Mint",
+          );
+        }
+
+        // only the current mint authority can authorize issuing new supply
+        if (
+          isSome(mintAccount.data.mintAuthority) &&
+          mintAccount.data.mintAuthority.value !== mintAuthority.address
+        ) {
+          return errorOutro(
+            `The provided mint authority cannot mint new tokens: ${mintAuthority.address}\n` +
+              `Only ${mintAccount.data.mintAuthority.value} can authorize minting new tokens`,
+            "Incorrect Mint Authority",
+          );
+        }
+
+        spinner.text = "Fetching the latest blockhash";
+        const { value: latestBlockhash } = await rpc
+          .getLatestBlockhash()
+          .send();
+
+        spinner.text = `Preparing to mint '${options.amount}' ${tokenPlurality} to ${destination}`;
+
+        const mintTokensTx = await buildMintTokensTransaction({
+          feePayer: payer,
+          latestBlockhash,
+          mint,
+          mintAuthority,
+          tokenProgram: mintAccount.programAddress,
+          amount: Number(options.amount),
+          // amount: Number(options.amount) * 10 ** Number(options.decimals),
+          destination: destination,
+        });
+
+        spinner.text = `Minting '${options.amount}' ${tokenPlurality} to ${destination}`;
+        let signature = await sendAndConfirmTransaction(mintTokensTx, {
+          commitment: "confirmed",
+          // skipPreflight: true,
+        }).catch(async (err) => {
+          await simulateTransactionOnThrow(
+            simulateTransaction,
+            err,
+            mintTokensTx,
+          );
+          throw err;
+        });
+
+        spinner.succeed(
+          `Minted '${options.amount}' ${tokenPlurality} to ${destination}`,
         );
+        console.log(
+          " ",
+          getExplorerLink({
+            cluster: parsedRpcUrl.cluster,
+            transaction: signature,
+          }),
+        );
+      } catch (err) {
+        spinner.stop();
+        let title = "Failed to complete operation";
+        let message = err;
+        let extraLog = null;
+
+        if (isSolanaError(err)) {
+          title = "SolanaError";
+          message = err.message;
+          extraLog = err.context;
+        }
+
+        errorOutro(message, title, extraLog);
       }
-
-      spinner.text = "Fetching the latest blockhash";
-      const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
-
-      spinner.text = `Preparing to mint '${options.amount}' ${tokenPlurality} to ${destination}`;
-
-      const mintTokensTx = await buildMintTokensTransaction({
-        feePayer: payer,
-        latestBlockhash,
-        mint,
-        mintAuthority,
-        tokenProgram: mintAccount.programAddress,
-        amount: Number(options.amount),
-        // amount: Number(options.amount) * 10 ** Number(options.decimals),
-        destination: destination,
-      });
-
-      spinner.text = `Minting '${options.amount}' ${tokenPlurality} to ${destination}`;
-      let signature = await sendAndConfirmTransaction(
-        await signTransactionMessageWithSigners(mintTokensTx),
-      );
-      spinner.succeed(
-        `Minted '${options.amount}' ${tokenPlurality} to ${destination}`,
-      );
-      console.log(
-        " ",
-        getExplorerLink({
-          cluster: parsedRpcUrl.cluster,
-          transaction: signature,
-        }),
-      );
     });
 }

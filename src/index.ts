@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 
-import { assertRuntimeVersion, suppressRuntimeWarnings } from "@/lib/node";
+import {
+  assertRuntimeVersion,
+  patchBigint,
+  suppressRuntimeWarnings,
+} from "@/lib/node";
 
 assertRuntimeVersion();
 suppressRuntimeWarnings();
+patchBigint();
 
 import { checkForSelfUpdate } from "@/lib/npm";
 import { errorOutro } from "@/lib/logs";
