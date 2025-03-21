@@ -23,6 +23,7 @@ import { cloneCommand } from "@/commands/clone";
 import { getAppInfo } from "@/lib/app-info";
 import { loadKeypairSignerFromFile } from "gill/node";
 import { getExplorerLink } from "gill";
+import { logger } from "@/lib/logger";
 
 /**
  * Command: `validator`
@@ -41,7 +42,7 @@ export function validatorCommand() {
       getCommandOutputSync("solana-test-validator --version") ||
         `solana-test-validator not found`,
     );
-    process.exit();
+    logger.exit();
   }
 
   return new Command("validator")
@@ -166,7 +167,7 @@ export function validatorCommand() {
 
       if (options.verbose) console.log(`\n${command}\n`);
       // only log the "run validator" command, do not execute it
-      if (options.outputOnly) process.exit();
+      if (options.outputOnly) logger.exit();
 
       if (options.reset && options.verbose) {
         console.log(

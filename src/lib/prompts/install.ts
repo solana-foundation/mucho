@@ -1,5 +1,6 @@
 import { select } from "@inquirer/prompts";
 import { ToolNames } from "@/types";
+import { logger } from "../logger";
 
 export async function promptToInstall(
   toolName: ToolNames,
@@ -33,7 +34,6 @@ export async function promptToInstall(
        */
       // do nothing on user cancel instead of exiting the cli
       console.log("Operation canceled.");
-      process.exit();
-      return;
+      return logger.exit();
     });
 }

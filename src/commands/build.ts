@@ -6,6 +6,7 @@ import { COMMON_OPTIONS } from "@/const/commands";
 import { autoLocateProgramsInWorkspace, loadCargoToml } from "@/lib/cargo";
 import { buildProgramCommand } from "@/lib/shell/build";
 import { doesFileExist } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 /**
  * Command: `build`
@@ -65,7 +66,7 @@ export function buildCommand() {
           );
 
           // todo: should we prompt the user to select a valid program?
-          process.exit();
+          logger.exit();
         }
       }
 

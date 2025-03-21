@@ -2,12 +2,7 @@ import path from "path";
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliConfig, COMMON_OPTIONS } from "@/const/commands";
 import { cliOutputConfig, loadConfigToml } from "@/lib/cli";
-import {
-  cancelMessage,
-  titleMessage,
-  warningOutro,
-  warnMessage,
-} from "@/lib/logs";
+import { titleMessage, warningOutro, warnMessage } from "@/lib/logs";
 import { checkCommand, shellExecInSession } from "@/lib/shell";
 import {
   buildDeployProgramCommand,
@@ -19,6 +14,7 @@ import { getSafeClusterMoniker, parseRpcUrlOrMoniker } from "@/lib/solana";
 import { promptToSelectCluster } from "@/lib/prompts/build";
 import { loadKeypairSignerFromFile } from "gill/node";
 import { getRunningTestValidatorCommand } from "@/lib/shell/test-validator";
+import { logger } from "@/lib/logger";
 
 /**
  * Command: `deploy`
@@ -86,7 +82,7 @@ export function deployCommand() {
         );
 
         // todo: should we prompt the user to select a valid program?
-        process.exit();
+        logger.exit();
       }
 
       if (!options.url) {
@@ -170,17 +166,16 @@ export function deployCommand() {
             });
           });
 
-          process.exit();
+          logger.exit();
         }
 
         if (
           !config?.programs?.[selectedCluster] ||
           !Object.hasOwn(config.programs[selectedCluster], options.programName)
         ) {
-          warnMessage(
+          return warningOutro(
             `Program '${options.programName}' not found in 'programs.${selectedCluster}'`,
           );
-          process.exit();
         }
 
         programId = config.programs[selectedCluster][options.programName];
@@ -194,8 +189,9 @@ export function deployCommand() {
           console.log(` - keypair path: ${programIdPath}`);
           console.log(` - program id: ${programId}`);
         } else {
-          warnMessage(`Unable to locate any program id or program keypair.`);
-          process.exit();
+          return warningOutro(
+            `Unable to locate any program id or program keypair.`,
+          );
         }
       }
 
@@ -237,7 +233,7 @@ export function deployCommand() {
           warnMessage(
             `Unable to perform initial program deployment. Operation cancelled.`,
           );
-          process.exit();
+          logger.exit();
           // todo: should we prompt the user if they want to proceed
         }
         programId = programIdFromKeypair;
@@ -258,13 +254,13 @@ export function deployCommand() {
        */
       if (programInfo) {
         if (!programInfo.authority) {
-          return cancelMessage(
+          return warningOutro(
             `Program ${programInfo.programId} is no longer upgradeable`,
           );
         }
 
         if (programInfo.authority !== authorityKeypair.address) {
-          return cancelMessage(
+          return warningOutro(
             `Your keypair (${authorityKeypair.address}) is not the upgrade authority for program ${programId}`,
           );
         }

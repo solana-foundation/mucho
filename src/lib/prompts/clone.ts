@@ -1,5 +1,6 @@
 import { select } from "@inquirer/prompts";
 import { cloneCommand } from "@/commands/clone";
+import { logger } from "../logger";
 
 export async function promptToAutoClone(): Promise<void | boolean> {
   console.log(); // print a line separator
@@ -37,7 +38,6 @@ export async function promptToAutoClone(): Promise<void | boolean> {
        */
       // do nothing on user cancel instead of exiting the cli
       console.log("Operation canceled.");
-      process.exit();
-      return;
+      return logger.exit();
     });
 }

@@ -14,6 +14,7 @@ import ora from "ora";
 import { TOOL_CONFIG } from "@/const/setup";
 import picocolors from "picocolors";
 import { getCurrentNpmPackageVersion } from "./npm";
+import { logger } from "./logger";
 
 /**
  * Install the mucho cli
@@ -136,7 +137,7 @@ export async function installRust({}: InstallCommandPropsBase = {}) {
           missingDeps.join(" "),
         );
 
-        process.exit(0);
+        logger.exit(0);
       }
     }
 

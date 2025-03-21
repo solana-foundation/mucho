@@ -1,5 +1,6 @@
 import { select } from "@inquirer/prompts";
 import { SolanaClusterMoniker } from "gill";
+import { logger } from "../logger";
 
 export async function promptToSelectCluster(
   message: string = "Select a cluster?",
@@ -56,7 +57,7 @@ export async function promptToSelectCluster(
        */
       // do nothing on user cancel instead of exiting the cli
       console.log("Operation canceled.");
-      process.exit();
+      logger.exit();
       // todo: support selecting a default value here?
       return defaultValue;
     });

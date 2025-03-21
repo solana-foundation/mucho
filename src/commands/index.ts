@@ -4,6 +4,7 @@ import { getAppInfo } from "@/lib/app-info";
 import { getCommandOutputSync } from "@/lib/shell";
 import { getPlatformToolsVersions } from "@/lib/solana";
 import { TOOL_CONFIG } from "@/const/setup";
+import { logger } from "@/lib/logger";
 
 export function cliProgramRoot() {
   // console.log(picocolors.bgMagenta(` ${app.name} - v${app.version} `));
@@ -39,7 +40,7 @@ export function cliProgramRoot() {
 
         console.log("\nFor more info run: 'npx mucho info'");
       }
-      process.exit(0);
+      logger.exit(0);
     });
 
   return program;
