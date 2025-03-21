@@ -44,7 +44,7 @@ export async function getNpmPackageUpdates(
  */
 export async function getCargoUpdateOutput(): Promise<PackageUpdate[]> {
   const res = await checkCommand("cargo install-update --git --list", {
-    exit: true,
+    exit: false,
     onError: async () => {
       warnMessage(
         "Unable to detect the 'cargo install-update' command. Installing...",

@@ -53,29 +53,24 @@ export async function checkCommand(
     if (errorOptions) throw "Command not found";
     return false;
   } catch (err) {
-    if (errorOptions) {
-      // execute the onError function
-      if (typeof errorOptions?.onError == "function") {
-        // the onError function can attempt to fix the error of the command not executing
-        // (like prompting the user to install a command)
-        const res = await errorOptions.onError();
+    if (!errorOptions) return false;
+    // execute the onError function
+    if (typeof errorOptions?.onError == "function") {
+      // the onError function can attempt to fix the error of the command not executing
+      // (like prompting the user to install a command)
+      const res = await errorOptions.onError();
 
-        if (errorOptions.doubleCheck) {
-          return await checkCommand(cmd, {
-            exit: errorOptions.exit,
-          });
-        }
-
-        if (!res && errorOptions?.exit) process.exit(1);
-      } else {
-        warnMessage(
-          errorOptions.message ||
-            `Unable to execute command: ${cmd.split(" ")[0]}`,
-        );
-        if (errorOptions.exit) process.exit(1);
+      if (errorOptions.doubleCheck) {
+        return await checkCommand(cmd, {
+          exit: errorOptions.exit,
+        });
       }
+
+      if (!res && errorOptions?.exit) process.exit(1);
+    } else {
+      warnMessage(errorOptions.message || `Unable to execute command: ${cmd}`);
+      if (errorOptions.exit) process.exit(1);
     }
-    return false;
   }
 }
 
