@@ -2,12 +2,7 @@ import path from "path";
 import { Command, Option } from "@commander-js/extra-typings";
 import { cliConfig, COMMON_OPTIONS } from "@/const/commands";
 import { cliOutputConfig, loadConfigToml } from "@/lib/cli";
-import {
-  cancelMessage,
-  titleMessage,
-  warningOutro,
-  warnMessage,
-} from "@/lib/logs";
+import { titleMessage, warningOutro, warnMessage } from "@/lib/logs";
 import { checkCommand, shellExecInSession } from "@/lib/shell";
 import {
   buildDeployProgramCommand,
@@ -258,13 +253,13 @@ export function deployCommand() {
        */
       if (programInfo) {
         if (!programInfo.authority) {
-          return cancelMessage(
+          return warningOutro(
             `Program ${programInfo.programId} is no longer upgradeable`,
           );
         }
 
         if (programInfo.authority !== authorityKeypair.address) {
-          return cancelMessage(
+          return warningOutro(
             `Your keypair (${authorityKeypair.address}) is not the upgrade authority for program ${programId}`,
           );
         }

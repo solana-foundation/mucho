@@ -1,5 +1,6 @@
 import picocolors from "picocolors";
 import type { Formatter } from "picocolors/types";
+import { logger } from "./logger";
 
 /**
  * Print a plain message using `picocolors`
@@ -22,18 +23,9 @@ export function warnMessage(msg: string) {
 /**
  * Show a cancel outro and exit the cli process
  */
-export function cancelMessage(msg: string = "Operation canceled") {
-  console.log(msg);
-  // cancel(msg);
-  process.exit();
-}
-
-/**
- * Show a cancel outro and exit the cli process
- */
 export function warningOutro(msg: string = "Operation canceled") {
   warnMessage(msg);
-  process.exit();
+  logger.exit();
 }
 
 /**
@@ -43,7 +35,7 @@ export function warningOutro(msg: string = "Operation canceled") {
 export function cancelOutro(msg: string = "Operation canceled") {
   console.log(picocolors.inverse(` ${msg} `), "\n");
   // outro(picocolors.inverse(` ${msg} `));
-  process.exit(0);
+  logger.exit(0);
 }
 
 /**
@@ -53,7 +45,7 @@ export function cancelOutro(msg: string = "Operation canceled") {
 export function noticeOutro(msg: string) {
   // outro(picocolors.bgBlue(` ${msg} `));
   console.log(picocolors.bgBlue(` ${msg} `), "\n");
-  process.exit(0);
+  logger.exit(0);
 }
 
 /**
@@ -63,7 +55,7 @@ export function noticeOutro(msg: string) {
 export function successOutro(msg: string = "Operation successful") {
   console.log(picocolors.bgGreen(` ${msg} `), "\n");
   // outro(picocolors.bgGreen(` ${msg} `));
-  process.exit(0);
+  logger.exit(0);
 }
 
 /**
@@ -76,7 +68,7 @@ export function errorOutro(
   extraLog?: any,
 ) {
   errorMessage(msg, title, extraLog);
-  process.exit(1);
+  logger.exit(1);
 }
 
 /**
