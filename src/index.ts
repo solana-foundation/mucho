@@ -10,6 +10,11 @@ assertRuntimeVersion();
 suppressRuntimeWarnings();
 patchBigint();
 
+import { logger } from "@/lib/logger";
+// we expect this to NOT create the log file due to no errors existing
+// but this ensure we have global import access to the logger as soon as the command is run
+logger.ensureLogFile();
+
 import { checkForSelfUpdate } from "@/lib/npm";
 import { errorOutro } from "@/lib/logs";
 import { cliProgramRoot } from "@/commands";
