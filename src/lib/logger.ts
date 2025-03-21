@@ -84,7 +84,7 @@ class ErrorLogger {
     if (this.logFilePath) {
       console.error(
         picocolors.red(
-          `An error occurred during execution.\n` +
+          `\nAn error occurred during execution.\n` +
             `See the full log at: ${this.logFilePath}`,
         ),
       );
