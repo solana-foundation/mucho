@@ -6,6 +6,7 @@ import shellExec from "shell-exec";
 import { TOOL_CONFIG } from "@/const/setup";
 import { warnMessage } from "@/lib/logs";
 import { type ChildProcess, execSync, spawn } from "node:child_process";
+import { logger } from "../logger";
 
 export const VERSION_REGEX = /(?:[\w-]+\s+)?(\d+\.\d+\.?\d+?)/;
 
@@ -66,13 +67,13 @@ export async function checkCommand(
           });
         }
 
-        if (!res && errorOptions?.exit) process.exit(1);
+        if (!res && errorOptions?.exit) logger.exit(1);
       } else {
         warnMessage(
           errorOptions.message ||
             `Unable to execute command: ${cmd.split(" ")[0]}`,
         );
-        if (errorOptions.exit) process.exit(1);
+        if (errorOptions.exit) logger.exit(1);
       }
     }
     return false;

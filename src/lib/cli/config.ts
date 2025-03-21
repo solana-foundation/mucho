@@ -81,7 +81,6 @@ export function loadConfigToml(
   } else {
     if (isConfigRequired) {
       warningOutro(`No Solana.toml config file found. Operation canceled.`);
-      process.exit();
     }
   }
 

@@ -14,6 +14,7 @@ import { getSafeClusterMoniker, parseRpcUrlOrMoniker } from "@/lib/solana";
 import { promptToSelectCluster } from "@/lib/prompts/build";
 import { loadKeypairSignerFromFile } from "gill/node";
 import { getRunningTestValidatorCommand } from "@/lib/shell/test-validator";
+import { logger } from "@/lib/logger";
 
 /**
  * Command: `deploy`
@@ -81,7 +82,7 @@ export function deployCommand() {
         );
 
         // todo: should we prompt the user to select a valid program?
-        process.exit();
+        logger.exit();
       }
 
       if (!options.url) {
@@ -165,17 +166,16 @@ export function deployCommand() {
             });
           });
 
-          process.exit();
+          logger.exit();
         }
 
         if (
           !config?.programs?.[selectedCluster] ||
           !Object.hasOwn(config.programs[selectedCluster], options.programName)
         ) {
-          warnMessage(
+          return warningOutro(
             `Program '${options.programName}' not found in 'programs.${selectedCluster}'`,
           );
-          process.exit();
         }
 
         programId = config.programs[selectedCluster][options.programName];
@@ -189,8 +189,9 @@ export function deployCommand() {
           console.log(` - keypair path: ${programIdPath}`);
           console.log(` - program id: ${programId}`);
         } else {
-          warnMessage(`Unable to locate any program id or program keypair.`);
-          process.exit();
+          return warningOutro(
+            `Unable to locate any program id or program keypair.`,
+          );
         }
       }
 
@@ -232,7 +233,7 @@ export function deployCommand() {
           warnMessage(
             `Unable to perform initial program deployment. Operation cancelled.`,
           );
-          process.exit();
+          logger.exit();
           // todo: should we prompt the user if they want to proceed
         }
         programId = programIdFromKeypair;
