@@ -2,27 +2,20 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { getAppInfo } from "./app-info";
+import picocolors from "picocolors";
 
 class ErrorLogger {
   private logFilePath: string | null = null;
   private logs: string[] = [];
   private appName: string;
+  private version: string;
   private timestamp: string;
 
-  constructor(appName: string) {
-    this.appName = appName;
+  constructor(appName?: string) {
+    const info = getAppInfo();
+    this.appName = appName || info.name;
+    this.version = info.version;
     this.timestamp = new Date().toISOString();
-
-    // Initialize the log file with header
-    this.logs.push(
-      `# Error Log: ${this.appName}`,
-      `Timestamp: ${this.timestamp}`,
-      `Command:   ${process.argv.slice(0, 2).join(" ")}`,
-      `Arguments: ${
-        process.argv.length > 2 ? process.argv.slice(2).join(" ") : "<NONE>"
-      }`,
-      `----------`,
-    );
   }
 
   /**
@@ -56,13 +49,13 @@ class ErrorLogger {
     let formattedMessage = `[ERROR] ${new Date().toISOString()}: ${message}`;
 
     if (error) {
-      if (error instanceof Error) {
-        formattedMessage += `\nError: ${error.message}`;
+      if (typeof error == "string") {
+        formattedMessage += `\nMessage: ${error}`;
+      } else if (error instanceof Error) {
+        formattedMessage += `\nMessage: ${error.message}`;
         if (error.stack) {
-          formattedMessage += `\nStack trace:\n${error.stack}`;
+          formattedMessage += `\nStack trace: ${error.stack}`;
         }
-      } else if (typeof error == "string") {
-        formattedMessage += `\nError: ${error}`;
       }
     }
 
@@ -90,9 +83,10 @@ class ErrorLogger {
   public printErrorNotification(): void {
     if (this.logFilePath) {
       console.error(
-        "An error occurred during execution.",
-        "See the full log at:",
-        this.logFilePath,
+        picocolors.red(
+          `An error occurred during execution.\n` +
+            `See the full log at: ${this.logFilePath}`,
+        ),
       );
     }
   }
@@ -100,12 +94,10 @@ class ErrorLogger {
   /**
    * Exit the logger and print the error notification if needed
    */
-  public exit(): void {
-    // const formattedMessage = `Args: ${process.argv.join(" ")}`;
-    // this.logs.push(formattedMessage);
-
+  public exit(code?: number | string | null | undefined): void {
+    this.flushLogsToFile();
     this.printErrorNotification();
-    process.exit();
+    process.exit(code);
   }
 
   /**
@@ -127,7 +119,21 @@ class ErrorLogger {
       )}.log`;
 
       this.logFilePath = path.join(os.tmpdir(), filename);
-      fs.writeFileSync(this.logFilePath, "");
+
+      // Initialize the log file with header
+      const header =
+        [
+          `# Error Log for ${this.appName}`,
+          `Version:   ${this.version}`,
+          `Timestamp: ${this.timestamp}`,
+          `Command:   ${process.argv.slice(0, 2).join(" ")}`,
+          `Arguments: ${
+            process.argv.length > 2 ? process.argv.slice(2).join(" ") : "<NONE>"
+          }`,
+          `----------`,
+        ].join("\n") + "\n";
+
+      fs.writeFileSync(this.logFilePath, header, { encoding: "utf-8" });
     }
   }
 
@@ -139,13 +145,13 @@ class ErrorLogger {
 
     try {
       const content = this.logs.join("\n") + "\n";
-      fs.writeFileSync(this.logFilePath, content, { flag: "w" });
+      fs.appendFileSync(this.logFilePath, content, { encoding: "utf-8" });
+
+      // Clear the logs array after flushing
+      this.logs = [];
     } catch (err) {
       console.error("Failed to write to log file:", err);
     }
-
-    // Clear the logs array after flushing
-    this.logs = [];
   }
 }
 
