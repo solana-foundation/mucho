@@ -67,10 +67,10 @@ export async function checkCommand(
         });
       }
 
-      if (!res && errorOptions?.exit) process.exit(1);
+      if (!res && errorOptions?.exit) logger.exit(1);
     } else {
       warnMessage(errorOptions.message || `Unable to execute command: ${cmd}`);
-      if (errorOptions.exit) process.exit(1);
+      if (errorOptions.exit) logger.exit(1);
     }
   }
 }
