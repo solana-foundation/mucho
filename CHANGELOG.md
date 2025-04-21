@@ -1,5 +1,30 @@
 # mucho
 
+## 0.10.0
+
+### Minor Changes
+
+- [#78](https://github.com/solana-foundation/mucho/pull/78)
+  [`0c3cf91`](https://github.com/solana-foundation/mucho/commit/0c3cf9188ad9538200f527c1f5ab91daa9bd4bc0)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - added an error logger
+
+### Patch Changes
+
+- [#107](https://github.com/solana-foundation/mucho/pull/107)
+  [`662bab1`](https://github.com/solana-foundation/mucho/commit/662bab1ce010012f3fd40441631a7a81c858a4d0)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - fix incorrect inspector
+  colors and failed status checker
+
+- [#94](https://github.com/solana-foundation/mucho/pull/94)
+  [`9c95b97`](https://github.com/solana-foundation/mucho/commit/9c95b97c396ad3bd0be0df1825dcade3a3a733b8)
+  Thanks [@rudrodip](https://github.com/rudrodip)! - Fix cargo update parser:
+  Handle spinner output, git packages, and array bounds checking
+
+- [#76](https://github.com/solana-foundation/mucho/pull/76)
+  [`2391d77`](https://github.com/solana-foundation/mucho/commit/2391d77ec7d71940c151a12bdb0389008045b6c5)
+  Thanks [@nickfrosty](https://github.com/nickfrosty)! - make the cargo updater
+  an optional install
+
 ## 0.9.0
 
 ### Minor Changes
