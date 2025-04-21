@@ -93,10 +93,10 @@ function buildTransactionOverview({ tx }: BuildTableInput): CliTable3.Table {
   const table = new CliTable3({
     head: [
       "Transaction Overview",
-      tx.meta?.err ? picocolors.green("SUCCESS") : picocolors.red("FAILED"),
+      !tx.meta?.err ? picocolors.green("SUCCESS") : picocolors.red("FAILED"),
     ],
     style: {
-      head: [tx.meta?.err ? "green" : "red"],
+      head: [!tx.meta?.err ? "green" : "red"],
     },
   });
 
@@ -168,7 +168,7 @@ function buildInstructionsTable({
   const table = new CliTable3({
     head: ["#", "Instruction & Logs"],
     style: {
-      head: [tx.meta?.err ? "green" : "red"],
+      head: [!tx.meta?.err ? "green" : "red"],
     },
     wordWrap: true,
     colWidths: [3, 90],
@@ -224,7 +224,7 @@ function buildAccountsTable({ tx }: BuildTableInput): CliTable3.Table {
   const table = new CliTable3({
     head: ["#", "Address", "Details"],
     style: {
-      head: [tx.meta?.err ? "green" : "red"],
+      head: [!tx.meta?.err ? "green" : "red"],
     },
   });
 
