@@ -47,8 +47,11 @@ export async function checkCommand(
   try {
     const { stdout } = await shellExec(cmd);
 
-    if (stdout) {
-      return stdout.trim();
+    // Remove the dots from the output
+    const cleanedOutput = stdout.replace(/^\s*\.\s*$/gm, "");
+
+    if (cleanedOutput) {
+      return cleanedOutput.trim();
     }
 
     if (errorOptions) throw "Command not found";

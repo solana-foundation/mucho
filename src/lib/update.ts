@@ -66,6 +66,11 @@ export async function getCargoUpdateOutput(): Promise<PackageUpdate[]> {
   let currentChunk: string[] = [];
 
   for (const line of linesToParse) {
+    if (line.includes("Checking") && line.includes("git packages")) {
+      // Skip this line as it's just a header for git packages
+      continue;
+    }
+
     if (line.startsWith("Package")) {
       if (currentChunk.length > 1) {
         processChunk(currentChunk, results);
@@ -95,6 +100,10 @@ function processChunk(chunk: string[], results: PackageUpdate[]) {
 
   for (const line of dataLines) {
     const parts = line.split(/\s+/).filter((part) => part.length > 0);
+
+    if (parts.length < 4) {
+      continue;
+    }
 
     if (isCommitHash) {
       results.push({
